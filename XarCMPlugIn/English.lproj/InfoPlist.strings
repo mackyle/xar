@@ -1,0 +1,6 @@
+﻿ˇ/* Localized versions of Info.plist keys */
+
+CFBundleName = "XarCMPlugIn";
+CFBundleShortVersionString = "XarCMPlugIn version 0.0.1d1";
+CFBundleGetInfoString = "XarCMPlugIn version 0.0.1d1, Copyright 2005, Rob Braun.";
+NSHumanReadableCopyright = "Copyright 2005, Rob Braun.";
