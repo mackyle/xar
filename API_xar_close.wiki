@@ -1,0 +1,36 @@
+<!-- LABELS: Phase-Implementation -->
+== API Documentation ==
+
+=== void xar_close(xar_t x) ===
+
+Close an open xarchive handle
+
+==== Description ====
+
+If the passed xar_t was opened WRITE, xar_close() will serialize the xarchive, writing the archive out to the filename specified when the xar_t handle was opened. Then all memory associated with the xar_t handle will be freed, and any associated file descriptors will be closed.
+
+If the passed xar_t was opened READ, xar_close will free all memory associated with the xar_t handle and close any associated file descriptors.
+
+xar_close() should be called whenever a xar_t is no longer needed.
+
+==== Example ====
+<pre>
+#include <xar/xar.h>
+
+int main(int argc, char *argv[]) {
+	xar_t x;
+
+	x = xar_open(argv[1], READ);
+	if( x == NULL ) {
+		fprintf(stderr, "Error opening xarchive: %s\n", argv[1]);
+		exit(1);
+	}
+
+	...
+
+	xar_close(x);
+	
+	...
+
+}
+</pre>
