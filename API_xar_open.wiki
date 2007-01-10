@@ -1,11 +1,10 @@
 <!-- LABELS: Phase-Implementation -->
-#Obtain a handle to an existing or new xarchive
-
-*xar_t xar_open(const char *file, int32_t flags)*
+== API Documentation ==
+=== xar_t xar_open(const char *file, int32_t flags) ===
 
 Obtain a handle to an existing or new xarchive
 
-Description
+==== Description ====
 
 xar_open() returns a handle to an in memory representation of a xarchive. The first argument, file, is the relative or absolute path to the xarchive that is to be opened/created. The second argument, flags can be one of either READ, which will open the xarchive read only (useful for extracting from the xarchive or listing the contents), or WRITE which will create a new xarchive.
 
@@ -13,7 +12,7 @@ When a xarchive is opened with READ, the binary and xml headers are both parsed 
 
 On success, a valid handle is returned. On failure, NULL is returned.
 
-Example
+==== Example ====
 
 <pre>
 #include <xar/xar.h>
