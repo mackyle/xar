@@ -1,4 +1,6 @@
+<!-- SUMMARY: xar_file_t xar_add(xar_t x, const char *path) -->
 <!-- LABELS: Phase-Implementation -->
+
 == API Documentation ==
 
 === xar_file_t xar_add(xar_t x, const char *path) ===
