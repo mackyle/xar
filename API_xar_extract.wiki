@@ -1,4 +1,6 @@
+<!-- SUMMARY: int32_t xar_extract(xar_t x, xar_file_t f) -->
 <!-- LABELS: Phase-Implementation -->
+
 == API Documentation ==
 
 === int32_t xar_extract(xar_t x, xar_file_t f) ===
