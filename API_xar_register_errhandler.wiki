@@ -1,4 +1,6 @@
+<!-- SUMMARY: void xar_register_errhandler(xar_t x, err_handler callback, void *usrctx) -->
 <!-- LABELS: Phase-Implementation -->
+
 == API Documentation ==
 
 === void xar_register_errhandler(xar_t x, err_handler callback, void *usrctx) ===
