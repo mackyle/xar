@@ -1,4 +1,6 @@
+<!-- SUMMARY: void xar_close(xar_t x) -->
 <!-- LABELS: Phase-Implementation -->
+
 == API Documentation ==
 
 === void xar_close(xar_t x) ===
