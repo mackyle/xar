@@ -1,4 +1,6 @@
+<!-- SUMMARY: xar_iter_t xar_iter_new() -->
 <!-- LABELS: Phase-Implementation -->
+
 == API Documentation ==
 
 === xar_iter_t xar_iter_new() ===
