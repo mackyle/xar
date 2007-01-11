@@ -1,4 +1,6 @@
+<!-- SUMMARY: void xar_iter_free(xar_iter_t i) -->
 <!-- LABELS: Phase-Implementation -->
+
 == API Documentation ==
 
 === void xar_iter_free(xar_iter_t i) ===
