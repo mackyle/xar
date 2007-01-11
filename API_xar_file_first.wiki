@@ -1,4 +1,6 @@
+<!-- SUMMARY: xar_file_t xar_file_first(xar_t x, xar_iter_t i) -->
 <!-- LABELS: Phase-Implementation -->
+
 == API Documentation ==
 
 === xar_file_t xar_file_first(xar_t x, xar_iter_t i) ===
