@@ -2,35 +2,61 @@
 
 == pyxar API Documentation ==
 
-=== XarArchive(name, mode) ===
+=== XarArchive(name, mode == 'r') ==
 
 This class provides an interface to a xar archive file.  Each archive member is represented by a XarInfo object.
 
+The XarArchive class provides methods for accessing members and subdocs, and additionally provides a standard Python container API.
 
-__contains__(...)
-|      x.__contains__(y) <==> y in x
+===== open() =====
+
+Open the XarArchive
+
+===== close() =====
+
+Close the XarArchive.  This method is called implicitly upon
+
+deallocation, if not explicitly prior.
+
+
+==== Accessing Members ====
+
+|  getmembers(...)
+|      Return the members as a list of XarInfo objects.
+
+|  getmember(...)
+|      Return a XarInfo object for the member
+
+|  getnames(...)
+|      Return the members as a list of their names.
+
+|  items(...)
+|      Return a list of tuples of (name, member) for the members in
+|      the archive.
+
+|  get(...)
+|      Return the member for the given name, or the given default
+|      if the name doesn't exist
+
+
+|  has_key(...)
+|      Return whether the archive contains the given name
+
+|  iteritems(...)
 |  
-|  __delitem__(...)
-|      x.__delitem__(y) <==> del x[[y]]
+|  iterkeys(...)
 |  
-|  __getitem__(...)
-|      x.__getitem__(y) <==> x[[y]]
+|  itervalues(...)
 |  
-|  __init__(...)
-|      x.__init__(...) initializes x; see x.__class__.__doc__ for signature
-|  
-|  __iter__(...)
-|      x.__iter__() <==> iter(x)
-|  
-|  __len__(...)
-|      x.__len__() <==> len(x)
-|  
-|  __setitem__(...)
-|      x.__setitem__(i, y) <===> x[[i]]==y
-|  
-|  __str__(...)
-|      x.__str__() <==> str(x)
-|  
+|  keys(...)
+|  values(...)
+
+
+
+
+==== 
+
+
 |  add(...)
 |      Add a file (or directory) to the archive, if the archive is
 |      writable.  If the name is a directory, and recursive is
@@ -54,18 +80,7 @@ __contains__(...)
 |      file in the archive is extracted to the given path, or the 
 |      current directory.
 |  
-|  get(...)
-|      Return the member for the given name, or the given default
-|      if the name doesn't exist
 |  
-|  getmember(...)
-|      Return a XarInfo object for the member
-|  
-|  getmembers(...)
-|      Return the members as a list of XarInfo objects.
-|  
-|  getnames(...)
-|      Return the members as a list of their names.
 |  
 |  getsubdoc(...)
 |      Return a XarSubdoc object for the subdoc of the given name
@@ -81,20 +96,6 @@ __contains__(...)
 |      Create a XarInfo object for the given file name that is NOT
 |      in the XarArchive.
 |  
-|  has_key(...)
-|      Return whether the archive contains the given name
-|  
-|  items(...)
-|      Return a list of tuples of (name, member) for the members in
-|      the archive.
-|  
-|  iteritems(...)
-|  
-|  iterkeys(...)
-|  
-|  itervalues(...)
-|  
-|  keys(...)
 
 |  open(...)
 |      Open the XarArchive
@@ -110,5 +111,4 @@ __contains__(...)
 |  
 |  update(...)
 |  
-|  values(...)
 
