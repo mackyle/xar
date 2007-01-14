@@ -1,4 +1,4 @@
-<!-- SUMMARY: One-sentence summary of this page. -->
+<!-- SUMMARY: XarInfo(name, type == '', mode == '', uid = '', user = '', gid = '', group = '', atime = '', mtime = '', ctime = '') -->
 <!-- LABELS: pyxar,api -->
 
 == pyxar API Documentation ==
@@ -16,4 +16,3 @@ This method is the same as isfile()
 
 ===== isdir() =====
 Returns True if the archive member is a directory. Otherwise, returns false.
-
