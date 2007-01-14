@@ -3,7 +3,7 @@
 
 == pyxar API Documentation ==
 
-=== XarInfo ===
+=== XarInfo(name, type == '', mode = '', uid = '', user = '', gid = '', group = '', atime = '', mtime = '', ctime = '') ==
 
 This class represents a member of a XarArchive. More specifically, it allows access to that member's metadata.
 
