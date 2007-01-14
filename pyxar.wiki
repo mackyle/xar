@@ -12,6 +12,6 @@ There existed a previous Python module for xar, simply named xar, but it has bee
 == Todo ==
 
 * Most errors are not properly handled
-* XarFile should implement Python container methods
-* XarFile needs general clean-up and organization to remove the redundant code
-* XarInfo filetype methods needs implementing
+* [[pyxar_API_xarfile_XarFile|XarFile]] should implement Python container methods
+* [[pyxar_API_xarfile_XarFile|XarFile]] needs general clean-up and organization to remove the redundant code
+* [[pyxar_API_xarfile_XarInfo|XarInfo]] filetype methods needs implementing
