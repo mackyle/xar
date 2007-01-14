@@ -5,7 +5,7 @@ pyxar!  The Python bindings for xar.
 
 The Python bindings for xar currently include a single Python module, xarfile, which attempts to be as compatible with the Python tarfile module as reasonably possible.
 
-pyxar is currently under active development, and as such, is incomplete. A brief "todo" list of known issues/unimplemented features is:
+pyxar is currently under active development, and as such, is incomplete. A brief "todo" list of known issues/unimplemented features is included below.
 
 There existed a previous Python module for xar, simply named xar, but it has been deprecated.
 
@@ -15,4 +15,3 @@ There existed a previous Python module for xar, simply named xar, but it has bee
 * XarFile should implement Python container methods
 * XarFile needs general clean-up and organization to remove the redundant code
 * XarInfo filetype methods needs implementing
-
