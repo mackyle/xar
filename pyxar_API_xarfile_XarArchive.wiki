@@ -1,14 +1,5 @@
-<!-- SUMMARY: One-sentence summary of this page. -->
+<!-- SUMMARY: XarArchive(name, mode = 'r') -->
 
-== Introduction ==
+== XarArchive(name, mode == 'r') =
 
-Add your content here.
-
-
-== Details ==
-
-Add your content here.  Format your content with:
-''' Text in '''bold* or _italic_
-* Headings, paragraphs, and lists
-* Automatic links to other wiki pages
-
+This class provides an interface to a xar archive file.  Each archive member is represented by a XarInfo object.
