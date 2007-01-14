@@ -1,5 +1,5 @@
 <!-- SUMMARY: XarArchive(name, mode = 'r') -->
 
-== XarArchive(name, mode == 'r') =
+== XarArchive XarArchive(name, mode == 'r') =
 
 This class provides an interface to a xar archive file.  Each archive member is represented by a XarInfo object.
