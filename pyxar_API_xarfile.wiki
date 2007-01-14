@@ -1,0 +1,14 @@
+<!-- SUMMARY: One-sentence summary of this page. -->
+<!-- LABELS: pyxar,api -->
+
+== xarfile ==
+
+The xarfile module is still under development, and there are many bits and pieces that are unimplemented or incomplete. This API documentation only lists those pieces which should work as intended, though they may lack robustness.
+
+=== Classes ===
+
+* XarArchive
+* XarInfo
+* XarSubdoc
+
+
