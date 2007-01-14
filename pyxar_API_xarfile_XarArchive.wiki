@@ -9,13 +9,6 @@ This class provides an interface to a xar archive file.  Each archive member is 
 
 The XarArchive class provides methods for accessing members and subdocs, and additionally provides a standard Python container API.
 
-===== open() =====
-
-Open the XarArchive
-
-===== close() =====
-
-Close the XarArchive.  This method is called implicitly upon deallocation, if not explicitly prior.
 
 ==== Accessing Members ====
 
@@ -58,54 +51,31 @@ Return a list of the names of each subdoc in the archive.
 ===== getsubdocs(...) =====
 Return a list of XarSubdoc objects for each subdoc in the archive.
 
+==== Mutation ====
+
+===== add(...) =====
+Add a file (or directory) to the archive, if the archive is writable.  If the name is a directory, and recursive is True, then add the directory recursively.
+
+===== extract(...) =====
+Extract the member to the given path, or the current directory if no path is given. If no member is given, every file in the archive is extracted to the given path, or the current directory.
+
 ===== addsubdoc(...) =====
 Adds the given subdoc to the xar archive.  Subdoc is assumed to be an instance of XarSubdoc, but if not, it is assumed to be a path to an xml file that can be used to create a XarSubdoc instance.
 
 ===== removesubdoc(...) =====
 Remove the subdoc of the given name from the archive.
 
+==== Miscellaneous ====
 
+===== getxarinfo(...) =====
+Create a XarInfo object for the given file name that is NOT in the XarArchive.
 
+===== open() =====
+Open the XarArchive
 
+===== close() =====
+Close the XarArchive.  This method is called implicitly upon deallocation, if not explicitly prior.
 
-|  add(...)
-|      Add a file (or directory) to the archive, if the archive is
-|      writable.  If the name is a directory, and recursive is
-|      True, then add the directory recursively.
-|  
-|  addfile(...)
-|  
-|  
-|  close(...)
-|      Close the XarArchive.  This method is called implicitly upon
-|      deallocation, if not explicitly prior.
-
-|  extract(...)
-|      Extract the member to the given path, or the current
-|      directory if no path is given. If no member is given, every 
-|      file in the archive is extracted to the given path, or the 
-|      current directory.
-|  
-|  
-|  
-|  
-|  getxarinfo(...)
-|      Create a XarInfo object for the given file name that is NOT
-|      in the XarArchive.
-|  
-
-|  open(...)
-|      Open the XarArchive
-|  
-|  pop(...)
-|  
-|  popitem(...)
-|  
-|  
-|  setdefault(...)
-|  
-|  update(...)
-|  
 
 
 
