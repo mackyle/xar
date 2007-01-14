@@ -1,0 +1,7 @@
+<!-- SUMMARY: XarSubdoc(name, xml) -->
+
+== pyxar API Documentation ==
+
+=== XarSubdoc(...) ===
+
+This class represents a xar subdoc that is stored in the archive. It provides access to the XML, ability to extract to a file, and a convenience parser method.
