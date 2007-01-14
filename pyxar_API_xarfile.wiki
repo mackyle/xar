@@ -7,6 +7,6 @@ The xarfile module is still under development, and there are many bits and piece
 
 === Classes ===
 
-* XarArchive
-* XarInfo
-* XarSubdoc
+* [[pyxar_API_xarfile_XarArchive|XarArchive]]
+* [[pyxar_API_xarfile_|XarInfo XarInfo]]
+* [[pyxar_API_xarfile_|XarSubdoc XarSubdoc]]
