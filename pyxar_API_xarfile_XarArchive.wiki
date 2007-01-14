@@ -3,7 +3,7 @@
 
 == pyxar API Documentation ==
 
-=== XarArchive(name, mode == 'r') ==
+=== XarArchive(...) ===
 
 This class provides an interface to a xar archive file.  Each archive member is represented by a XarInfo object.
 
@@ -76,7 +76,6 @@ Open the [[pyxar_API_xarfile_|XarArchive XarArchive]]
 
 ===== close() =====
 Close the [[pyxar_API_xarfile_|XarArchive XarArchive]].  This method is called implicitly upon deallocation, if not explicitly prior.
-
 
 
 
