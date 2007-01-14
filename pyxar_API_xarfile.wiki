@@ -1,5 +1,5 @@
-<!-- SUMMARY: One-sentence summary of this page. -->
 <!-- LABELS: pyxar,api -->
+#The top-level pyxar module.
 
 == xarfile ==
 
@@ -10,5 +10,4 @@ The xarfile module is still under development, and there are many bits and piece
 * XarArchive
 * XarInfo
 * XarSubdoc
-
 
