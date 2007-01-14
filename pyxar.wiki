@@ -1,5 +1,5 @@
+<!-- SUMMARY: pyxar!  The Python bindings for xar. -->
 <!-- LABELS: pyxar -->
-pyxar!  The Python bindings for xar.
 
 == Introduction ==
 
