@@ -9,7 +9,6 @@ This class provides an interface to a xar archive file.  Each archive member is 
 
 The XarArchive class provides methods for accessing members and subdocs, and additionally provides a standard Python container API.
 
-
 ==== Accessing Members ====
 
 ===== getmembers(...) =====
@@ -75,7 +74,6 @@ Open the XarArchive
 
 ===== close() =====
 Close the XarArchive.  This method is called implicitly upon deallocation, if not explicitly prior.
-
 
 
 
