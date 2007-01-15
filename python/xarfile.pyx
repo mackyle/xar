@@ -2,7 +2,7 @@
 # py-xar
 # Python Bindings for XAR, the eXtensible ARchiver
 #
-# Copyright (c) 2005 Will Barton.  
+# Copyright (c) 2005, 2006 Will Barton <wb@willbarton.com>
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without 
@@ -31,15 +31,14 @@
 ## TODO: (In no particular order)
 ##  - Error Handling!! Errors are mostly ignored at the moment
 ##  - Cache the member list in XarArchive
-##  - Implement container methods in XarArchive, and have other methods
-##      wrap these
+##  - Implement remaining container methods in XarArchive
 ##  - General clean-up
 
 ## XXX: Importing __builtin__ to use open(), because the local open()
 ##      function for XarArchives is found first.  Is there a better way?
 import os, os.path, __builtin__
 
-__version__ = "pyxar Python Bindings for xar Version 0.3"
+__version__ = "0.4"
 
 cdef extern from "xar/xar.h":
 
@@ -173,14 +172,6 @@ cdef class XarArchive:
     def __str__(self):
         return "XarArchive: %s (mode %s)" % (self.name, self.mode)
 
-    ## XXX: Eventually, this class should also be a container
-    def __len__(self): pass
-    def __getitem__(self, key): pass
-    def __setitem__(self, key, value): pass
-    def __delitem__(self, key): pass
-    def __iter__(self): pass
-    def __contains__(self, item): pass
-
     property mode:
         """ mode property to set the private _mode integer to the
             friendly string value """
@@ -211,12 +202,18 @@ cdef class XarArchive:
             deallocation, if not explicitly prior. """
         xar_close(self._c_xar_t)
         self._c_xar_t = NULL
+
+    ####################################################################
+    # Member Access
         
+    # The following method, getmembers, is the core of the functionality
+    # of this class.  All other query methods are based on getmembers,
+    # including the container methods.
     def getmembers(self):
         """ Return the members as a list of XarInfo objects. """
-        ## XXX: Cache the member list, since much of the functionality
-        ## of the rest of the module depends on this, we should have to
-        ## continually read from the xarfile.
+        ## XXX: Cache the member list?  Since much of the functionality
+        ## of the rest of the module depends on this, we shouldn't have
+        ## to continually read from the xarfile.
         cdef xar_iter_t c_iter
         cdef xar_file_t c_file
 
@@ -228,11 +225,78 @@ cdef class XarArchive:
             info = _xarfile_get_info(c_file)
             result.append(info)
             c_file = xar_file_next(c_iter)
-
         xar_iter_free(c_iter)
 
         return result
-       
+
+    def getnames(self):
+        """ Return the members as a list of their names. """
+        names = []
+        for m in self.getmembers(): 
+            names.append(m.name)
+        return names
+
+    # Python Container methods for the XarArchive
+    # These cause the archive to be accessible as a Python container, in
+    # this case, dictionary-like, using member names as keys.  Other
+    # dictionary-like methods are defined for further compatibilty.
+    # 
+    # These are all ultimately wrappers of some kind around getmembers().
+    def __len__(self): 
+        """ Return the number of members in the archive """
+        members = self.getmembers()
+        return len(members)
+
+    def __getitem__(self, key): 
+        """ Return the member matching the given name """
+        return dict(self.items()).__getitem__(key)
+
+    def __iter__(self): 
+        """ Return an iterator over the archive members """
+        return self.getmembers().__iter__()
+
+    def __contains__(self, item): 
+        """ Return whether the archive contains the given XarInfo object """
+        return (item in self.getmembers())
+
+    def items(self):
+        """ Return a list of tuples of (name, member) for the members in
+            the archive. """
+        items = []
+        for m in self.getmembers():
+            items.append((m.name, m))
+        return items
+        
+    def has_key(self, key):
+        """ Return whether the archive contains the given name """
+        return key in self.getnames()
+
+    def get(self, key, default = None):
+        """ Return the member for the given name, or the given default
+            if the name doesn't exist """
+        return dict(self.items()).get(key, default)
+
+    def iteritems(self):
+        return dict(self.items()).itemitems()
+
+    def iterkeys(self):
+        return dict(self.items()).itemkeys()
+
+    def itervalues(self):
+        return dict(self.items()).itemvalues()
+
+    # Container methods for which we already have identical methods
+    def keys(self): return self.getnames()
+    def values(self): return self.getmembers()
+
+    ## XXX: Writable container methods need implementing
+    def __setitem__(self, key, value): pass
+    def __delitem__(self, key): pass
+    def setdefault(self, key, default): pass
+    def pop(self, key, default): pass
+    def popitem(self): pass
+    def update(self, e, **f): pass
+
     def getmember(self, name): 
         """ Return a XarInfo object for the member """
         ## Return the first XarInfo instance who's name matches the
@@ -243,26 +307,8 @@ cdef class XarArchive:
         # If we arrived here, we did not find the member
         raise KeyError, "Member not found"
 
-    def getnames(self):
-        """ Return the members as a list of their names. """
-        ## XXX: Make this method a wrapper around getmembers?  That
-        ## would reduce duplication of code, but would create a lot of
-        ## unneeded objects, in the form of XarInfo instances
-
-        cdef xar_iter_t c_iter
-        cdef xar_file_t c_file
-
-        result = []        
-
-        c_iter = xar_iter_new()
-        c_file = xar_file_first(self._c_xar_t, c_iter)
-        while c_file != NULL:
-            result.append(xar_get_path(c_file))
-            c_file = xar_file_next(c_iter)
-
-        xar_iter_free(c_iter)
-
-        return result
+    ####################################################################
+    # Subdoc access
 
     def getsubdoc(self, name):
         """ Return a XarSubdoc object for the subdoc of the given name """
@@ -300,6 +346,9 @@ cdef class XarArchive:
 
         return result
 
+    ####################################################################
+    # Extraction
+
     def extract(self, member = None, path = None):
         """ Extract the member to the given path, or the current
             directory if no path is given. If no member is given, every 
@@ -328,6 +377,9 @@ cdef class XarArchive:
             c_file = xar_file_next(c_iter)
 
         xar_iter_free(c_iter)
+
+    ####################################################################
+    # Mutation
 
     def add(self, name, recursive = True): 
         """ Add a file (or directory) to the archive, if the archive is
