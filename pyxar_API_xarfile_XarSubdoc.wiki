@@ -13,8 +13,8 @@ Creates a XarSubdoc instance with the given name containing the given XML string
 ==== toxml() ====
 Returns the subdoc as an XML string.
 
-==== tofile(name) ====
+==== tofile(...) ====
 Write the XML string to a file by the given filename.
 
-==== parse(parser_function, args == None) ===
+==== parse(...) ====
 Parse the document's xml string using the given function. This assumes the function takes a single string argument.
