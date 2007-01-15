@@ -40,7 +40,7 @@ python setup.py install
 
 pyxar's API documentation is currently available in the [http://code.google.com/p/xar/wiki/pyxar_API_xarfile xar project wiki]. This covers the pieces of pyxar that are implemented, and should function as described. As new features are added, they will appear in this documentation.
 
-== Todo ==
+== Issues/Todo ==
 
 * Most errors are not properly handled
 * [[pyxar_API_xarfile_XarArchive|XarArchive]] should implement Python container methods
