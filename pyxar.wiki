@@ -38,7 +38,7 @@ python setup.py install
 
 ==Documentation==
 
-pyxar's API documentation is available in the [http://code.google.com/p/xar/wiki/pyxar_API_xarfile xar project wiki]. This covers the pieces of pyxar that are implemented, and should function as described. As new features are added, they will appear in this documentation.
+pyxar's API documentation is currently available in the [http://code.google.com/p/xar/wiki/pyxar_API_xarfile xar project wiki]. This covers the pieces of pyxar that are implemented, and should function as described. As new features are added, they will appear in this documentation.
 
 == Todo ==
 
@@ -46,4 +46,3 @@ pyxar's API documentation is available in the [http://code.google.com/p/xar/wiki
 * [[pyxar_API_xarfile_XarArchive|XarArchive]] should implement Python container methods
 * [[pyxar_API_xarfile_XarArchive|XarArchive]] needs general clean-up and organization to remove the redundant code
 * [[pyxar_API_xarfile_XarInfo|XarInfo]] filetype methods needs implementing
-
