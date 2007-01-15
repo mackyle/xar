@@ -9,9 +9,41 @@ pyxar is currently under active development, and as such, is incomplete. A brief
 
 There existed a previous Python module for xar, simply named xar, but it has been deprecated.
 
+==Download==
+
+pyxar has been tested to work with Python 2.4 and 2.5, and has the following requirements:
+
+* [http://code.google.com/p/xar xar] must be installed.
+* The Python module [http://www.cosc.canterbury.ac.nz/greg.ewing/python/Pyrex/ pyrex] must be installed.
+
+You can get pyxar from xar's Subversion repository:
+pyxar is currently only available from xar's Subversion repository.  It can be checked-out individually:
+
+<pre>
+svn checkout http://xar.googlecode.com/svn/trunk/python pyxar
+</pre>
+
+If you're checking out the entire xar repository, pyxar is located in the python subdirectory.
+
+To build pyxar:
+
+<pre>
+python setup.py build
+</pre>
+
+To install pyxar:
+<pre>
+python setup.py install
+</pre>
+
+==Documentation==
+
+pyxar's API documentation is available in the [http://code.google.com/p/xar/wiki/pyxar_API_xarfile xar project wiki]. This covers the pieces of pyxar that are implemented, and should function as described. As new features are added, they will appear in this documentation.
+
 == Todo ==
 
 * Most errors are not properly handled
 * [[pyxar_API_xarfile_XarArchive|XarArchive]] should implement Python container methods
 * [[pyxar_API_xarfile_XarArchive|XarArchive]] needs general clean-up and organization to remove the redundant code
 * [[pyxar_API_xarfile_XarInfo|XarInfo]] filetype methods needs implementing
+
