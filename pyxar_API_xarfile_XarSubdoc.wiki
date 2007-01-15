@@ -8,7 +8,7 @@
 This class represents a xar subdoc that is stored in the archive. It provides access to the XML, ability to extract to a file, and a convenience parser method.
 
 ==== XarSubdoc(name, xml) ====
-Creates a XarSubdoc instance with the given name containing the given XML string. Instance creation is only useful when adding a subdoc to a xar archive.
+Creates a [[pyxar_API_xarfile_XarSubdoc|XarSubdoc]] instance with the given name containing the given XML string. Instance creation is only useful when adding a subdoc to a xar archive.
 
 ==== toxml() ====
 Returns the subdoc as an XML string.
