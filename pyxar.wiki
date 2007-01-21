@@ -16,6 +16,8 @@ pyxar has been tested to work with Python 2.4 and 2.5, and has the following req
 * [http://code.google.com/p/xar xar] must be installed.
 * The Python module [http://www.cosc.canterbury.ac.nz/greg.ewing/python/Pyrex/ pyrex] must be installed.
 
+'''NOTE''' Pyrex has issues with Python 2.5 and the new-style exception classes it introduced, which may cause cryptic TypeErrors when pyxar tries to raise an exception.  This should be fixed in the next Pyrex release.
+
 You can get pyxar from xar's Subversion repository:
 pyxar is currently only available from xar's Subversion repository.  It can be checked-out individually:
 
