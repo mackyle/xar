@@ -2,7 +2,7 @@
 # py-xar
 # Python Bindings for XAR, the eXtensible ARchiver
 #
-# Copyright (c) 2005, 2006 Will Barton <wb@willbarton.com>
+# Copyright (c) 2005, 2006, 2007 Will Barton <wb@willbarton.com>
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without 
@@ -96,24 +96,67 @@ cdef extern from "xar/xar.h":
     cdef char       *xar_err_get_string(xar_errctx_t ctx)
     cdef int        xar_err_get_errno(xar_errctx_t ctx)
    
+# Constants 
 READ = 0
 WRITE = 1
 
-class XarError(Exception): pass
+# Error constants
+XAR_SEVERITY_DEBUG    = 1
+XAR_SEVERITY_INFO     = 2
+XAR_SEVERITY_NORMAL   = 3
+XAR_SEVERITY_WARNING  = 4
+XAR_SEVERITY_NONFATAL = 5
+XAR_SEVERITY_FATAL    = 6
+XAR_ERR_ARCHIVE_CREATION   = 1
+XAR_ERR_ARCHIVE_EXTRACTION = 2
 
+class XarError(Exception):  pass
+class XarCreationError(XarError): pass
+class XarExtractionError(XarError): pass
+class XarFileError(XarError): pass
+class XarArchiveError(XarError): pass
+class XarDocError(XarError): pass
+
+# Sort of a clone of xar's err_callback function
 cdef int _error_callback(int sev, int err, xar_errctx_t ctx, void *usrctx):
     cdef xar_file_t f
     cdef char *str
     cdef int e
 
-    f = xar_err_get_file(ctx)
     str = xar_err_get_string(ctx)
     e = xar_err_get_errno(ctx)
+    f = xar_err_get_file(ctx)
 
-    ## XXX: Cycle through severities
-	
-	## XXX: for some reason, python claims an error raised here is ignored?
-    raise XarError, str
+    if f: 
+        file = xar_get_path(f)
+    else: 
+        file = ""
+
+	# XXX: for some reason, python claims an error raised in this
+    # function is ignored? Why?
+    
+    # Create the exception, then we cycle through severities to decide
+    # what to do with it.
+    exception = None
+    if err == XAR_ERR_ARCHIVE_CREATION:
+        exception = XarCreationError("%s:%s" % (str, file))
+    elif err == XAR_ERR_ARCHIVE_EXTRACTION:
+        exception = XarExtractionError("%s:%s" % (str, file))
+    else:
+        exception = XarError(s)
+
+    # XXX: What should we do with non-fatal errors?
+#    if sev == XAR_SEVERITY_DEBUG or sev == XAR_SEVERITY_INFO: pass
+#    elif sev == XAR_SEVERITY_WARNING: 
+#        raise exception
+#    elif sev == XAR_SEVERITY_NORMAL: 
+#        raise exception
+#    elif sev == XAR_SEVERITY_NONFATAL: 
+#        raise exception
+#    elif sev == XAR_SEVERITY_FATAL:
+#        raise exception
+    
+    raise exception
 
 # Create a XarInfo object based on the properties of a xar_file_t
 cdef _xarfile_get_info(xar_file_t c_file):
@@ -193,7 +236,7 @@ cdef class XarArchive:
         cdef xar_t c_xar_t
         c_xar_t = xar_open(self.name, self._mode)
         if c_xar_t == NULL:
-            raise XarError, "Unable to open xar archive"
+            raise XarArchiveError, "Unable to open xar archive"
         xar_register_errhandler(c_xar_t, _error_callback, NULL)
         self._c_xar_t = c_xar_t
 
@@ -367,12 +410,13 @@ cdef class XarArchive:
 
             if not member or (member == info.name):
                 if path:
-                    ## XXX: try xar_extract_tofile() ?
-                    ## Either that, or implement in python
-                    raise NotImplementedError
+                    if (xar_extract_tofile(self._c_xar_t, c_file, path) != 0):
+                        raise XarExtractionError,  \
+                            "Error extracting " + info.name
                 else:
                     if (xar_extract(self._c_xar_t, c_file) != 0):
-                        raise XarError, "Error extracting " + info.name
+                        raise XarExtractionError,  \
+                            "Error extracting " + info.name
 
             c_file = xar_file_next(c_iter)
 
@@ -388,17 +432,17 @@ cdef class XarArchive:
         cdef xar_file_t c_file
 
         if self.mode != 'w': 
-            raise XarError, "archive is not writable"
+            raise XarArchiveError, "archive is not writable"
        
         # Normalize the path, if necessary
         name = os.path.expanduser(name)
         name = os.path.expandvars(name)
         name = os.path.normpath(name)
-       
+
         # Add the file
         c_file = xar_add(self._c_xar_t, name)
         if c_file == NULL:
-            raise XarError, "unable to add file to the archive"
+            raise XarFileError, "file does not exist: %s" % name
         info = _xarfile_get_info(c_file)
 
         # If the file is a directory, and recursive is true, recurse
@@ -414,7 +458,7 @@ cdef class XarArchive:
     def getxarinfo(self, name): 
         """ Create a XarInfo object for the given file name that is NOT
             in the XarArchive. """
-        pass
+        raise NotImplementedError
 
     def addsubdoc(self, subdoc):
         """ Adds the given subdoc to the xar archive.  Subdoc is assumed
@@ -428,7 +472,7 @@ cdef class XarArchive:
             subdoc = XarSubdoc.fromfile(subdoc)
 
         if self.mode != 'w':
-            raise XarError, "archive is not writable"
+            raise XarArchiveError, "archive is not writable"
 
         name = subdoc.name
         xmlstring = subdoc.toxml()
@@ -531,7 +575,11 @@ class XarDoc(object):
 
     def __init__(self, name, xml):
         self.name = name
+        # XXX: c14n for comparison
         self._xml = xml
+
+    def __cmp__(self, other):
+        return self.name == other.name and self._xml == other._xml
 
     def toxml(self):
         """ Return the xml string for the document """
