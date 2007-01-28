@@ -139,7 +139,7 @@ static unsigned int raw_base64_decode(
     unsigned int  x, i = 0, ignr = 0;
     unsigned char buf[3], pad = 0;
 
-    while (i <= len || !pad) {
+    while (i < len || !pad) {
         x = b64revtb[input[i++]];
         switch (x) {
             case -3: /* NULL TERMINATOR */
