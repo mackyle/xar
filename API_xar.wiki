@@ -14,55 +14,55 @@ int32_t [[API_xar_extract|xar_extract]](xar_t x, xar_file_t f);
 
 void [[API_xar_register_errhandler|xar_register_errhandler]](xar_t x, err_handler callback, void *usrctx);
 
-xar_file_t xar_err_get_file(xar_errctx_t ctx);
+xar_file_t [[API_xar_err_get_file|xar_err_get_file]](xar_errctx_t ctx);
 
-const char *xar_err_get_string(xar_errctx_t ctx);
+const char *[[API_xar_err_get_string|xar_err_get_string]](xar_errctx_t ctx);
 
-int xar_err_get_errno(xar_errctx_t ctx);
+int [[API_xar_err_get_errno|xar_err_get_errno]](xar_errctx_t ctx);
 
-xar_iter_t xar_iter_new();
+xar_iter_t [[API_xar_iter_new|xar_iter_new]]();
 
-void xar_iter_free(xar_iter_t i);
+void [[API_xar_iter_free|xar_iter_free]](xar_iter_t i);
 
-xar_file_t xar_file_first(xar_t x, xar_iter_t i);
+xar_file_t [[API_xar_file_first|xar_file_first]](xar_t x, xar_iter_t i);
 
-xar_file_t xar_file_next(xar_iter_t i);
+xar_file_t [[API_xar_file_next|xar_file_next]](xar_iter_t i);
 
-int32_t xar_opt_set(xar_t x, const char *option, const char *value)
+int32_t [[API_xar_opt_set|xar_opt_set]](xar_t x, const char *option, const char *value)
 
-const char *xar_opt_get(xar_t x, const char *option
+const char *[[API_xar_opt_get|xar_opt_get]](xar_t x, const char *option
 
-int32_t xar_prop_set(xar_file_t, const char *key, const char *value)
+int32_t [[API_xar_prop_set|xar_prop_set]](xar_file_t, const char *key, const char *value)
 
-int32_t xar_prop_get(xar_file_t, const char *key, const char **value)
+int32_t [[API_xar_prop_get|xar_prop_get]](xar_file_t, const char *key, const char **value)
 
-const char *xar_prop_first(xar_file_t f, xar_iter_t i)
+const char *[[API_xar_prop_first|xar_prop_first]](xar_file_t f, xar_iter_t i)
 
-const char *xar_prop_next(xar_iter_t i)
+const char *[[API_xar_prop_next|xar_prop_next]](xar_iter_t i)
 
-int32_t xar_attr_set(xar_file_t f, const char *property, const char *key, const char *value)
+int32_t [[API_xar_attr_set|xar_attr_set]](xar_file_t f, const char *property, const char *key, const char *value)
 
-const char *xar_attr_get(xar_file_t f, const char * property, const char *key)
+const char *[[API_xar_attr_get|xar_attr_get]](xar_file_t f, const char * property, const char *key)
 
-const char *xar_attr_first(xar_file_t f, const char *prop, xar_iter_t i)
+const char *[[API_xar_attr_first|xar_attr_first]](xar_file_t f, const char *prop, xar_iter_t i)
 
-const char *xar_attr_next(xar_iter_t i)
+const char *[[API_xar_attr_next|xar_attr_next]](xar_iter_t i)
 
 
-xar_subdoc_t xar_subdoc_new(xar_t x, const char *name)
+xar_subdoc_t [[API_xar_subdoc_new|xar_subdoc_new]](xar_t x, const char *name)
 
-int32_t xar_subdoc_prop_set(xar_subdoc_t s, const char *key, const char *value)
+int32_t [[API_xar_subdoc_prop_set|xar_subdoc_prop_set]](xar_subdoc_t s, const char *key, const char *value)
 
-int32_txar_subdoc_prop_get(xar_subdoc_t s, const char *key, const char **value)
+int32_t [[API_xar_subdoc_prop_get|xar_subdoc_prop_get]](xar_subdoc_t s, const char *key, const char **value)
 
-xar_subdoc_t xar_subdoc_first(xar_t x)
+xar_subdoc_t [[API_xar_subdoc_first|xar_subdoc_first]](xar_t x)
 
-xar_subdoc_t xar_subdoc_next(xar_subdoc_t s)
+xar_subdoc_t [[API_xar_subdoc_next|xar_subdoc_next]](xar_subdoc_t s)
 
-const char *xar_subdoc_name(xar_subdoc_t s)
+const char *[[API_xar_subdoc_name|xar_subdoc_name]](xar_subdoc_t s)
 
-int32_t xar_subdoc_copyout(xar_subdoc_t s, unsigned char **buf, unsigned int *size)
+int32_t [[API_xar_subdoc_copyout|xar_subdoc_copyout]](xar_subdoc_t s, unsigned char **buf, unsigned int *size)
 
-int32_t xar_subdoc_copyin(xar_subdoc_t s, unsigned char *buf, unsigned int size)
+int32_t [[API_xar_subdoc_copyin|xar_subdoc_copyin]](xar_subdoc_t s, unsigned char *buf, unsigned int size)
 
-void xar_subdoc_remove(xar_subdoc_t s)
+void [[API_xar_subdoc_remove|xar_subdoc_remove]](xar_subdoc_t s)
