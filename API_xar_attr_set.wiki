@@ -1,0 +1,59 @@
+<!-- SUMMARY: int32_t xar_attr_set(xar_file_t f, const char *prop, const char *key, const char *value) -->
+<!-- LABELS: Phase-Implementation -->
+
+== API Documentation ==
+
+=== int32_t xar_attr_set(xar_file_t f, const char *prop, const char *key, const char *value) ===
+Add or set an attribute
+
+==== Description ====
+XAR attributes map to XML attributes. The XAR attribute "bar" with value "baz" on (empty) property "foo" would serialize to XML as: 
+
+<foo bar="baz"/>
+
+xar_attr_set() can be used to add or set attributes on files or properties within a file. If the attribute does not exist, it is created. If the attribute does exist, the value is set to the value specified. No attribute may have a NULL value. 
+
+To set the attribute on a file, pass a NULL value for the second argument (the property). Here is an example of a call and what value it is modifying: 
+xar_attr_set(f, NULL, "foo", "bar");
+<pre>
+<file foo="bar">
+</pre>
+Similarly, to modify an attribute of a property within a file: 
+xar_attr_set(f, "name", "foo", "bar");
+<pre>
+<file>
+	<name foo="bar">filename</name>
+</file>
+</pre>
+Returns 0 for success, -1 on failure.
+
+==== Example ====
+<pre>
+#include <xar/xar.h>
+
+int main(int argc, char *argv[]) {
+	xar_t x;
+	xar_file_t f;
+
+	x = xar_open(argv[1], WRITE);
+	if( x == NULL ) {
+		fprintf(stderr, "Error opening xarchive: %s\n", argv[1]);
+		exit(1);
+	}
+
+	if( (f = xar_add(x, "/path/to/file")) == NULL ) {
+		fprintf(stderr, "Error adding /path/to/file to the xarchive\n");
+	}
+
+	if( xar_attr_set(f, "name", "foo", "bar) == -1 ) {
+		fprintf(stderr, "Error setting attribute\n");
+	}
+
+	...
+
+	xar_close(x);
+	
+	...
+
+}
+</pre>
