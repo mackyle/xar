@@ -1,0 +1,35 @@
+<!-- SUMMARY: void xar_subdoc_remove(xar_subdoc_t s) -->
+<!-- LABELS: Phase-Implementation -->
+== API Documentation ==
+=== void xar_subdoc_remove(xar_subdoc_t s) ===
+Removes and deallocates a subdocument from a xarchive
+
+==== Description ====
+xar_subdoc_remove() removes and frees a subdocument from a XAR archive. The entire subdocument is removed, all children, properties, attributes, etc. associated with the subdocument are removed.
+
+==== Example ====
+<pre>
+#include <xar/xar.h>
+
+int main(int argc, char *argv[]) {
+	xar_t x;
+	xar_subdoc_t s;
+
+	x = xar_open(argv[1], WRITE);
+	if( x == NULL ) {
+		fprintf(stderr, "Error opening xarchive: %s\n", argv[1]);
+		exit(1);
+	}
+
+	s = xar_subdoc_first(x);
+	if( s )
+		xar_subdoc_remove(s);
+
+	...
+
+	xar_close(x);
+	
+	...
+
+}
+</pre>
