@@ -165,6 +165,9 @@ AC_CHECK_FUNCS(getattrlist)
 AC_CHECK_FUNCS(setattrlist)
 AC_CHECK_FUNCS(lchmod)
 AC_CHECK_FUNCS(lchown)
+AC_CHECK_FUNCS(chflags)
+
+AC_CHECK_MEMBERS([struct stat.st_flags])
 
 AC_CHECK_SIZEOF(uid_t)
 if test $ac_cv_sizeof_uid_t = "4"; then
