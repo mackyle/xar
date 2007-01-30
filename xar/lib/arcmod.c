@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Rob Braun
+ * Copyright (c) 2007 Rob Braun
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@ struct arcmod xar_arcmods[] = {
 	{ xar_ext2attr_archive, xar_ext2attr_extract },
 	{ xar_data_archive, xar_data_extract },
 	/* Add new modules here */
+	{ NULL, xar_flags_extract },
 	{ NULL, xar_set_perm }
 };
 

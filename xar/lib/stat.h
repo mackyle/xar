@@ -43,5 +43,6 @@
 int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *buffer, size_t len);
 int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, size_t len);
 int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size_t len);
+int32_t xar_flags_extract(xar_t x, xar_file_t f, const char *file, char *buffer, size_t len);
 
 #endif /* _XAR_STAT_H_ */

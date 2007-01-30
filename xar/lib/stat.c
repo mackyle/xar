@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Rob Braun
+ * Copyright (c) 2007 Rob Braun
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -219,6 +219,114 @@ static int32_t eacls(xar_t x, xar_file_t f, const char *file) {
 	return 0;
 }
 
+#define XAR_FLAG_FORK "flags"
+static void x_addflag(xar_file_t f, const char *name) {
+	char opt[1024];
+	memset(opt, 0, sizeof(opt));
+	snprintf(opt, sizeof(opt)-1, "%s/%s", XAR_FLAG_FORK, name);
+	xar_prop_set(f, opt, NULL);
+	return;
+}
+
+static int32_t flags_archive(xar_file_t f, const struct stat *sb) {
+#ifdef HAVE_STRUCT_STAT_ST_FLAGS
+	if( !sb->st_flags )
+		return 0;
+#ifdef UF_NODUMP
+	if( sb->st_flags & UF_NODUMP )
+		x_addflag(f, "UserNoDump");
+#endif
+#ifdef UF_IMMUTABLE
+	if( sb->st_flags & UF_IMMUTABLE )
+		x_addflag(f, "UserImmutable");
+#endif
+#ifdef UF_APPEND
+	if( sb->st_flags & UF_APPEND )
+		x_addflag(f, "UserAppend");
+#endif
+#ifdef UF_OPAQUE
+	if( sb->st_flags & UF_OPAQUE )
+		x_addflag(f, "UserOpaque");
+#endif
+#ifdef SF_ARCHIVED
+	if( sb->st_flags & SF_ARCHIVED )
+		x_addflag(f, "SystemArchived");
+#endif
+#ifdef SF_IMMUTABLE
+	if( sb->st_flags & SF_IMMUTABLE )
+		x_addflag(f, "SystemImmutable");
+#endif
+#ifdef SF_APPEND
+	if( sb->st_flags & SF_APPEND )
+		x_addflag(f, "SystemAppend");
+#endif
+
+#endif /* HAVE_STRUCT_STAT_ST_FLAGS */
+	return 0;
+}
+
+static int32_t x_getprop(xar_file_t f, const char *name, char **value) {
+	char v[1024];
+	memset(v, 0, sizeof(v));
+	snprintf(v, sizeof(v)-1, "%s/%s", XAR_FLAG_FORK, name);
+	return xar_prop_get(f, v, (const char **)value);
+}
+
+int32_t xar_flags_extract(xar_t x, xar_file_t f, const char *file, char *buffer, size_t len) {
+#ifdef HAVE_CHFLAGS
+	char *tmp;
+	u_int flags = 0;
+
+	if( xar_prop_get(f, XAR_FLAG_FORK, NULL) )
+		return 0;
+
+#ifdef UF_NODUMP
+	if( x_getprop(f, "UserNoDump", (char **)&tmp) == 0 )
+		flags |= UF_NODUMP;
+#endif
+#ifdef UF_IMMUTABLE
+	if( x_getprop(f, "UserImmutable", (char **)&tmp) == 0 )
+		flags |= UF_IMMUTABLE;
+#endif
+#ifdef UF_APPEND
+	if( x_getprop(f, "UserAppend", (char **)&tmp) == 0 )
+		flags |= UF_APPEND;
+#endif
+#ifdef UF_OPAQUE
+	if( x_getprop(f, "UserOpaque", (char **)&tmp) == 0 )
+		flags |= UF_OPAQUE;
+#endif
+#ifdef SF_ARCHIVED
+	if( x_getprop(f, "SystemArchived", (char **)&tmp) == 0 )
+		flags |= SF_ARCHIVED;
+#endif
+#ifdef SF_IMMUTABLE
+	if( x_getprop(f, "SystemImmutable", (char **)&tmp) == 0 )
+		flags |= SF_IMMUTABLE;
+#endif
+#ifdef SF_APPEND
+	if( x_getprop(f, "SystemAppend", (char **)&tmp) == 0 )
+		flags |= SF_APPEND;
+#endif
+
+	if( !flags )
+		return 0;
+
+	if( chflags(file, flags) != 0 ) {
+		char e[1024];
+		memset(e, 0, sizeof(e));
+		snprintf(e, sizeof(e)-1, "chflags: %s", strerror(errno));
+		xar_err_new(x);
+		xar_err_set_file(x, f);
+		xar_err_set_string(x, e);
+		xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+		return -1;
+	}
+#endif
+	
+	return 0;
+}
+
 int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *buffer, size_t len) {
 	char *tmpstr;
 	struct passwd *pw;
@@ -309,6 +417,8 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	strftime(time, sizeof(time), "%FT%T", &t);
 	strcat(time, "Z");
 	xar_prop_set(f, "ctime", time);
+
+	flags_archive(f, &(XAR(x)->sbcache));
 
 	aacls(f, file);
 
