@@ -44,6 +44,7 @@ struct __xar_subdoc_t {
 	const char *ns;
 	const char *blank1; /* filler for xar_file_t compatibility */
 	const char *blank2; /* filler for xar_file_t compatibility */
+	const char blank3; /* filler for xar_file_t compatibility */
 	const char *name;
 	struct __xar_subdoc_t *next;
 	const char *value; /* a subdoc should very rarely have a value */

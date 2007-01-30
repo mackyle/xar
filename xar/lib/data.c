@@ -211,15 +211,8 @@ int32_t xar_data_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 		/* mode 600 since other modules may need to operate on the file
 		* prior to the real permissions being set.
 		*/
-TRYAGAIN:
 		context.fd = open(file, O_RDWR|O_TRUNC|O_EXLOCK, 0600);
 		if( context.fd < 0 ) {
-			if( errno == ENOENT ) {
-				xar_file_t parent = XAR_FILE(f)->parent;
-				if( parent && (xar_extract(x, parent) == 0) )
-					goto TRYAGAIN;
-			}
-			
 			xar_err_new(x);
 			xar_err_set_file(x, f);
 			xar_err_set_string(x, "io: Could not create file");
