@@ -1091,7 +1091,7 @@ int32_t xar_extract(xar_t x, xar_file_t f) {
 	char *tmp1, *dname;
 	xar_file_t tmpf;
 	
-	if( (strstr(XAR_FILE(f)->fspath, "/") != NULL) && (stat(XAR_FILE(f)->fspath, &sb)) ) {
+	if( (strstr(XAR_FILE(f)->fspath, "/") != NULL) && (stat(XAR_FILE(f)->fspath, &sb)) && (XAR_FILE(f)->parent_extracted == 0) ) {
 		tmp1 = strdup(XAR_FILE(f)->fspath);
 		dname = dirname(tmp1);
 		tmpf = xar_file_find(XAR(x)->files, dname);
@@ -1101,6 +1101,7 @@ int32_t xar_extract(xar_t x, xar_file_t f) {
 			return -1;
 		}
 		free(tmp1);
+		XAR_FILE(f)->parent_extracted++;
 		xar_extract(x, tmpf);
 	}
 	

@@ -51,8 +51,8 @@ struct arcmod xar_arcmods[] = {
 	{ xar_ext2attr_archive, xar_ext2attr_extract },
 	{ xar_data_archive, xar_data_extract },
 	/* Add new modules here */
-	{ NULL, xar_flags_extract },
-	{ NULL, xar_set_perm }
+	{ NULL, xar_set_perm },
+	{ NULL, xar_flags_extract }
 };
 
 /* xar_arcmod_archive

@@ -66,6 +66,7 @@ struct __xar_file_t {
 	const char *prefix;
 	const char *ns;
 	const char *fspath;
+	char parent_extracted;
 	const struct __xar_file_t *parent;
 	const struct __xar_file_t *children;
 	const struct __xar_file_t *next;
