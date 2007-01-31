@@ -18,7 +18,8 @@ xar_add() will treat files differently under the following circumstances:
 * The path /path/to/foo will be archived as path/to/foo, stripping out the leading /.
 * The path ../path/to/foo will be archived as path/to/foo, stripping out the leading .. The same applies to using ./path/to/foo
 * The path path/../../../to/foo will archive path non-recursively, and will archive the files at ../../to/foo as to/foo. The archive will then contain current working directory relative files/directoris of path and to.
-* If a path of path/to/foo is given, it will treat path and path/to as directories, even if they are symlinks. However, if path is given, and path is a symlink, it will be archived as a symlink. The same is true for to if the path given is path/to. This means, if you would like either path or path/to preserved as a symlink, they must be explicitly passed to xar_add() before calling xar_add() with an argument of path/to/foo.
+* In xar 1.4 and earlier, if a path of path/to/foo is given, it will treat path and path/to as directories, even if they are symlinks. However, if path is given, and path is a symlink, it will be archived as a symlink. The same is true for to if the path given is path/to. This means, if you would like either path or path/to preserved as a symlink, they must be explicitly passed to xar_add() before calling xar_add() with an argument of path/to/foo.
+* Post 1.4,  if a path of path/to/foo is given, path and path/to are not archived.  Instead, empty placeholder directory entires are created in the toc.  When path and path/to are later extracted, they will be created with the uid/gid of the extracting process, and permissions will be set based on umask.  No metadata for these directories is preserved.
 
 ==== Behavior on different filesystem objects ====
 
