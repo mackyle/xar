@@ -752,6 +752,78 @@ static xar_file_t xar_add_node(xar_t x, xar_file_t f, const char *name, const ch
 	return ret;
 }
 
+/* xar_add_pseudodir
+ * Summary: Adds a placeholder directory when archiving a file prior
+ * to archiving its path.
+ */
+static xar_file_t xar_add_pseudodir(xar_t x, xar_file_t f, const char *name, const char *prefix, const char *realpath)
+{
+	xar_file_t ret;
+	const char *path; 
+	char *tmp;
+	char idstr[32];
+
+	if( !f ) {
+		if( realpath )
+			asprintf(&tmp, "%s", realpath);
+		else
+			asprintf(&tmp, "%s%s%s", XAR(x)->path_prefix, prefix, name);
+
+		if( lstat(tmp, &XAR(x)->sbcache) != 0 ) {
+			free(tmp);
+			return NULL;
+		}
+
+		ret = xar_file_new(NULL);
+		if( !ret )
+			return NULL;
+		memset(idstr, 0, sizeof(idstr));
+		snprintf(idstr, sizeof(idstr)-1, "%"PRIu64, ++XAR(x)->last_fileid);
+		xar_attr_set(ret, NULL, "id", idstr);
+		XAR_FILE(ret)->parent = NULL;
+		XAR_FILE(ret)->fspath = tmp;
+		if( XAR(x)->files == NULL )
+			XAR(x)->files = ret;
+		else {
+			XAR_FILE(ret)->next = XAR(x)->files;
+			XAR(x)->files = ret;
+		}
+	} else {
+		path = XAR_FILE(f)->fspath;
+		if( strcmp(prefix, "../") == 0 ) {
+			int len1, len2;
+			len1 = strlen(path);
+			len2 = strlen(name);
+			if( (len1>=len2) && (strcmp(path+(len1-len2), name) == 0) ) {
+				return f;
+			}
+			
+		}
+
+		if( realpath ){
+			asprintf(&tmp, "%s", realpath);
+		}else
+			asprintf(&tmp, "%s/%s%s", path, prefix, name);
+		
+		if( lstat(tmp, &XAR(x)->sbcache) != 0 ) {
+			free(tmp);
+			return NULL;
+		}
+
+		ret = xar_file_new(f);
+		if( !ret )
+			return NULL;
+		memset(idstr, 0, sizeof(idstr));
+		snprintf(idstr, sizeof(idstr)-1, "%"PRIu64, ++XAR(x)->last_fileid);
+		xar_attr_set(ret, NULL, "id", idstr);
+		XAR_FILE(ret)->fspath = tmp;
+	}
+	xar_prop_set(ret, "name", name);
+	xar_prop_set(ret, "type", "directory");
+
+	return ret;
+}
+
 /* xar_add_r
  * Summary: a recursive helper function for adding a node to the
  * tree.  This will search all children of node f, looking for
@@ -824,7 +896,8 @@ static xar_file_t xar_add_r(xar_t x, xar_file_t f, const char *path, const char 
 
 	/* tmp3 was not found in children of start, so we add it */
 	if( tmp2 ) {
-		ret = xar_add_node(x, f, tmp3, prefix, NULL,  1);
+		//ret = xar_add_node(x, f, tmp3, prefix, NULL,  1);
+		ret = xar_add_pseudodir(x, f, tmp3, prefix, NULL);
 	} else {
 		ret = xar_add_node(x, f, tmp3, prefix, NULL,  0);
 	}
