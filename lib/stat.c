@@ -498,6 +498,16 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 	}
 
 	xar_prop_get(f, "type", &opt);
+	if( opt && !mset ) {
+		mode_t u = umask(0);
+		umask(u);
+		if( strcmp(opt, "directory") == 0 ) {
+			m = (mode_t)(0777 & ~u);
+		} else {
+			m = (mode_t)(0666 & ~u);
+		}
+		mset = 1;
+	}
 	if( opt && (strcmp(opt, "symlink") == 0) ) {
 #ifdef HAVE_LCHOWN
 		if( lchown(file, u, g) ) {
