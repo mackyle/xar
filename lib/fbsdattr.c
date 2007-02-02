@@ -62,17 +62,17 @@
 
 #ifdef HAVE_SYS_EXTATTR_H
 struct _fbsdattr_context{
-	const char *file = NULL;
-	const char *attr = NULL;
-	void *buf = NULL;
-	int off = 0;
-	int bufsz = 0;
-	int ns = 0;
+	const char *file;
+	const char *attr;
+	void *buf;
+	int off;
+	int bufsz;
+	int ns;
 };
 
 #define FBSDATTR_CONTEXT(x) ((struct _fbsdattr_context *)(x))
 
-int32_t xar_fbsdattr_read(xar_t x, xar_file_t f, void *buf, size_t len) {
+int32_t xar_fbsdattr_read(xar_t x, xar_file_t f, void *buf, size_t len, void *context) {
 	if( !FBSDATTR_CONTEXT(context)->buf ) {
 		FBSDATTR_CONTEXT(context)->bufsz = extattr_get_link(FBSDATTR_CONTEXT(context)->file, FBSDATTR_CONTEXT(context)->ns, FBSDATTR_CONTEXT(context)->attr, NULL, 0);
 		if( FBSDATTR_CONTEXT(context)->bufsz < 0 )
@@ -98,7 +98,7 @@ int32_t xar_fbsdattr_read(xar_t x, xar_file_t f, void *buf, size_t len) {
 	}
 
 }
-int32_t xar_fbsdattr_write(xar_t x, xar_file_t f, void *buf, size_t len) {
+int32_t xar_fbsdattr_write(xar_t x, xar_file_t f, void *buf, size_t len, void *context) {
 	return extattr_set_link(FBSDATTR_CONTEXT(context)->file, FBSDATTR_CONTEXT(context)->ns, FBSDATTR_CONTEXT(context)->attr, buf, len);
 }
 #endif
@@ -190,16 +190,16 @@ TRYAGAIN:
 		extattr_namespace_to_string(namespace, &ns);
 		memset(tempnam, 0, sizeof(tempnam));
 		snprintf(tempnam, sizeof(tempnam)-1, "%s/%s.%s", XAR_EA_FORK, ns, key);
-		FBSDATTR_CONTEXT(context).ns = namespace;
-		FBSDATTR_CONTEXT(context).file = file;
-		FBSDATTR_CONTEXT(context).attr = key;
+		FBSDATTR_CONTEXT(&context)->ns = namespace;
+		FBSDATTR_CONTEXT(&context)->file = file;
+		FBSDATTR_CONTEXT(&context)->attr = key;
 
 		xar_attr_set(f, tempnam, "fstype", fsname);
-		xar_attrcopy_to_heap(x, f, tempnam, xar_fbsdattr_read);
+		xar_attrcopy_to_heap(x, f, tempnam, xar_fbsdattr_read, &context);
 
-		free(FBSDATTR_CONTEXT(context).buf);
-		FBSDATTR_CONTEXT(context).buf = NULL;
-		FBSDATTR_CONTEXT(context).off = 0;
+		free(FBSDATTR_CONTEXT(&context)->buf);
+		FBSDATTR_CONTEXT(&context)->buf = NULL;
+		FBSDATTR_CONTEXT(&context)->off = 0;
 	}
 
 	if( namespace == EXTATTR_NAMESPACE_USER ) {
@@ -250,18 +250,20 @@ int32_t xar_fbsdattr_extract(xar_t x, xar_file_t f, const char* file, char *buff
 		}
 
 		tmp = prop + strlen(XAR_EA_FORK) + 1;
+		if( strstr(tmp, "/") )
+			continue;
 		if( strncmp(tmp, "user.", 5) == 0 ) {
-			FBSDATTR_CONTEXT(context).ns = EXTATTR_NAMESPACE_USER;
-			FBSDATTR_CONTEXT(context).attr = tmp + 5;
+			FBSDATTR_CONTEXT(&context)->ns = EXTATTR_NAMESPACE_USER;
+			FBSDATTR_CONTEXT(&context)->attr = tmp + 5;
 		} else if( strncmp(tmp, "system.", 7) == 0 ) {
-			FBSDATTR_CONTEXT(context).ns = EXTATTR_NAMESPACE_SYSTEM;
-			FBSDATTR_CONTEXT(context).attr = tmp + 7;
+			FBSDATTR_CONTEXT(&context)->ns = EXTATTR_NAMESPACE_SYSTEM;
+			FBSDATTR_CONTEXT(&context)->attr = tmp + 7;
 		} else {
 			continue;
 		}
 
-		FBSDATTR_CONTEXT(context).file = file;
-		xar_attrcopy_from_heap(x, f, prop, xar_fbsdattr_write);
+		FBSDATTR_CONTEXT(&context)->file = file;
+		xar_attrcopy_from_heap(x, f, prop, xar_fbsdattr_write, &context);
 	}
 
 	xar_iter_free(iter);

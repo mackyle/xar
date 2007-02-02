@@ -37,6 +37,7 @@
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>
 #include <inttypes.h>  /* for PRIu64 */
+#include <unistd.h>
 
 #include "xar.h"
 #include "archive.h"
