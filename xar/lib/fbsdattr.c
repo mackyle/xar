@@ -108,7 +108,11 @@ int32_t xar_fbsdattr_archive(xar_t x, xar_file_t f, const char* file, const char
 #ifdef HAVE_SYS_EXTATTR_H
 	char *buf = NULL;
 	int ret, retval=0, bufsz, i;
+#ifdef HAVE_STATVFS
+	struct statvfs sfs;
+#else
 	struct statfs sfs;
+#endif
 	char *fsname = NULL;
 	int namespace = EXTATTR_NAMESPACE_USER;
 	struct _fbsdattr_context context;
@@ -169,7 +173,11 @@ TRYAGAIN:
 	}
 
 
+#ifdef HAVE_STATVFS
+	statvfs(file, &sfs);
+#else
 	statfs(file, &sfs);
+#endif
 
 	fsname = sfs.f_fstypename;
 
@@ -221,7 +229,11 @@ int32_t xar_fbsdattr_extract(xar_t x, xar_file_t f, const char* file, char *buff
 #ifdef HAVE_SYS_EXTATTR_H
 	char *fsname = "bogus";
 	const char *prop;
+#ifdef HAVE_STATVFS
+	struct statvfs sfs;
+#else
 	struct statfs sfs;
+#endif
 	int eaopt = 0;
 	xar_iter_t iter;
 	struct _fbsdattr_context context;
@@ -233,7 +245,11 @@ int32_t xar_fbsdattr_extract(xar_t x, xar_file_t f, const char* file, char *buff
 		return 0;
 	}
 	
+#ifdef HAVE_STATVFS
+	statvfs(file, &sfs);
+#else
 	statfs(file, &sfs);
+#endif
 	fsname = sfs.f_fstypename;
 
 	iter = xar_iter_new();
