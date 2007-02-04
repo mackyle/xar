@@ -108,12 +108,8 @@ int xar_gzip_fromheap_in(xar_t x, xar_file_t f, const char *attr, void **in, siz
 			return -1;
 		}
 		offset += outlen - offset - GZIP_CONTEXT(context)->z.avail_out;
-		if( (r == Z_STREAM_END) && (offset == 0) ) {
-			//r = inflate(GZIP_CONTEXT(context), Z_FINISH);
-			offset += outlen - offset - GZIP_CONTEXT(context)->z.avail_out;
-			xar_gzip_fromheap_done(x, f, attr, context);
+		if( (r == Z_STREAM_END) && (offset == 0) )
 			break;
-		}
 	}
 
 	free(*in);

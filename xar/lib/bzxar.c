@@ -115,11 +115,8 @@ int xar_bzip_fromheap_in(xar_t x, xar_file_t f, const char *attr, void **in, siz
 			return -1;
 		}
 		offset += outlen - offset - BZIP2_CONTEXT(context)->bz.avail_out;
-		if( (r == BZ_STREAM_END) && (offset == 0) ) {
-			offset += outlen - offset - BZIP2_CONTEXT(context)->bz.avail_out;
-			xar_bzip_fromheap_done(x, f, attr, context);
+		if( (r == BZ_STREAM_END) && (offset == 0) )
 			break;
-		}
 	}
 
 	free(*in);
