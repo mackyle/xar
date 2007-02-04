@@ -169,6 +169,10 @@ AC_CHECK_FUNCS(chflags)
 AC_CHECK_FUNCS(statvfs)
 AC_CHECK_FUNCS(statfs)
 
+AC_CHECK_MEMBERS([struct statfs.f_fstypename],,,[#include <sys/types.h>
+#include <sys/param.h>
+#include <sys/mount.h>])
+AC_CHECK_MEMBERS([struct statvfs.f_fstypename],,,[#include <sys/statvfs.h>])
 AC_CHECK_MEMBERS([struct stat.st_flags])
 
 AC_CHECK_SIZEOF(uid_t)
