@@ -142,6 +142,13 @@ TRYAGAIN:
 			namespace = EXTATTR_NAMESPACE_SYSTEM;
 			goto TRYAGAIN;
 		} else {
+			/* If we get eperm on system namespace, don't
+			 * return error.  This is expected for normal
+			 * users trying to archive the system namespace
+			 * on *bsd.
+			 */
+			if( errno == EPERM )
+				ret = 0;
 			goto BAIL;
 		}
 	}
@@ -168,6 +175,13 @@ TRYAGAIN:
 			namespace = EXTATTR_NAMESPACE_SYSTEM;
 			goto TRYAGAIN;
 		} else {
+			/* If we get eperm on system namespace, don't
+			 * return error.  This is expected for normal
+			 * users trying to archive the system namespace
+			 * on *bsd.
+			 */
+			if( errno == EPERM )
+				ret = 0;
 			goto BAIL;
 		}
 	}
