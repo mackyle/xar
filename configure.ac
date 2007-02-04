@@ -166,6 +166,8 @@ AC_CHECK_FUNCS(setattrlist)
 AC_CHECK_FUNCS(lchmod)
 AC_CHECK_FUNCS(lchown)
 AC_CHECK_FUNCS(chflags)
+AC_CHECK_FUNCS(statvfs)
+AC_CHECK_FUNCS(statfs)
 
 AC_CHECK_MEMBERS([struct stat.st_flags])
 
