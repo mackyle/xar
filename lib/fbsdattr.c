@@ -145,10 +145,20 @@ TRYAGAIN:
 			/* If we get eperm on system namespace, don't
 			 * return error.  This is expected for normal
 			 * users trying to archive the system namespace
-			 * on *bsd.
+			 * on freebsd 6.2.  On netbsd 3.1, they've decided
+			 * to return EOPNOTSUPP instead.
 			 */
 			if( errno == EPERM )
 				ret = 0;
+			else if( errno == EOPNOTSUPP )
+				ret = 0;
+			else {
+				xar_err_new(x);
+				xar_err_set_file(x, f);
+				xar_err_set_string(x, "Error archiving EA"); 
+				xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_CREATION);
+				ret = 0;
+			}
 			goto BAIL;
 		}
 	}
@@ -178,10 +188,20 @@ TRYAGAIN:
 			/* If we get eperm on system namespace, don't
 			 * return error.  This is expected for normal
 			 * users trying to archive the system namespace
-			 * on *bsd.
+			 * on freebsd 6.2.  On netbsd 3.1, they've decided
+			 * to return EOPNOTSUPP instead.
 			 */
 			if( errno == EPERM )
 				ret = 0;
+			else if( errno == EOPNOTSUPP )
+				ret = 0;
+			else {
+				xar_err_new(x);
+				xar_err_set_file(x, f);
+				xar_err_set_string(x, "Error archiving EA"); 
+				xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_CREATION);
+				ret = 0;
+			}
 			goto BAIL;
 		}
 	}
