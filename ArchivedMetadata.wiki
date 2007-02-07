@@ -5,24 +5,24 @@
 
 This is meant to be a list of metadata that xar knows about and explicitly archives.  This does not mean to be an exhaustive list of how archived information will be extracted on systems other than the one it was archived on.
 
-* Generic stat information such as file type, permissions, uid, gid, atime, ctime, mtime.
-* Username corresponding to the uid on the system the archive was created on.
-* Group name corresponding to the gid on the system the archive was created on.
-* On systems supporting the st_flags stat member, the flags set on the file are archived.
-* On systems supporting the POSIX draft standard ACL calls and semantics, ACLs are archived.
-* On Linux systems supporting it, on the EXT3, JFS, Reiserfs, and XFS filesystems, Extended Attributes are archived.
-* On Linux system, EXT2 file attributes are archived (similar to but distinct from chflags() on systems supporting struct stat st_flags)
-* On FreeBSD and NetBSD, Extended Attributes are archived.
-* On Mac OS X systems, on HFS, the Finder info is archived.
-* On Mac OS X 10.3, on HFS the resource fork is archived via the ..namedfork method.
-* On Mac OS X 10.4 Extended Attributes (including the resource fork) is archived.
-* On Mac OS X systems dot-underbar (google wiki doesn't like the actual characters) files corresponding to an archived file will be read as AppleDouble and the information will be associated with the original file.
+* [[metadata_stat|Generic stat information]] such as file type, permissions, uid, gid, atime, ctime, mtime.
+** Username corresponding to the uid on the system the archive was created on.
+** Group name corresponding to the gid on the system the archive was created on.
+* On systems supporting the st_flags stat member, [[metadata_chflags|the flags]] set on the file are archived.
+* On systems supporting the [[metadata_posix1e_acls|POSIX draft standard ACL]] calls and semantics, ACLs are archived.
+** See note about lack of Mac OS X 10.4 support
+* On Linux systems supporting it, on the [[metadata_linux_ea|EXT3, JFS, Reiserfs, and XFS filesystems, Extended Attributes]] are archived.
+* On [[metadata_linux_attrib|Linux system, EXT2 file attributes]] are archived (similar to but distinct from chflags() on systems supporting struct stat st_flags)
+* On FreeBSD and NetBSD, [[metadata_bsd_ea|Extended Attributes]] are archived.
+* On [[metadata_darwin_ea|Mac OS X 10.4 Extended Attributes]] (including the resource fork) is archived.
+* [[metadata_darwin_legacy|Legacy Mac OS X metadata]]
+** On Mac OS X systems, on HFS, the Finder info is archived.
+** On Mac OS X 10.3, on HFS the resource fork is archived via the ..namedfork method.
 
 
 == Known unarchived metadata ==
-* ACLs on Mac OS X 10.4
-* Tru64 Extended Attributes
-* Volume level metadata
+* [[metadata_tru64_ea|Tru64 Extended Attributes]]
+* [[metadata_volume|Volume level metadata]]
 
 
 
