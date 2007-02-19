@@ -1,44 +1,23 @@
-#
+<!-- SUMMARY: POSIX stat Metadata -->
 == "POSIX" stat Metadata ==
-#
 
-#
 "POSIX"-ish [http://www.opengroup.org/onlinepubs/009695399/functions/stat.html stat] metadata.
-#
 
-#
 === Metadata supported ===
-#
 
-#
 * Type of file (file, hardlink, link)
-#
 ** Broken links
-#
 * File mode (UNIX-like permissions)
-#
 * UID
-#
 ** Textual user representation of UID on archiving system
-#
 * GID
-#
 ** Textual group representation of GID on archiving system
-#
 * atime, ctime, and mtime (in [http://en.wikipedia.org/wiki/ISO_8601 ISO 8601] format)
-#
 
-#
 === Implementation status ===
-#
 
-#
-Implemented since >= 1.0?
-#
+Implemented since >= 1.0
 
-#
 === Notes ===
-#
 
-#
 * On systems that support the <tt>st_flags</tt> member of the <tt>stat</tt> struct xar will archive the [[metadata_chflags|chflags(2)]] flags.
