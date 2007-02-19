@@ -1,48 +1,24 @@
-#
+<!-- SUMMARY: File Flags Metadata -->
 == File Flags Metadata ==
-#
 
-#
 chflags(2) (<tt>st_flags</tt>) metadata support. Per-file settable attributes. Typically implemented on BSD platforms.
-#
 
-#
 === Metadata supported ===
-#
 
-#
 For platforms that support them:
-#
-
-#
 * User No Dump
-#
 * User Immutable
-#
 * User Append
-#
 * User Opaque
-#
 * System Archived
-#
 * System Immutable
-#
 
-#
 === Implementation status ===
-#
 
-#
 Implemented since repository revision 92 (2007-01-29).
-#
 
-#
 === Notes ===
-#
 
-#
 * Note that some flags have overlap and may be duplicated with other metadata support. Most notably this happens with [[metadata_linux_attrib|Linux EXT2 file attributes]].
-#
 * Archival of flags is implemented using the <tt>st_flags</tt> struct member of the [[metadata_stat|stat metadata]] on platforms that support it.
-#
 * Extraction of flags is implemented using the chflags(2) APIs on platforms that support it.
