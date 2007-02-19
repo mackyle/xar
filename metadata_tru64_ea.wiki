@@ -1,0 +1,24 @@
+#
+== Tru64 Extended Attributes Metadata ==
+#
+
+#
+Extended attributes as supported on [http://en.wikipedia.org/wiki/Tru64_UNIX Tru64 UNIX].
+#
+
+#
+=== Implementation status ===
+#
+
+#
+Not implemented.
+#
+
+#
+=== Notes ===
+#
+
+#
+* Support is likely to use the -proplist(3) (and other) system calls.
+#
+* Some [http://h30097.www3.hp.com/docs/base_doc/DOCUMENTATION/V50_HTML/MAN/MAN4/0200____.HTM HP Tru64 documentation on Extended Attributes].

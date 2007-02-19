@@ -18,7 +18,7 @@ This is meant to be a list of metadata that xar knows about and explicitly archi
 * [[metadata_darwin_legacy|Legacy Mac OS X metadata]]
 ** On Mac OS X systems, on HFS, the Finder info is archived.
 ** On Mac OS X 10.3, on HFS the resource fork is archived via the ..namedfork method.
-
+* [[metadata_macho|Mach-O metadata]]
 
 == Known unarchived metadata ==
 * [[metadata_tru64_ea|Tru64 Extended Attributes]]
