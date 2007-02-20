@@ -981,7 +981,7 @@ xar_file_t xar_add_frombuffer(xar_t x, xar_file_t parent, const char *name, char
 		memset(idstr, 0, sizeof(idstr));
 		snprintf(idstr, sizeof(idstr)-1, "%"PRIu64, ++XAR(x)->last_fileid);
 		xar_attr_set(ret, NULL, "id", idstr);
-		XAR_FILE(ret)->fspath = "";
+		XAR_FILE(ret)->fspath = NULL;
 	}
 	
 	xar_prop_set(ret, "name", name);
