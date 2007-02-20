@@ -12,6 +12,8 @@ xar_file_t [[API_xar_add|xar_add]](xar_t x, const char *path);
 
 xar_file_t [[API_xar_add_frombuffer|xar_add_frombuffer]](xar_t x, xar_file_t parent, const char *name, char *buffer, size_t length);
 
+xar_file_t [[API_xar_add_folder|xar_add_folder]](xar_t x, xar_file_t f, const char *name, struct stat *info);
+
 int32_t [[API_xar_extract|xar_extract]](xar_t x, xar_file_t f);
 
 void [[API_xar_register_errhandler|xar_register_errhandler]](xar_t x, err_handler callback, void *usrctx);
