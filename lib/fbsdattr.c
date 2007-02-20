@@ -120,9 +120,10 @@ int32_t xar_fbsdattr_archive(xar_t x, xar_file_t f, const char* file, const char
 	memset(&context,0,sizeof(struct _fbsdattr_context));
 
 	/* no fbsdattr attributes for data to a buffer */
-	if(len){
+	if(len)
 		return 0;
-	}
+	if(file == NULL)
+		return 0;
 	
 TRYAGAIN:
 	/* extattr_list_link()'s man page does not define the return
