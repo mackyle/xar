@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/fcntl.h>
+#include <string.h>
 #include <xar/xar.h>
 
 int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
@@ -57,7 +58,10 @@ int main(int argc, char *argv[])
 
 	xar_register_errhandler(x, err_callback, NULL);
 
-	f = xar_add_frombuffer(x, NULL, "filename", buffer, red);
+	memset(&sb, 0, sizeof(sb));
+
+	sb.st_mode = S_IFDIR | S_IRWXU;
+	f = xar_add_folder(x, NULL, "mydir", &sb);
 	if( !f ) {
 		fprintf(stderr, "Error adding parent to archive\n");
 		exit(7);

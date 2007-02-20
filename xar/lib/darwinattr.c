@@ -208,6 +208,9 @@ static int32_t ea_archive(xar_t x, xar_file_t f, const char* file, void *context
 	int ret, bufsz;
 	int32_t retval = 0;
 
+	if( file == NULL )
+		return 0;
+
 	ret = listxattr(file, NULL, 0, XATTR_NOFOLLOW);
 	if( ret < 0 )
 		return -1;
