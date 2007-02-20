@@ -1,0 +1,43 @@
+<!-- SUMMARY: xar_file_t xar_add_frombuffer(xar_t x, xar_file_t parent, const char *name, char *buffer, size_t length) -->
+<!-- LABELS: Phase-Implementation -->
+
+== API Documentation ==
+
+=== xar_file_t xar_add_frombuffer(xar_t x, xar_file_t parent, const char *name, char *buffer, size_t length) ===
+
+Add a file object to the archive with the data coming from an in-memory buffer.
+
+==== Description ====
+
+xar_add_frombuffer() adds a single file object, represented by the in-memory buffer, to the xarchive represented by x.
+
+The added object will be of type file.  It is important that the parent of this object be of type directory (or symliink to directory) for successful extraction.
+
+Upon successful archival, xar_add_frombuffer() will return a reference to the file handle (non-zero). On failure, NULL will be returned. If an error or warning occurs while adding the file to the xarchive, the callback registered via xar_register_errhandler() will be invoked.
+
+==== Example ====
+<pre>
+#include <xar/xar.h>
+
+int main(int argc, char *argv[]) {
+	xar_t x;
+	char *buffer = "hello world";
+
+	x = xar_open(argv[1], WRITE);
+	if( x == NULL ) {
+		fprintf(stderr, "Error opening xarchive: %s\n", argv[1]);
+		exit(1);
+	}
+
+	if( xar_add_frombuffer(x, NULL, "myfile", buffer, strlen(buffer)) == NULL ) {
+		fprintf(stderr, "Error adding /path/to/file to the xarchive\n");
+	}
+
+	...
+
+	xar_close(x);
+	
+	...
+
+}
+</pre>
