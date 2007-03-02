@@ -1180,7 +1180,7 @@ int32_t xar_extract(xar_t x, xar_file_t f) {
 	return xar_extract_tofile(x, f, XAR_FILE(f)->fspath);
 }
 
-/* xar_extract
+/* xar_verify
 * x: archive to extract from
 * f: file to verify
 * Returns 0 on success, -1 on failure.
