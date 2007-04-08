@@ -296,7 +296,23 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		if( args[0] ) {
 			int i;
 			for(i = 0; args[i]; i++) {
-				if( strcmp(path, args[i]) == 0 ) {
+				struct lnode *tmp;
+				int err, extract_match;
+
+				tmp = malloc(sizeof(struct lnode));
+				tmp->str = args[i];
+				tmp->next = NULL;
+				err = regcomp(&tmp->reg, tmp->str, REG_NOSUB);
+				if( err ) {
+					char errstr[1024];
+					regerror(err, &tmp->reg, errstr, sizeof(errstr));
+					printf("Error with regular expression %s: %s\n", tmp->str, errstr);
+					exit(1);
+				}
+				extract_match = regexec(&tmp->reg, path, 0, NULL, 0);
+				regfree(&tmp->reg);
+				free(tmp);
+				if( !extract_match ) {
 					matched = 1;
 					break;
 				}

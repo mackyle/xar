@@ -213,6 +213,7 @@ static int32_t eacls(xar_t x, xar_file_t f, const char *file) {
 				xar_err_set_file(x, f);
 				xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
 			}
+			acl_free(a);
 		}
 	}
 #endif
