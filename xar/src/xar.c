@@ -261,6 +261,51 @@ static int extract(const char *filename, int arglen, char *args[]) {
 	xar_iter_t i;
 	xar_file_t f;
 	int files_extracted = 0;
+	int argi;
+	struct lnode *extract_files = NULL;
+	struct lnode *extract_tail = NULL;
+	struct lnode *lnodei = NULL;
+
+	for(argi = 0; args[argi]; argi++) {
+		struct lnode *tmp;
+		int err;
+		tmp = malloc(sizeof(struct lnode));
+		tmp->str = strdup(args[argi]);
+		tmp->next = NULL;
+		err = regcomp(&tmp->reg, tmp->str, REG_NOSUB);
+		if( err ) {
+			char errstr[1024];
+			regerror(err, &tmp->reg, errstr, sizeof(errstr));
+			printf("Error with regular expression %s: %s\n", tmp->str, errstr);
+			exit(1);
+		}
+		if( extract_files == NULL ) {
+			extract_files = tmp;
+			extract_tail = tmp;
+		} else {
+			extract_tail->next = tmp;
+			extract_tail = tmp;
+		}
+		
+		/* Add a clause for recursive extraction */
+		tmp = malloc(sizeof(struct lnode));
+		asprintf(&tmp->str, "%s/.*", args[argi]);
+		tmp->next = NULL;
+		err = regcomp(&tmp->reg, tmp->str, REG_NOSUB);
+		if( err ) {
+			char errstr[1024];
+			regerror(err, &tmp->reg, errstr, sizeof(errstr));
+			printf("Error with regular expression %s: %s\n", tmp->str, errstr);
+			exit(1);
+		}
+		if( extract_files == NULL ) {
+			extract_files = tmp;
+			extract_tail = tmp;
+		} else {
+			extract_tail->next = tmp;
+			extract_tail = tmp;
+		}
+	}
 
 	x = xar_open(filename, READ);
 	if( !x ) {
@@ -294,24 +339,10 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		char *path = xar_get_path(f);
 
 		if( args[0] ) {
-			int i;
-			for(i = 0; args[i]; i++) {
-				struct lnode *tmp;
-				int err, extract_match;
+			for(i = extract_files; i != NULL; i = i->next) {
+				int extract_match = 1;
 
-				tmp = malloc(sizeof(struct lnode));
-				tmp->str = args[i];
-				tmp->next = NULL;
-				err = regcomp(&tmp->reg, tmp->str, REG_NOSUB);
-				if( err ) {
-					char errstr[1024];
-					regerror(err, &tmp->reg, errstr, sizeof(errstr));
-					printf("Error with regular expression %s: %s\n", tmp->str, errstr);
-					exit(1);
-				}
-				extract_match = regexec(&tmp->reg, path, 0, NULL, 0);
-				regfree(&tmp->reg);
-				free(tmp);
+				extract_match = regexec(&i->reg, path, 0, NULL, 0);
 				if( !extract_match ) {
 					matched = 1;
 					break;
@@ -353,6 +384,15 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		fprintf(stderr, "Error extracting the archive\n");
 		if( !Err )
 			Err = 42;
+	}
+
+	for(lnodei = extract_files; lnodei != NULL; ) {
+		struct lnode *tmp;
+		free(lnodei->str);
+		regfree(&lnodei->reg);
+		tmp = lnodei;
+		lnodei = lnodei->next;
+		free(tmp);
 	}
 	return Err;
 }
