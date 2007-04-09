@@ -63,6 +63,10 @@ Cleanup targets include:
 	distclean
 	relclean
 
+Note that if you are using a development version of xar, configure is
+not checked into the repository.  You may replace the ./configure step
+above with ./autogen.sh.
+
 ################################################################################
 
 The build system is capable of building in a different directory than the
