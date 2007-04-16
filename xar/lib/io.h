@@ -41,13 +41,13 @@
 typedef int (*read_callback)(xar_t, xar_file_t, void *, size_t, void *context);
 typedef int (*write_callback)(xar_t, xar_file_t, void *, size_t, void *context);
 
-typedef int (*fromheap_in)(xar_t x, xar_file_t f, const char *attr, void **in, size_t *inlen, void **context);
-typedef int (*fromheap_out)(xar_t x, xar_file_t f, const char *attr, void *in, size_t inlen, void **context);
-typedef int (*fromheap_done)(xar_t x, xar_file_t f, const char *attr, void **context);
+typedef int (*fromheap_in)(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
+typedef int (*fromheap_out)(xar_t x, xar_file_t f, xar_prop_t p, void *in, size_t inlen, void **context);
+typedef int (*fromheap_done)(xar_t x, xar_file_t f, xar_prop_t p, void **context);
 
-typedef int (*toheap_in)(xar_t x, xar_file_t f, const char *attr, void **in, size_t *inlen, void **context);
-typedef int (*toheap_out)(xar_t x, xar_file_t f, const char *attr, void *in, size_t inlen, void **context);
-typedef int (*toheap_done)(xar_t x, xar_file_t f, const char *attr, void **context);
+typedef int (*toheap_in)(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
+typedef int (*toheap_out)(xar_t x, xar_file_t f, xar_prop_t p, void *in, size_t inlen, void **context);
+typedef int (*toheap_done)(xar_t x, xar_file_t f, xar_prop_t p, void **context);
 
 struct datamod {
 	fromheap_in      fh_in;
@@ -58,9 +58,9 @@ struct datamod {
 	toheap_done      th_done;
 };
 
-int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, const char *attr, read_callback rcb, void *context);
-int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, const char *attr, write_callback wcb, void *context);
-int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, const char *attr, xar_t xdest, xar_file_t fdest);
+int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb, void *context);
+int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, xar_prop_t p, write_callback wcb, void *context);
+int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, xar_prop_t p, xar_t xdest, xar_file_t fdest);
 int32_t xar_heap_to_archive(xar_t x);
 
 #endif /* _XAR_IO_H_ */

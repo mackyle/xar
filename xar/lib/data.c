@@ -135,6 +135,7 @@ int32_t xar_data_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	const char *opt;
 	int32_t retval = 0;
 	struct _data_context context;
+	xar_prop_t tmpp;
 	
 	memset(&context,0,sizeof(struct _data_context));
 
@@ -171,7 +172,8 @@ int32_t xar_data_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	fcntl(context.fd, F_NOCACHE, 1);
 #endif
 
-	retval = xar_attrcopy_to_heap(x, f, "data", xar_data_read,(void *)(&context));
+	tmpp = xar_prop_pset(f, NULL, "data", NULL);
+	retval = xar_attrcopy_to_heap(x, f, tmpp, xar_data_read,(void *)(&context));
 
 	if(context.fd > 0){
 		close(context.fd);
@@ -185,6 +187,7 @@ int32_t xar_data_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 	const char *opt;
 	int32_t retval = 0;
 	struct _data_context context;
+	xar_prop_t tmpp;
 	
 	memset(&context,0,sizeof(struct _data_context));
 	
@@ -222,7 +225,10 @@ int32_t xar_data_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 		
 	}
 	
-	retval = xar_attrcopy_from_heap(x, f, "data", xar_data_write, (void *)(&context));
+	tmpp = xar_prop_pfirst(f);
+	if( tmpp )
+		tmpp = xar_prop_find(tmpp, "data");
+	retval = xar_attrcopy_from_heap(x, f, tmpp, xar_data_write, (void *)(&context));
 	
 	if( context.fd > 0 ){		
 		close(context.fd);
@@ -236,6 +242,7 @@ int32_t xar_data_verify(xar_t x, xar_file_t f)
 {
 	const char *opt;
 	struct _data_context context;
+	xar_prop_t tmpp;
 	
 	memset(&context,0,sizeof(struct _data_context));
 
@@ -246,5 +253,8 @@ int32_t xar_data_verify(xar_t x, xar_file_t f)
 		return 0;
 	}
 	
-	return xar_attrcopy_from_heap(x, f, "data", NULL , (void *)(&context));
+	tmpp = xar_prop_pfirst(f);
+	if( tmpp )
+		tmpp = xar_prop_find(tmpp, "data");
+	return xar_attrcopy_from_heap(x, f, tmpp, NULL , (void *)(&context));
 }

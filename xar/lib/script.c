@@ -40,6 +40,7 @@
 #include "asprintf.h"
 #endif
 #include "xar.h"
+#include "filetree.h"
 
 struct _script_context{
 	int initted;
@@ -47,8 +48,9 @@ struct _script_context{
 
 #define SCRIPT_CONTEXT(x) ((struct _script_context*)(*x))
 
-int32_t xar_script_in(xar_t x, xar_file_t f, const char *attr, void **in, size_t *inlen, void **context) {
+int32_t xar_script_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
 	char *buf = *in;
+	xar_prop_t tmpp;
 
 	if(!SCRIPT_CONTEXT(context)){
 		*context = calloc(1,sizeof(struct _script_context));
@@ -73,14 +75,17 @@ int32_t xar_script_in(xar_t x, xar_file_t f, const char *attr, void **in, size_t
 			exe[i-2] = buf[i];
 		}
 
-		xar_prop_set(f, "content/type", "script");
-		xar_prop_set(f, "content/interpreter", exe);
+		tmpp = xar_prop_pset(f, p, "content", NULL);
+		if( tmpp ) {
+			xar_prop_pset(f, tmpp, "type", "script");
+			xar_prop_pset(f, tmpp, "interpreter", exe);
+		}
 		free(exe);
 	}
 	return 0;
 }
 
-int32_t xar_script_done(xar_t x, xar_file_t f, const char *attr, void **context) {
+int32_t xar_script_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 
 	if(!SCRIPT_CONTEXT(context)){
 		return 0;

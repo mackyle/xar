@@ -1083,24 +1083,21 @@ xar_file_t xar_add_from_archive(xar_t x, xar_file_t parent, const char *name, xa
 	xar_prop_set(ret, "name", name);
 		
 	/* iterate through all the properties, see if any of them have an offset */
-	xar_iter_t iter = xar_iter_new();
-	const char *attr = xar_prop_first(ret , iter);
-	char *tmpstr = NULL;
+	xar_prop_t p = xar_prop_pfirst(ret);
 
 	do{
-		asprintf(&tmpstr, "%s/offset", attr);
-		if(0 == xar_prop_get(ret, tmpstr, NULL) ){
-			if( 0 != xar_attrcopy_from_heap_to_heap(sourcearchive, sourcefile, attr, x, ret)){			
+		xar_prop_t tmpp;
+		
+		tmpp = xar_prop_pget(p, "offset");
+		if(tmpp) {
+			if( 0 != xar_attrcopy_from_heap_to_heap(sourcearchive, sourcefile, p, x, ret)){			
 				xar_file_free(ret);
 				ret = NULL;
 				break;
 			}
 		}
-		free(tmpstr);
 		
-	}while( (attr = xar_prop_next(iter)) );
-	
-	xar_iter_free(iter);
+	}while( (p = xar_prop_pnext(p)) );
 	
 	return ret;	
 }

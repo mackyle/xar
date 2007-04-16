@@ -62,23 +62,24 @@ struct _bzip_context{
 #define BZIP2_CONTEXT(x) ((struct _bzip_context *)(*x))
 #endif
 
-int xar_bzip_fromheap_done(xar_t x, xar_file_t f, const char *attr, void **context);
+int xar_bzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context);
 
-int xar_bzip_fromheap_in(xar_t x, xar_file_t f, const char *attr, void **in, size_t *inlen, void **context) {
+int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
 #ifdef HAVE_LIBBZ2
 	const char *opt;
 	void *out = NULL;
 	size_t outlen, offset = 0;
 	int r;
-	char *tmpstr;
+	xar_prop_t tmpp;
 
 	/* on first run, we init the context and check the compression type */
 	if( !BZIP2_CONTEXT(context) ) {
 		*context = calloc(1,sizeof(struct _bzip_context));
 		
-		asprintf(&tmpstr, "%s/encoding", attr);
-		opt = xar_attr_get(f, tmpstr, "style");
-		free(tmpstr);
+		opt = NULL;
+		tmpp = xar_prop_pget(p, "encoding");
+		if( tmpp )
+			opt = xar_attr_pget(f, tmpp, "style");
 		if( !opt ) return 0;
 		if( strcmp(opt, "application/x-bzip2") != 0 ) return 0;
 		
@@ -126,7 +127,7 @@ int xar_bzip_fromheap_in(xar_t x, xar_file_t f, const char *attr, void **in, siz
 	return 0;
 }
 
-int xar_bzip_fromheap_done(xar_t x, xar_file_t f, const char *attr, void **context) {
+int xar_bzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 #ifdef HAVE_LIBBZ2
 
 	if( !context || !BZIP2_CONTEXT(context) )
@@ -143,19 +144,16 @@ int xar_bzip_fromheap_done(xar_t x, xar_file_t f, const char *attr, void **conte
 	return 0;
 }
 
-int xar_bzip_toheap_done(xar_t x, xar_file_t f, const char *attr, void **context) {
+int xar_bzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 #ifdef HAVE_LIBBZ2
-	char *tmpstr;
+	xar_prop_t tmpp;
 
 	if( BZIP2_CONTEXT(context)->bzipcompressed){
 		BZ2_bzCompressEnd(&BZIP2_CONTEXT(context)->bz);
 
-		asprintf(&tmpstr, "%s/encoding", attr);
-		if( f ) {
-			xar_prop_set(f, tmpstr, NULL);
-			xar_attr_set(f, tmpstr, "style", "application/x-bzip2");
-		}
-		free(tmpstr);		
+		tmpp = xar_prop_pset(f, p, "encoding", NULL);
+		if( tmpp )
+			xar_attr_pset(f, tmpp, "style", "application/x-bzip2");
 	}
 	
 	free(BZIP2_CONTEXT(context));
@@ -165,7 +163,7 @@ int xar_bzip_toheap_done(xar_t x, xar_file_t f, const char *attr, void **context
 	return 0;
 }
 
-int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, const char *attr, void **in, size_t *inlen, void **context) {
+int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
 #ifdef HAVE_LIBBZ2
 	void *out = NULL;
 	size_t outlen, offset = 0;

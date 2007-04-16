@@ -85,7 +85,7 @@ struct datamod xar_datamods[] = {
 	  (toheap_out)NULL,
 	  xar_script_done
 	},
-#if 1
+#if 0
 	{ (fromheap_in)NULL,
 	  (fromheap_out)NULL,
 	  (fromheap_done)NULL,
@@ -110,17 +110,18 @@ struct datamod xar_datamods[] = {
 	}
 };
 
-int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, const char *attr, read_callback rcb, void *context) {
+int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb, void *context) {
 	int modulecount = (sizeof(xar_datamods)/sizeof(struct datamod));
 	void	*modulecontext[modulecount];
 	int r, off, i;
 	size_t bsize, rsize;
 	int64_t readsize=0, writesize=0, inc = 0;
 	void *inbuf;
-	char *tmpstr = NULL, *tmpstr2 = NULL;
+	char *tmpstr = NULL;
 	const char *opt, *csum;
 	off_t orig_heap_offset = XAR(x)->heap_offset;
 	xar_file_t tmpf = NULL;
+	xar_prop_t tmpp = NULL;
 
 	memset(modulecontext, 0, sizeof(void*)*modulecount);
 
@@ -153,14 +154,14 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, const char *attr, read_callb
 		/* filter the data through the in modules */
 		for( i = 0; i < modulecount; i++) {
 			if( xar_datamods[i].th_in ) {
-				xar_datamods[i].th_in(x, f, attr, &inbuf, &rsize, &(modulecontext[i]));
+				xar_datamods[i].th_in(x, f, p, &inbuf, &rsize, &(modulecontext[i]));
 			}
 		}
 
 		/* filter the data through the out modules */
 		for( i = 0; i < modulecount; i++) {
 			if( xar_datamods[i].th_out )
-				xar_datamods[i].th_out(x, f, attr, inbuf, rsize, &(modulecontext[i]));
+				xar_datamods[i].th_out(x, f, p, inbuf, rsize, &(modulecontext[i]));
 		}
 
 		off = 0;
@@ -185,30 +186,45 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, const char *attr, read_callb
 		lseek(XAR(x)->heap_fd, -writesize, SEEK_CUR);
 		for( i = 0; i < modulecount; i++) {
 			if( xar_datamods[i].th_done )
-				xar_datamods[i].th_done(x, f, attr, &(modulecontext[i]));
+				xar_datamods[i].th_done(x, f, p, &(modulecontext[i]));
 		}
 		return 0;
 	}
 	/* finish up anything that still needs doing */
 	for( i = 0; i < modulecount; i++) {
 		if( xar_datamods[i].th_done )
-			xar_datamods[i].th_done(x, f, attr, &(modulecontext[i]));
+			xar_datamods[i].th_done(x, f, p, &(modulecontext[i]));
 	}
 
 	XAR(x)->heap_len += writesize;
-	asprintf(&tmpstr, "%s/archived-checksum", attr);
-	xar_prop_get(f, tmpstr, &csum);
-	free(tmpstr);
+	tmpp = xar_prop_pget(p, "archived-checksum");
+	if( tmpp )
+		csum = xar_prop_getvalue(tmpp);
 	tmpf = xmlHashLookup(XAR(x)->csum_hash, BAD_CAST(csum));
 	if( tmpf ) {
+		const char *attr = xar_prop_getkey(p);
 		opt = xar_opt_get(x, XAR_OPT_LINKSAME);
 		if( opt && (strcmp(attr, "data") == 0) ) {
-			const char *id = xar_attr_get(tmpf, NULL, "id");
-			xar_prop_set(f, "type", "hardlink");
-			xar_attr_set(f, "type", "link", id);
-			xar_prop_set(tmpf, "type", "hardlink");
-			xar_attr_set(tmpf, "type", "link", "original");
-			xar_prop_unset(f, "data");
+			const char *id = xar_attr_pget(tmpf, NULL, "id");
+			xar_prop_pset(f, NULL, "type", "hardlink");
+			tmpp = xar_prop_pfirst(f);
+			if( tmpp )
+				tmpp = xar_prop_find(tmpp, "type");
+			if( tmpp )
+				xar_attr_pset(f, tmpp, "link", id);
+
+			xar_prop_pset(tmpf, NULL, "type", "hardlink");
+			tmpp = xar_prop_pfirst(tmpf);
+			if( tmpp )
+				tmpp = xar_prop_find(tmpp, "type");
+			if( tmpp )
+				xar_attr_pset(tmpf, tmpp, "link", "original");
+			
+			tmpp = xar_prop_pfirst(f);
+			if( tmpp )
+				tmpp = xar_prop_find(tmpp, "data");
+			xar_prop_punset(f, tmpp);
+
 			XAR(x)->heap_offset = orig_heap_offset;
 			lseek(XAR(x)->heap_fd, -writesize, SEEK_CUR);
 			XAR(x)->heap_len -= writesize;
@@ -217,10 +233,18 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, const char *attr, read_callb
 		opt = xar_opt_get(x, XAR_OPT_COALESCE);
 		if( opt ) {
 			long long tmpoff;
-			const char *offstr;
-			asprintf(&tmpstr2, "%s/offset", attr);
-			xar_prop_get(tmpf, tmpstr2, &offstr);
-			if( tmpstr ) {
+			const char *offstr = NULL;
+			tmpp = xar_prop_pfirst(tmpf);
+			if( tmpp ) {
+				const char *key;
+				key = xar_prop_getkey(p);
+				tmpp = xar_prop_find(tmpp, key);
+			}
+			if( tmpp )
+				tmpp = xar_prop_pget(tmpp, "offset");
+			if( tmpp )
+				offstr = xar_prop_getvalue(tmpp);
+			if( offstr ) {
 				tmpoff = strtoll(offstr, NULL, 10);
 				XAR(x)->heap_offset = orig_heap_offset;
 				lseek(XAR(x)->heap_fd, -writesize, SEEK_CUR);
@@ -233,31 +257,25 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, const char *attr, read_callb
 		xmlHashAddEntry(XAR(x)->csum_hash, BAD_CAST(csum), XAR_FILE(f));
 	}
 
-	asprintf(&tmpstr2, "%s/size", attr);
 	asprintf(&tmpstr, "%"PRIu64, readsize);
-	xar_prop_set(f, tmpstr2, tmpstr);
+	xar_prop_pset(f, p, "size", tmpstr);
 	free(tmpstr);
-	free(tmpstr2);
 
 	asprintf(&tmpstr, "%"PRIu64, (uint64_t)orig_heap_offset);
-	asprintf(&tmpstr2, "%s/offset", attr);
-	xar_prop_set(f, tmpstr2, tmpstr);
+	xar_prop_pset(f, p, "offset", tmpstr);
 	free(tmpstr);
-	free(tmpstr2);
 	
 	tmpstr = (char *)xar_opt_get(x, XAR_OPT_COMPRESSION);
 	if( tmpstr && (strcmp(tmpstr, XAR_OPT_VAL_NONE) == 0) ) {
-		asprintf(&tmpstr2, "%s/encoding", attr);
-		xar_prop_set(f, tmpstr2, NULL);
-		xar_attr_set(f, tmpstr2, "style", "application/octet-stream");
-		free(tmpstr2);
+		xar_prop_pset(f, p, "encoding", NULL);
+		tmpp = xar_prop_pget(p, "encoding");
+		if( tmpp )
+			xar_attr_pset(f, tmpp, "style", "application/octet-stream");
 	}
 
-	asprintf(&tmpstr2, "%s/length", attr);
 	asprintf(&tmpstr, "%"PRIu64, writesize);
-	xar_prop_set(f, tmpstr2, tmpstr);
+	xar_prop_pset(f, p, "length", tmpstr);
 	free(tmpstr);
-	free(tmpstr2);
 
 	return 0;
 }
@@ -267,7 +285,7 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, const char *attr, read_callb
  * data from the heap file.
  * It is assumed the heap_fd is already positioned appropriately.
  */
-int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, const char *attr, write_callback wcb, void *context) {
+int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, xar_prop_t p, write_callback wcb, void *context) {
 	int modulecount = (sizeof(xar_datamods)/sizeof(struct datamod));
 	void	*modulecontext[modulecount];
 	int r, i;
@@ -275,7 +293,7 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, const char *attr, write_ca
 	int64_t fsize, inc = 0, seekoff;
 	void *inbuf;
 	const char *opt;
-	char *tmpstr = NULL;
+	xar_prop_t tmpp;
 
 	memset(modulecontext, 0, sizeof(void*)*modulecount);
 
@@ -289,9 +307,10 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, const char *attr, write_ca
 		}
 	}
 
-	asprintf(&tmpstr, "%s/offset", attr);
-	xar_prop_get(f, tmpstr, &opt);
-	free(tmpstr);
+	opt = NULL;
+	tmpp = xar_prop_pget(p, "offset");
+	if( tmpp )
+		opt = xar_prop_getvalue(tmpp);
 	if( !opt ) {
 		wcb(x, f, NULL, 0, context);
 		return 0;
@@ -340,9 +359,10 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, const char *attr, write_ca
 		}
 	}
 
-	asprintf(&tmpstr, "%s/length", attr);
-	xar_prop_get(f, tmpstr, &opt);
-	free(tmpstr);
+	opt = NULL;
+	tmpp = xar_prop_pget(p, "length");
+	if( tmpp )
+		opt = xar_prop_getvalue(tmpp);
 	if( !opt ) {
 		return 0;
 	} else {
@@ -382,7 +402,7 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, const char *attr, write_ca
 		for( i = 0; i < modulecount; i++) {
 			if( xar_datamods[i].fh_in ) {
 				int32_t ret;
-				ret = xar_datamods[i].fh_in(x, f, attr, &inbuf, &bsize, &(modulecontext[i]));
+				ret = xar_datamods[i].fh_in(x, f, p, &inbuf, &bsize, &(modulecontext[i]));
 				if( ret < 0 )
 					return -1;
 			}
@@ -395,7 +415,7 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, const char *attr, write_ca
 			for( i = 0; i < modulecount; i++) {
 				if( xar_datamods[i].fh_out ) {
 					int32_t ret;
-					ret = xar_datamods[i].fh_out(x, f, attr, inbuf, bsize, &(modulecontext[i]));
+					ret = xar_datamods[i].fh_out(x, f, p, inbuf, bsize, &(modulecontext[i]));
 					if( ret < 0 )
 						return -1;
 				}
@@ -414,7 +434,7 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, const char *attr, write_ca
 	for( i = 0; i < modulecount; i++) {
 		if( xar_datamods[i].fh_done ) {
 			int32_t ret;
-			ret = xar_datamods[i].fh_done(x, f, attr, &(modulecontext[i]));
+			ret = xar_datamods[i].fh_done(x, f, p, &(modulecontext[i]));
 			if( ret < 0 )
 				return ret;
 		}
@@ -426,14 +446,15 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, const char *attr, write_ca
 * This does a simple copy of the heap data from one head (read-only) to another heap (write only). 
 * This does not set any properties or attributes of the file, so this should not be used alone.
 */
-int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, const char *attr, xar_t xdest, xar_file_t fdest){
+int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, xar_prop_t p, xar_t xdest, xar_file_t fdest){
 	int r, off;
 	size_t bsize;
 	int64_t fsize, inc = 0, seekoff, writesize=0;
 	off_t orig_heap_offset = XAR(xdest)->heap_offset;
 	void *inbuf;
 	const char *opt;
-	char *tmpstr = NULL, *tmpstr2 = NULL;
+	char *tmpstr = NULL;
+	xar_prop_t tmpp;
 	
 	opt = xar_opt_get(xsource, "rsize");
 	if( !opt ) {
@@ -445,9 +466,9 @@ int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, const 
 		}
 	}
 	
-	asprintf(&tmpstr, "%s/offset", attr);
-	xar_prop_get(fsource, tmpstr, &opt);
-	free(tmpstr);
+	tmpp = xar_prop_pget(p, "offset");
+	if( tmpp )
+		opt = xar_prop_getvalue(tmpp);
 	
 	seekoff = strtoll(opt, NULL, 0);
 		
@@ -494,9 +515,10 @@ int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, const 
 		}
 	}
 	
-	asprintf(&tmpstr, "%s/length", attr);
-	xar_prop_get(fsource, tmpstr, &opt);
-	free(tmpstr);
+	opt = NULL;
+	tmpp = xar_prop_pget(p, "length");
+	if( tmpp )
+		opt = xar_prop_getvalue(tmpp);
 	if( !opt ) {
 		return 0;
 	} else {
@@ -544,10 +566,13 @@ int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, const 
 	}
 	
 	asprintf(&tmpstr, "%"PRIu64, (uint64_t)orig_heap_offset);
-	asprintf(&tmpstr2, "%s/offset", attr);
-	xar_prop_set(fdest, tmpstr2, tmpstr);
+	opt = xar_prop_getkey(p);
+	tmpp = xar_prop_pfirst(fdest);
+	if( tmpp )
+		tmpp = xar_prop_find(tmpp, opt);
+	if( tmpp )
+		xar_prop_pset(fdest, tmpp, "offset", tmpstr);
 	free(tmpstr);
-	free(tmpstr2);
 	
 	
 	free(inbuf);
