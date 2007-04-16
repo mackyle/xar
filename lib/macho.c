@@ -354,10 +354,10 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 	return consumed;
 }
 
-int32_t xar_macho_in(xar_t x, xar_file_t f, const char *attr, void **in, size_t *inlen, void **context) {
+int32_t xar_macho_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
 	int32_t consumed = 0, total = 0;
 
-	if( strcmp(attr, "data") != 0 )
+	if( strcmp(xar_prop_getkey(p), "data") != 0 )
 		return 0;
 
 	if( !*context ) {
@@ -373,7 +373,7 @@ int32_t xar_macho_in(xar_t x, xar_file_t f, const char *attr, void **in, size_t 
 	return 0;
 }
 
-int32_t xar_macho_done(xar_t x, xar_file_t f, const char *attr, void **context) {
+int32_t xar_macho_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 
 	if( MACHO_CONTEXT(context) ){
 		int i;

@@ -85,7 +85,6 @@ struct datamod xar_datamods[] = {
 	  (toheap_out)NULL,
 	  xar_script_done
 	},
-#if 0
 	{ (fromheap_in)NULL,
 	  (fromheap_out)NULL,
 	  (fromheap_done)NULL,
@@ -93,7 +92,6 @@ struct datamod xar_datamods[] = {
 	  (toheap_out)NULL,
 	  xar_macho_done
 	},
-#endif
 	{ xar_gzip_fromheap_in,
 	  (fromheap_out)NULL,
 	  xar_gzip_fromheap_done,

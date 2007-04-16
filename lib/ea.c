@@ -69,3 +69,31 @@ int32_t xar_ea_pget(xar_ea_t e, const char *key, const char **value) {
 xar_prop_t xar_ea_root(xar_ea_t e) {
 	return XAR_EA(e)->prop;
 }
+
+xar_prop_t xar_ea_find(xar_file_t f, const char *name)
+{
+	xar_prop_t p;
+
+	for(p = xar_prop_pfirst(f); p; p = xar_prop_pnext(p)) {
+		const char *tmp;
+		xar_prop_t tmpp;
+
+		tmp = xar_prop_getkey(p);
+		if( strncmp(tmp, XAR_EA_FORK, strlen(XAR_EA_FORK)) != 0 )
+			continue;
+		if( strlen(tmp) != strlen(XAR_EA_FORK) )
+			continue;
+
+		tmpp = xar_prop_pget(p, "name");
+		if( !tmpp )
+			continue;
+		tmp = xar_prop_getvalue(tmpp);
+		if( !tmp )
+			continue;
+
+		if( strcmp(tmp, name) == 0 )
+			return p;
+	}
+
+	return NULL;
+}
