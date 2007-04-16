@@ -15,7 +15,7 @@ LIBXAR_INCS := $(patsubst %, @srcroot@include/%, $(LIBXAR_INCS))
 LIBXAR_INCS += @objroot@include/xar.h
 
 # Sources.
-LIBXAR_SRCS := archive.c arcmod.c b64.c bzxar.c darwinattr.c data.c err.c
+LIBXAR_SRCS := archive.c arcmod.c b64.c bzxar.c darwinattr.c data.c ea.c err.c
 LIBXAR_SRCS += ext2.c fbsdattr.c filetree.c io.c linuxattr.c hash.c signature.c stat.c
 LIBXAR_SRCS += subdoc.c util.c zxar.c script.c macho.c
 

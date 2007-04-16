@@ -38,10 +38,10 @@
 #ifndef _XAR_BZLIB_H_
 #define _XAR_BZLIB_H_
 
-int xar_bzip_fromheap_in(xar_t x, xar_file_t f, const char *, void **in, size_t *inlen, void **context);
-int xar_bzip_fromheap_done(xar_t x, xar_file_t f, const char *, void **context);
+int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
+int xar_bzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context);
 
-int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, const char *, void **in, size_t *inlen, void **context);
-int xar_bzip_toheap_done(xar_t x, xar_file_t f, const char *, void **context);
+int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
+int xar_bzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context);
 
 #endif /* _XAR_BZLIB_H_ */
