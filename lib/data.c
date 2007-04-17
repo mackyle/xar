@@ -228,6 +228,8 @@ int32_t xar_data_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 	tmpp = xar_prop_pfirst(f);
 	if( tmpp )
 		tmpp = xar_prop_find(tmpp, "data");
+	if( !tmpp )
+		return 0;
 	retval = xar_attrcopy_from_heap(x, f, tmpp, xar_data_write, (void *)(&context));
 	
 	if( context.fd > 0 ){		
