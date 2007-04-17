@@ -205,7 +205,7 @@ static int32_t xar_ea_write(xar_t x, xar_file_t f, void *buf, size_t len, void *
 
 static int32_t ea_archive(xar_t x, xar_file_t f, const char* file, void *context) {
 	char *buf, *i;
-	int ret, bufsz;
+	int ret, bufsz, attrsz;
 	int32_t retval = 0;
 
 	if( file == NULL )
@@ -235,7 +235,8 @@ TRYAGAIN:
 		goto BAIL;
 	}
 
-	for( i = buf; (i-buf) < ret; i += strlen(i)+1 ) {
+	attrsz = ret;
+	for( i = buf; (i-buf) < attrsz; i += strlen(i)+1 ) {
 		xar_ea_t e;
 
 		ret = getxattr(file, i, NULL, 0, 0, XATTR_NOFOLLOW);
