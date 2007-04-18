@@ -50,6 +50,7 @@
 
 typedef struct _gzip_context{
 	uint8_t		gzipcompressed;
+	uint64_t        count;
 	z_stream	z;
 } gzip_context;
 
@@ -140,9 +141,11 @@ int xar_gzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 	if( GZIP_CONTEXT(context)->gzipcompressed){
 		deflateEnd(&GZIP_CONTEXT(context)->z);		
 		
-		tmpp = xar_prop_pset(f, p, "encoding", NULL);
-		if( tmpp )
-			xar_attr_pset(f, tmpp, "style", "application/x-gzip");
+		if( GZIP_CONTEXT(context)->count ) {
+			tmpp = xar_prop_pset(f, p, "encoding", NULL);
+			if( tmpp )
+				xar_attr_pset(f, tmpp, "style", "application/x-gzip");
+		}
 	}
 
 	/* free the context */
@@ -171,6 +174,8 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		
 		GZIP_CONTEXT(context)->gzipcompressed = 1;
 		deflateInit(&GZIP_CONTEXT(context)->z, Z_BEST_COMPRESSION);
+		if( *inlen == 0 )
+			return 0;
 	}else if( !GZIP_CONTEXT(context)->gzipcompressed ){
 		/* once the context has been initialized, then we have already
 		checked the compression type, so we need only check if we
@@ -202,6 +207,7 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 
 	free(*in);
 	*in = out;
+	GZIP_CONTEXT(context)->count += *inlen;
 	*inlen = offset;
 	return 0;
 }

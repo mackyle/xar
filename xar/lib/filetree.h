@@ -38,6 +38,10 @@
 #ifndef _XAR_FILETREE_H_
 #define _XAR_FILETREE_H_
 
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
+
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>
 

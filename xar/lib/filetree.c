@@ -35,6 +35,7 @@
  * Christopher Ryan <ryanc@apple.com>
 */
 
+#define _FILE_OFFSET_BITS 64
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -690,8 +691,18 @@ void xar_prop_punset(xar_file_t f, xar_prop_t p) {
 	}
 	if( XAR_PROP(p)->parent ) {
 		i = XAR_PROP(p)->parent->children;
+		if( i == p ) {
+			XAR_PROP(XAR_PROP(p)->parent)->children = XAR_PROP(p)->next;
+			xar_prop_free(p);
+			return;
+		}
 	} else {
 		i = XAR_FILE(f)->props;
+		if( i == p ) {
+			XAR_FILE(f)->props = XAR_PROP(p)->next;
+			xar_prop_free(p);
+			return;
+		}
 	}
 
 	while( i && (XAR_PROP(i)->next != XAR_PROP(p)) ) {
@@ -718,7 +729,7 @@ void xar_prop_unset(xar_file_t f, const char *key) {
 xar_file_t xar_file_new(xar_file_t f) {
 	xar_file_t ret, i;
 
-	ret = malloc(sizeof(struct __xar_file_t));
+	ret = calloc(1, sizeof(struct __xar_file_t));
 	if(!ret) return NULL;
 
 	XAR_FILE(ret)->parent = f;
@@ -1090,9 +1101,9 @@ xar_file_t xar_file_unserialize(xar_t x, xar_file_t parent, xmlTextReaderPtr rea
 		}
 
 		if( type == XML_READER_TYPE_ELEMENT ) {
-			if( strcmp(name, "file")==0 )
+			if( strcmp(name, "file")==0 ) {
 				xar_file_unserialize(x, ret, reader);
-			else
+			} else
 				xar_prop_unserialize(ret, NULL, reader);
 		}
 	}
