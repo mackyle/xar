@@ -57,14 +57,15 @@ The table of contents is an XML document which should conform to the XAR DTD. Th
         <archived-checksum style="md5">ceaf793ccb1990ecbadb20112d5f9e5d</checksum>
         <encoding style="application/x-gzip"/>
       </data>
-      <resource>
+      <ea>
+        <name>com.apple.ResourceFork</name>
         <offset>0</offset>
         <size>7072</size>
         <length>3942</length>
         <extracted-checksum style="md5">0f7061dca2d7411352377db0e53792db</checksum>
         <archived-checksum style="md5">c72de8ac25abe462a930254d82958534</checksum>
         <encoding style="application/x-gzip"/>
-      </resource>
+      </ea>
     </file>
   </toc>
 </xar>
