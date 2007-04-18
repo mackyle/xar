@@ -126,6 +126,7 @@ xar_file_t xar_add_from_archive(xar_t x, xar_file_t parent, const char *name, xa
 int32_t xar_extract(xar_t x, xar_file_t f);
 int32_t xar_extract_tofile(xar_t x, xar_file_t f, const char *path);
 int32_t xar_extract_tobuffer(xar_t x, xar_file_t f, char **buffer);
+int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *size);
 
 int32_t xar_verify(xar_t x, xar_file_t f);
 
