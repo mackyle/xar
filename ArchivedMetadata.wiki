@@ -10,10 +10,10 @@ This is meant to be a list of metadata that xar knows about and explicitly archi
 ** Group name corresponding to the gid on the system the archive was created on.
 * On systems supporting the st_flags stat member, [[metadata_chflags|the flags]] set on the file are archived.
 * On systems supporting the [[metadata_posix1e_acls|POSIX draft standard ACL]] calls and semantics, ACLs are archived.
-** See note about lack of Mac OS X 10.4 support
 * On Linux systems supporting it, on the [[metadata_linux_ea|EXT3, JFS, Reiserfs, and XFS filesystems, Extended Attributes]] are archived.
 * On [[metadata_linux_attrib|Linux system, EXT2 file attributes]] are archived (similar to but distinct from chflags() on systems supporting struct stat st_flags)
 * On FreeBSD and NetBSD, [[metadata_bsd_ea|Extended Attributes]] are archived.
+* On Mac OS X 10.4 ACLs are archived.
 * On [[metadata_darwin_ea|Mac OS X 10.4 Extended Attributes]] (including the resource fork) is archived.
 * [[metadata_darwin_legacy|Legacy Mac OS X metadata]]
 ** On Mac OS X systems, on HFS, the Finder info is archived.
@@ -23,6 +23,7 @@ This is meant to be a list of metadata that xar knows about and explicitly archi
 == Known unarchived metadata ==
 * [[metadata_tru64_ea|Tru64 Extended Attributes]]
 * [[metadata_volume|Volume level metadata]]
+
 
 
 
