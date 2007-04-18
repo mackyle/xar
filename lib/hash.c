@@ -56,6 +56,7 @@ struct _hash_context{
 	EVP_MD_CTX archived_cts;
 	uint8_t	unarchived;
 	uint8_t archived;
+	uint64_t count;
 };
 
 #define CONTEXT(x) ((struct _hash_context *)(*x))
@@ -100,6 +101,7 @@ int32_t xar_hash_unarchived_out(xar_t x, xar_file_t f, xar_prop_t p, void *in, s
 	if( inlen == 0 )
 		return 0;
 	
+	CONTEXT(context)->count += inlen;
 	EVP_DigestUpdate(&(CONTEXT(context)->unarchived_cts), in, inlen);
 	return 0;
 }
@@ -143,6 +145,7 @@ int32_t xar_hash_archived_in(xar_t x, xar_file_t f, xar_prop_t p, void *in, size
 	if( inlen == 0 )
 		return 0;
 
+	CONTEXT(context)->count += inlen;
 	EVP_DigestUpdate(&(CONTEXT(context)->archived_cts), in, inlen);
 	return 0;
 }
@@ -155,6 +158,9 @@ int32_t xar_hash_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 
 	if(!CONTEXT(context))
 		return 0;
+
+	if( CONTEXT(context)->count == 0 )
+		goto DONE;
 
 	if( CONTEXT(context)->unarchived ){
 		EVP_MD_CTX		*ctx = &CONTEXT(context)->unarchived_cts;
@@ -188,6 +194,7 @@ int32_t xar_hash_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 		free(str);
 	}
 	
+DONE:
 	if(*context){
 		free(*context);
 		*context = NULL;		

@@ -85,6 +85,8 @@ int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 		
 		BZ2_bzDecompressInit(&BZIP2_CONTEXT(context)->bz, 0, 0);
 		BZIP2_CONTEXT(context)->bzipcompressed = 1;
+		if( *inlen == 0 )
+			return 0;
 	}else if( !(BZIP2_CONTEXT(context)->bzipcompressed) ){
 		/* once the context has been initialized, then we have already
 		checked the compression type, so we need only check if we

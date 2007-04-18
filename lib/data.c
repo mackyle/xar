@@ -55,6 +55,7 @@ struct _data_context{
 	void *buffer;
 	size_t length;
 	off_t offset;
+	off_t total;
 };
 
 #define DATA_CONTEXT(x) ((struct _data_context*)(x))
@@ -92,6 +93,7 @@ int32_t xar_data_read(xar_t x, xar_file_t f, void *inbuf, size_t bsize, void *co
 		r = read(DATA_CONTEXT(context)->fd, inbuf, bsize);
 		if( (r < 0) && (errno == EINTR) )
 			continue;
+		DATA_CONTEXT(context)->total += r;
 		return r;
 	}		
 	
@@ -174,6 +176,8 @@ int32_t xar_data_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 
 	tmpp = xar_prop_pset(f, NULL, "data", NULL);
 	retval = xar_attrcopy_to_heap(x, f, tmpp, xar_data_read,(void *)(&context));
+	if( context.total == 0 )
+		xar_prop_unset(f, "data");
 
 	if(context.fd > 0){
 		close(context.fd);
