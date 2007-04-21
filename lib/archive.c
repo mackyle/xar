@@ -319,6 +319,9 @@ int xar_close(xar_t x) {
 		uint64_t ungztoc, gztoc;
 		unsigned char chkstr[EVP_MAX_MD_SIZE];
 		int tocfd;
+		char timestr[128];
+		struct tm tmptm;
+		time_t t;
 
 		tmpser = (char *)xar_opt_get(x, XAR_OPT_TOCCKSUM);
 		/* If no checksum type is specified, default to sha1 */
@@ -348,6 +351,12 @@ int xar_close(xar_t x) {
 			XAR(x)->docksum = 0;
 			XAR(x)->header.cksum_alg = XAR_CKSUM_NONE;
 		}
+
+		t = time(NULL);
+		gmtime_r(&t, &tmptm);
+		memset(timestr, sizeof(timestr), 0);
+		strftime(timestr, sizeof(timestr), "%FT%T", &tmptm);
+		xar_prop_set(XAR_FILE(x), "creation-time", timestr);
 
 		/* serialize the toc to a tmp file */
 		asprintf(&tmpser, "%s/xar.toc.XXXXXX", XAR(x)->dirname);
