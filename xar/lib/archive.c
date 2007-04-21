@@ -941,9 +941,11 @@ static xar_file_t xar_add_r(xar_t x, xar_file_t f, const char *path, const char 
  * representing "blah" will be returned.
  */
 xar_file_t xar_add(xar_t x, const char *path) {
-
-	if( xar_underbar_check(x, NULL, path) )
-		return NULL;
+#ifdef __APPLE__
+	xar_file_t ret;
+	if( (ret = xar_underbar_check(x, NULL, path)) )
+		return ret;
+#endif
 
 	if( path[0] == '/' ) {
 		XAR(x)->path_prefix = "/";
