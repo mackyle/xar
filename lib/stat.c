@@ -663,6 +663,7 @@ int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 		minor = tmpll;
 		
 		devt = xar_makedev(major, minor);
+		unlink(file);
 		if( mknod(file, modet, devt) ) {
 			xar_err_new(x);
 			xar_err_set_file(x, f);
@@ -749,6 +750,23 @@ int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 				return -1;
 			}
 		}
+		return 0;
+	}
+
+	if(opt && (strcmp(opt, "fifo") == 0)) {
+		unlink(file);
+		if( mkfifo(file, 0) ) {
+			xar_err_new(x);
+			xar_err_set_file(x, f);
+			xar_err_set_string(x, "mkfifo: Could not create fifo");
+			xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+			return -1;
+		}
+		return 0;
+	}
+
+	/* skip sockets */
+	if(opt && (strcmp(opt, "socket") == 0)) {
 		return 0;
 	}
 
