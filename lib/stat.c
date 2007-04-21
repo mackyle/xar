@@ -69,6 +69,7 @@
 #include "xar.h"
 #include "arcmod.h"
 #include "archive.h"
+#include "util.h"
 
 #ifndef LLONG_MIN
 #define LLONG_MIN LONG_LONG_MIN
@@ -413,6 +414,19 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 		xar_prop_set(f, "type", type);
 	}
 
+	/* Record major/minor device node numbers */
+	if( S_ISBLK(XAR(x)->sbcache.st_mode) || S_ISCHR(XAR(x)->sbcache.st_mode)) {
+		uint32_t major, minor;
+		char tmpstr[12];
+		xar_devmake(XAR(x)->sbcache.st_rdev, &major, &minor);
+		memset(tmpstr, 0, sizeof(tmpstr));
+		snprintf(tmpstr, sizeof(tmpstr)-1, "%u", major);
+		xar_prop_set(f, "device/major", tmpstr);
+		memset(tmpstr, 0, sizeof(tmpstr));
+		snprintf(tmpstr, sizeof(tmpstr)-1, "%u", minor);
+		xar_prop_set(f, "device/minor", tmpstr);
+	}
+
 	if( S_ISLNK(XAR(x)->sbcache.st_mode) ) {
 		char link[4096];
 		struct stat lsb;
@@ -619,8 +633,45 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, size_t len) {
 	const char *opt;
 	int ret, fd;
+	mode_t modet = 0;
 
 	xar_prop_get(f, "type", &opt);
+	if(opt && (strcmp(opt, "character special") == 0))
+		modet = S_IFCHR;
+	if(opt && (strcmp(opt, "block special") == 0))
+		modet = S_IFBLK;
+
+	if( modet ) {
+		uint32_t major, minor;
+		long long tmpll;
+		dev_t devt;
+
+		xar_prop_get(f, "device/major", &opt);
+		tmpll = strtoll(opt, NULL, 10);
+		if( ( (tmpll == LLONG_MIN) || (tmpll == LLONG_MAX) ) && (errno == ERANGE) )
+			return -1;
+		if( (tmpll < 0) || (tmpll > 255) )
+			return -1;
+		major = tmpll;
+
+		xar_prop_get(f, "device/minor", &opt);
+		tmpll = strtoll(opt, NULL, 10);
+		if( ( (tmpll == LLONG_MIN) || (tmpll == LLONG_MAX) ) && (errno == ERANGE) )
+			return -1;
+		if( (tmpll < 0) || (tmpll > 255) )
+			return -1;
+		minor = tmpll;
+		
+		devt = xar_makedev(major, minor);
+		if( mknod(file, modet, devt) ) {
+			xar_err_new(x);
+			xar_err_set_file(x, f);
+			xar_err_set_string(x, "mknod: Could not create character device");
+			xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+			return -1;
+		}
+		return 0;
+	}
 	if(opt && (strcmp(opt, "directory") == 0)) {
 		ret = mkdir(file, 0700);
 		if( (ret != 0) && (errno != EEXIST) ) {

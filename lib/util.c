@@ -144,3 +144,27 @@ ssize_t xar_write_fd( int fd, void * buffer, size_t nbytes ) {
 
 	return off;
 }
+
+dev_t xar_makedev(uint32_t major, uint32_t minor)
+{
+#ifdef makedev
+	return makedev(major, minor);
+#else
+	return (major << 8) | minor;
+#endif
+}
+
+void xar_devmake(dev_t dev, uint32_t *out_major, uint32_t *out_minor)
+{
+#ifdef major
+	*out_major = major(dev);
+#else
+	*out_major = (dev >> 8) & 0xFF;
+#endif
+#ifdef minor
+	*out_minor = minor(dev);
+#else
+	*out_minor = dev & 0xFF;
+#endif
+	return;
+}
