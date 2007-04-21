@@ -25,8 +25,8 @@ xar_ea_t xar_ea_new(xar_file_t f, const char *name)
 {
 	xar_ea_t ret;
 
-	XAR_EA(ret) = calloc(sizeof(struct __xar_ea_t), 1);
-	if( !ret )
+	ret = calloc(sizeof(struct __xar_ea_t), 1);
+	 if( !ret )
 		return NULL;
 
 	XAR_EA(ret)->prop = xar_prop_new(f, NULL);

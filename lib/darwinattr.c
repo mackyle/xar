@@ -53,6 +53,7 @@
 #include "io.h"
 #include "appledouble.h"
 #include "stat.h"
+#include "archive.h"
 
 #if defined(HAVE_SYS_XATTR_H)
 #include <sys/xattr.h>
@@ -407,7 +408,7 @@ static int32_t nonea_extract(xar_t x, xar_file_t f, const char* file, void *cont
  * Check to see if the file we're archiving is a ._ file.  If so,
  * stop the archival process.
  */
-int32_t xar_underbar_check(xar_t x, xar_file_t f, const char* file, void *context) {
+xar_file_t xar_underbar_check(xar_t x, xar_file_t f, const char* file, void *context) {
 	char *bname, *tmp;
 
 	tmp = strdup(file);
@@ -429,11 +430,10 @@ int32_t xar_underbar_check(xar_t x, xar_file_t f, const char* file, void *contex
 		if( stat(nupath, &sb) ) {
 			free(tmp);
 			free(nupath);
-			return 0;
+			return NULL;
 		}
 
 		asprintf(&tmp2, "%s/..namedfork/rsrc", nupath);
-		free(nupath);
 
 		/* If there is a file that the ._ file corresponds to, and
 		 * there is no resource fork, assume the ._ file contains
@@ -441,22 +441,29 @@ int32_t xar_underbar_check(xar_t x, xar_file_t f, const char* file, void *contex
 		 * when the file is archived.
 		 */
 		if( stat(tmp2, &sb) ) {
+			xar_file_t tmpf;
+			tmpf = xar_file_find(XAR(x)->files, nupath);
+			if( !tmpf ) {
+				tmpf = xar_add(x, nupath);
+			}
+			free(nupath);
 			free(tmp2);
 			free(tmp);
-			return 1;
+			return tmpf;
 		}
 
 		/* otherwise, we have a corresponding file and it supports
 		 * resource forks, so we assume this is a detached ._ file
 		 * and archive it as a real file.
 		 */
+		free(nupath);
 		free(tmp2);
 		free(tmp);
-		return 0;
+		return NULL;
 	}
 
 	free(tmp);
-	return 0;
+	return NULL;
 }
 
 #ifdef __APPLE__
