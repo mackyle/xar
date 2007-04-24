@@ -95,11 +95,13 @@ static void add_subdoc(xar_t x) {
 	struct stat sb;
 
 	if( SubdocName == NULL ) SubdocName = "subdoc";
-	s = xar_subdoc_new(x, (const char *)SubdocName);
 
 	fd = open(Subdoc, O_RDONLY);
-	if( fd < 0 )
+	if( fd < 0 ) {
+		fprintf(stderr, "ERROR: subdoc file %s doesn't exist.  Ignoring.\n", Subdoc);
 		return;
+	}
+	s = xar_subdoc_new(x, (const char *)SubdocName);
 	fstat(fd, &sb);
 	len = sb.st_size;
 	buf = malloc(len+1);
