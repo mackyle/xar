@@ -19,6 +19,8 @@
 #undef HAVE_LIBUTIL_H
 #undef HAVE_ASPRINTF
 #undef HAVE_LIBBZ2
+#undef HAVE_LCHOWN
+#undef HAVE_LCHMOD
 #undef UID_STRING
 #undef UID_CAST
 #undef GID_STRING
