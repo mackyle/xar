@@ -642,6 +642,7 @@ static int32_t underbar_extract(xar_t x, xar_file_t f, const char* file, void *c
 	return 0;
 }
 
+#if defined(__APPLE__)
 static int32_t stragglers_archive(xar_t x, xar_file_t f, const char* file, void *context) {
 #ifdef HAVE_GETATTRLIST
 	struct fits {
@@ -700,6 +701,7 @@ static int32_t stragglers_extract(xar_t x, xar_file_t f, const char* file, void 
 #endif
 	return 0;
 }
+#endif /* __APPLE__ */
 
 int32_t xar_darwinattr_archive(xar_t x, xar_file_t f, const char* file, const char *buffer, size_t len)
 {
