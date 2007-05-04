@@ -341,6 +341,8 @@ static int32_t nonea_archive(xar_t x, xar_file_t f, const char* file, void *cont
 		DARWINATTR_CONTEXT(context)->finfo = finfo.finderinfo;
 		xar_attrcopy_to_heap(x, f, xar_ea_root(e), finfo_read, context);
 	}
+
+		
 #endif /* HAVE_GETATTRLIST */
 
 
@@ -640,6 +642,64 @@ static int32_t underbar_extract(xar_t x, xar_file_t f, const char* file, void *c
 	return 0;
 }
 
+static int32_t stragglers_archive(xar_t x, xar_file_t f, const char* file, void *context) {
+#ifdef HAVE_GETATTRLIST
+	struct fits {
+    		uint32_t     length;
+		struct timespec ts;
+	};
+	struct fits fts;
+	struct attrlist attrs;
+	int ret;
+
+	memset(&attrs, 0, sizeof(attrs));
+	attrs.bitmapcount = ATTR_BIT_MAP_COUNT;
+	attrs.commonattr = ATTR_CMN_CRTIME;
+	ret = getattrlist(file, &attrs, &fts, sizeof(fts), 0);
+	if( ret == 0 ) {
+		xar_prop_t tmpp;
+
+		tmpp = xar_prop_new(f, NULL);
+		if( tmpp ) {
+			char tmpc[128];
+			struct tm tm;
+			xar_prop_setkey(tmpp, "FinderCreateTime");
+			xar_prop_setvalue(tmpp, NULL);
+			memset(tmpc, 0, sizeof(tmpc));
+			gmtime_r(&fts.ts.tv_sec, &tm);
+			strftime(tmpc, sizeof(tmpc), "%FT%T", &tm);
+			xar_prop_pset(f, tmpp, "time", tmpc);
+			memset(tmpc, 0, sizeof(tmpc));
+			sprintf(tmpc, "%ld", fts.ts.tv_nsec);
+			xar_prop_pset(f, tmpp, "nanoseconds", tmpc);
+		}
+	}
+#endif
+	return 0;	
+}
+
+static int32_t stragglers_extract(xar_t x, xar_file_t f, const char* file, void *context) {
+#ifdef HAVE_GETATTRLIST
+	const char *tmpc = NULL;
+	struct tm tm;
+	struct timespec ts;
+	struct attrlist attrs;
+
+	xar_prop_get(f, "FinderCreateTime/time", &tmpc);
+	if( tmpc ) {
+		strptime(tmpc, "%FT%T", &tm);
+		ts.tv_sec = timegm(&tm);
+		xar_prop_get(f, "FinderCreateTime/nanoseconds", &tmpc);
+		ts.tv_nsec = strtol(tmpc, NULL, 10);
+		memset(&attrs, 0, sizeof(attrs));
+		attrs.bitmapcount = ATTR_BIT_MAP_COUNT;
+		attrs.commonattr = ATTR_CMN_CRTIME;
+		setattrlist(file, &attrs, &ts, sizeof(ts), 0);
+	}
+
+#endif
+	return 0;
+}
 
 int32_t xar_darwinattr_archive(xar_t x, xar_file_t f, const char* file, const char *buffer, size_t len)
 {
@@ -650,6 +710,8 @@ int32_t xar_darwinattr_archive(xar_t x, xar_file_t f, const char* file, const ch
 #if defined(__APPLE__)
 	if( len )
 		return 0;
+	stragglers_archive(x, f, file, (void *)&context);
+
 #if defined(HAVE_GETXATTR)
 	if( ea_archive(x, f, file, (void *)&context) == 0 )
 		return 0;
@@ -670,6 +732,8 @@ int32_t xar_darwinattr_extract(xar_t x, xar_file_t f, const char* file, char *bu
 #if defined(__APPLE__)
 	if( len )
 		return 0;
+	stragglers_extract(x, f, file, (void *)&context);
+
 #if defined(HAVE_GETXATTR)
 	if( ea_extract(x, f, file, (void *)&context) == 0 )
 		return 0;
