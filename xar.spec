@@ -1,12 +1,12 @@
 Name: xar
 Epoch: 0
-Version: 1.4
+Version: 1.5
 Release: 1
 Summary: The XAR project aims to provide an easily extensible archive format.
 Group: Applications/Archivers
 License: BSD
-URL: http://www.opendarwin.org/projects/%{name}/
-Source: http://www.opendarwin.org/projects/%{name}/%{name}-%{version}.tar.gz
+URL: http://code.google.com/p/%{name}/
+Source: http://${name}.googlecode.com/files/${name}-${version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
 BuildRequires: libxml2-devel >= 2.6.11
 BuildRequires: openssl-devel
@@ -60,6 +60,8 @@ Libraries and header files required for xar.
 %{_libdir}/lib%{name}.1.so
 
 %changelog
+* Mon May 07 2007 Rob Braun <bbraun@synack.net> 0:1.5-1
+- 1.5
 * Thu Feb 23 2005 Rob Braun <bbraun@opendarwin.org> - 0:1.2-1
 - 1.4
 * Mon Oct 24 2005 Rob Braun <bbraun@opendarwin.org> - 0:1.2-1
