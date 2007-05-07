@@ -193,6 +193,7 @@ void  xar_err_set_errno(xar_t x, int e);
 void xar_err_new(xar_t x);
 int32_t xar_err_callback(xar_t x, int32_t sev, int32_t err);
 
+void xar_serialize(xar_t x, const char *file);
 char *xar_get_path(xar_file_t f);
 off_t	xar_get_heap_offset(xar_t x);
 uint64_t xar_ntoh64(uint64_t num);
