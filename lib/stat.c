@@ -268,6 +268,7 @@ static int32_t eacls(xar_t x, xar_file_t f, const char *file) {
 	return 0;
 }
 
+#ifdef HAVE_STRUCT_STAT_ST_FLAGS
 #define XAR_FLAG_FORK "flags"
 static void x_addflag(xar_file_t f, const char *name) {
 	char opt[1024];
@@ -276,6 +277,7 @@ static void x_addflag(xar_file_t f, const char *name) {
 	xar_prop_set(f, opt, NULL);
 	return;
 }
+#endif
 
 static int32_t flags_archive(xar_file_t f, const struct stat *sb) {
 #ifdef HAVE_STRUCT_STAT_ST_FLAGS
@@ -314,12 +316,14 @@ static int32_t flags_archive(xar_file_t f, const struct stat *sb) {
 	return 0;
 }
 
+#ifdef HAVE_CHFLAGS
 static int32_t x_getprop(xar_file_t f, const char *name, char **value) {
 	char v[1024];
 	memset(v, 0, sizeof(v));
 	snprintf(v, sizeof(v)-1, "%s/%s", XAR_FLAG_FORK, name);
 	return xar_prop_get(f, v, (const char **)value);
 }
+#endif
 
 int32_t xar_flags_extract(xar_t x, xar_file_t f, const char *file, char *buffer, size_t len) {
 #ifdef HAVE_CHFLAGS
