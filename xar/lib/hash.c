@@ -72,11 +72,8 @@ int32_t xar_hash_unarchived_out(xar_t x, xar_file_t f, xar_prop_t p, void *in, s
 	const EVP_MD *md;
 	xar_prop_t tmpp;
 
-	if(!context)
-		return 0;
-	
 	opt = NULL;
-	tmpp = xar_prop_find(p, "extracted-checksum");
+	tmpp = xar_prop_pget(p, "extracted-checksum");
 	if( tmpp )
 		opt = xar_attr_pget(f, tmpp, "style");
 	
@@ -116,11 +113,8 @@ int32_t xar_hash_archived_in(xar_t x, xar_file_t f, xar_prop_t p, void *in, size
 	const EVP_MD *md;
 	xar_prop_t tmpp;
 	
-	if(!context)
-		return 0;
-	
 	opt = NULL;
-	tmpp = xar_prop_find(p, "archived-checksum");
+	tmpp = xar_prop_pget(p, "archived-checksum");
 	if( tmpp )
 		opt = xar_attr_pget(f, tmpp, "style");
 	
@@ -219,7 +213,7 @@ static char* xar_format_hash(const unsigned char* m,unsigned int len) {
 }
 
 int32_t xar_hash_out_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
-	const char *uncomp, *uncompstyle;
+	const char *uncomp = NULL, *uncompstyle = NULL;
 	unsigned char hashstr[EVP_MAX_MD_SIZE];
 	unsigned int len;
 	char *tmpstr;
@@ -231,9 +225,11 @@ int32_t xar_hash_out_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 		return 0;
 
 	if( CONTEXT(context)->archived ){	
-		tmpp = xar_prop_find(p, "archived-checksum");
-		if( tmpp )
-			uncompstyle = xar_attr_pget(f, p, "style");
+		tmpp = xar_prop_pget(p, "archived-checksum");
+		if( tmpp ) {
+			uncompstyle = xar_attr_pget(f, tmpp, "style");
+			uncomp = xar_prop_getvalue(tmpp);
+		}
 		
 		md = EVP_get_digestbyname(uncompstyle);
 
