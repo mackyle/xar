@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-int
+static inline int
 vasprintf(char **rResult, const char *aFormat, va_list aAp)
 {
     int rVal;
