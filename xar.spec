@@ -1,6 +1,6 @@
 Name: xar
 Epoch: 0
-Version: 1.5
+Version: 1.5.1
 Release: 1
 Summary: The XAR project aims to provide an easily extensible archive format.
 Group: Applications/Archivers
@@ -60,6 +60,8 @@ Libraries and header files required for xar.
 %{_libdir}/lib%{name}.1.so
 
 %changelog
+* Fri May 25 2007 Rob Braun <bbraun@synack.net> 0:1.5.1-1
+- 1.5.1
 * Mon May 07 2007 Rob Braun <bbraun@synack.net> 0:1.5-1
 - 1.5
 * Thu Feb 23 2005 Rob Braun <bbraun@opendarwin.org> - 0:1.2-1
