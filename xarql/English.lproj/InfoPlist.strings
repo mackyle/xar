@@ -1,0 +1,4 @@
+﻿/* Localized versions of Info.plist keys */
+
+CFBundleGetInfoString = "xar version 1.0, Copyright (c) 2007 __MyCompanyName__.";
+NSHumanReadableCopyright = "Copyright (c) 2007 __MyCompanyName__.";
