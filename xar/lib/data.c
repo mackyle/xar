@@ -121,7 +121,7 @@ int32_t xar_data_write(xar_t x, xar_file_t f, void *buf, size_t len, void *conte
 	}
 	
 	do {
-		r = write(DATA_CONTEXT(context)->fd, buf+off, len-off);
+		r = write(DATA_CONTEXT(context)->fd, ((char *)buf)+off, len-off);
 		if( (r < 0) && (errno != EINTR) )
 			return r;
 		off += r;

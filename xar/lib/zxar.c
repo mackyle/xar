@@ -98,7 +98,7 @@ int xar_gzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 		out = realloc(out, outlen);
 		if( out == NULL ) abort();
 
-		GZIP_CONTEXT(context)->z.next_out = out + offset;
+		GZIP_CONTEXT(context)->z.next_out = ((unsigned char *)out) + offset;
 		GZIP_CONTEXT(context)->z.avail_out = outlen - offset;
 
 		r = inflate(&(GZIP_CONTEXT(context)->z), Z_SYNC_FLUSH);
@@ -195,7 +195,7 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		out = realloc(out, outlen);
 		if( out == NULL ) abort();
 
-		GZIP_CONTEXT(context)->z.next_out = out + offset;
+		GZIP_CONTEXT(context)->z.next_out = ((unsigned char *)out) + offset;
 		GZIP_CONTEXT(context)->z.avail_out = outlen - offset;
 
 		if( *inlen == 0 )

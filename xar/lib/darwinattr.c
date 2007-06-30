@@ -147,7 +147,7 @@ static int32_t xar_rsrc_write(xar_t x, xar_file_t f, void *buf, size_t len, void
 	int32_t r;
 	size_t off = 0;
 	do {
-		r = write(DARWINATTR_CONTEXT(context)->fd, buf+off, len-off);
+		r = write(DARWINATTR_CONTEXT(context)->fd, ((char *)buf)+off, len-off);
 		if( (r < 0) && (errno != EINTR) )
 			return r;
 		off += r;

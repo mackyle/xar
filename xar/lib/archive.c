@@ -415,7 +415,7 @@ int xar_close(xar_t x) {
 				wsize *= 2;
 				wbuf = realloc(wbuf, wsize);
 
-				zs.next_out = wbuf + off;
+				zs.next_out = ((unsigned char *)wbuf) + off;
 				zs.avail_out = wsize - off;
 
 				ret = deflate(&zs, Z_SYNC_FLUSH);
@@ -425,7 +425,7 @@ int xar_close(xar_t x) {
 			wbytes = off;
 			off = 0;
 			do {
-				r = write(tocfd, wbuf+off, wbytes-off);
+				r = write(tocfd, ((char *)wbuf)+off, wbytes-off);
 				if( (r < 0) && (errno == EINTR) )
 					continue;
 				if( r < 0 ) {
@@ -435,7 +435,7 @@ int xar_close(xar_t x) {
 					goto CLOSEEND;
 				}
 				if( XAR(x)->docksum )
-					EVP_DigestUpdate(&XAR(x)->toc_ctx, wbuf+off, r);
+					EVP_DigestUpdate(&XAR(x)->toc_ctx, ((char*)wbuf)+off, r);
 				off += r;
 				gztoc += r;
 			} while( off < wbytes );
@@ -476,7 +476,7 @@ int xar_close(xar_t x) {
 			wbytes = r;
 			off = 0;
 			do {
-				r = write(XAR(x)->fd, rbuf+off, wbytes-off);
+				r = write(XAR(x)->fd, ((char *)rbuf)+off, wbytes-off);
 				if( (r < 0) && (errno == EINTR) )
 					continue;
 				if( r < 0 ) {
@@ -553,7 +553,7 @@ int xar_close(xar_t x) {
 			wbytes = r;
 			off = 0;
 			do {
-				r = write(XAR(x)->fd, rbuf+off, wbytes);
+				r = write(XAR(x)->fd, ((char *)rbuf)+off, wbytes);
 				if( (r < 0 ) && (errno == EINTR) )
 					continue;
 				if( r < 0 ) {
@@ -1243,7 +1243,7 @@ static int toc_read_callback(void *context, char *buffer, int len) {
 
 	if( off && (off < XAR(x)->readbuf_len) )
 		XAR(x)->readbuf_len = off;
-	XAR(x)->zs.next_in = XAR(x)->readbuf + XAR(x)->offset;
+	XAR(x)->zs.next_in = ((unsigned char *)XAR(x)->readbuf) + XAR(x)->offset;
 	XAR(x)->zs.avail_in = XAR(x)->readbuf_len - XAR(x)->offset;
 	XAR(x)->zs.next_out = (void *)buffer;
 	XAR(x)->zs.avail_out = len;

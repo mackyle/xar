@@ -118,12 +118,12 @@ AGAIN2:
 	if( (LINUXATTR_CONTEXT(context)->bufsz-LINUXATTR_CONTEXT(context)->off) <= len ) {
 		int32_t ret;
 		ret = LINUXATTR_CONTEXT(context)->bufsz - LINUXATTR_CONTEXT(context)->off;
-		memcpy(buf, LINUXATTR_CONTEXT(context)->buf+LINUXATTR_CONTEXT(context)->off, ret);
+		memcpy(buf, ((char *)LINUXATTR_CONTEXT(context)->buf)+LINUXATTR_CONTEXT(context)->off, ret);
 		LINUXATTR_CONTEXT(context)->off += ret;
 		return(ret);
 	} else {
-		memcpy(buf, LINUXATTR_CONTEXT(context)->buf+LINUXATTR_CONTEXT(context)->off, len);
-		LINUXATTR_CONTEXT(context)->buf += len;
+		memcpy(buf, ((char *)LINUXATTR_CONTEXT(context)->buf)+LINUXATTR_CONTEXT(context)->off, len);
+		LINUXATTR_CONTEXT(context)->buf = ((char *)LINUXATTR_CONTEXT(context)->buf) + len;
 		return len;
 	}
 }

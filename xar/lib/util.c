@@ -117,7 +117,7 @@ ssize_t xar_read_fd( int fd, void * buffer, size_t nbytes ) {
 	ssize_t off = 0;
 
 	while ( off < nbytes ) {
-		rb = read(fd, buffer+off, nbytes-off);
+		rb = read(fd, ((char *)buffer)+off, nbytes-off);
 		if( (rb < 1 ) && (errno != EINTR) && (errno != EAGAIN) )
 			return -1;
 		off += rb;
@@ -136,7 +136,7 @@ ssize_t xar_write_fd( int fd, void * buffer, size_t nbytes ) {
 	ssize_t off = 0;
 
 	while ( off < nbytes ) {
-		rb = write(fd, buffer+off, nbytes-off);
+		rb = write(fd, ((char *)buffer)+off, nbytes-off);
 		if( (rb < 1 ) && (errno != EINTR) && (errno != EAGAIN) )
 			return -1;
 		off += rb;

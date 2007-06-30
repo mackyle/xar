@@ -106,7 +106,7 @@ int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 		out = realloc(out, outlen);
 		if( out == NULL ) abort();
 
-		BZIP2_CONTEXT(context)->bz.next_out = out + offset;
+		BZIP2_CONTEXT(context)->bz.next_out = ((char *)out) + offset;
 		BZIP2_CONTEXT(context)->bz.avail_out = outlen - offset;
 
 		r = BZ2_bzDecompress(&BZIP2_CONTEXT(context)->bz);
@@ -204,7 +204,7 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		out = realloc(out, outlen);
 		if( out == NULL ) abort();
 
-		BZIP2_CONTEXT(context)->bz.next_out = out + offset;
+		BZIP2_CONTEXT(context)->bz.next_out = ((char *)out) + offset;
 		BZIP2_CONTEXT(context)->bz.avail_out = outlen - offset;
 
 		if( (*inlen == 0) )

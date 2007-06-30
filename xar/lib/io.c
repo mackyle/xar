@@ -165,7 +165,7 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback 
 		off = 0;
 		if( rsize != 0 ) {
 			do {
-				r = write(XAR(x)->heap_fd, inbuf+off, rsize-off);
+				r = write(XAR(x)->heap_fd, ((char *)inbuf)+off, rsize-off);
 				if( (r < 0) && (errno != EINTR) )
 					return -1;
 				off += r;
@@ -555,7 +555,7 @@ int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, xar_pr
 		off = 0;
 		
 		do {
-			r = write(XAR(xdest)->heap_fd, inbuf+off, r-off );
+			r = write(XAR(xdest)->heap_fd, ((char *)inbuf)+off, r-off );
 			off += r;
 			writesize += r;
 		} while( off < r );
