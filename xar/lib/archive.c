@@ -1155,6 +1155,12 @@ int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *siz
 	const char *sizestring = NULL;
 	
 	if(0 != xar_prop_get(f,"data/size",&sizestring)){
+		if(0 != xar_prop_get(f, "type", &sizestring))
+			return -1;
+		if(strcmp(sizestring, "file") == 0) {
+			*size = 0;
+			return 0;
+		}
 		return -1;
 	}
 
