@@ -79,11 +79,13 @@ int32_t xar_data_read(xar_t x, xar_file_t f, void *inbuf, size_t bsize, void *co
 		/* dont read passed the end of the buffer */
 		if((DATA_CONTEXT(context)->offset + sizetoread) > DATA_CONTEXT(context)->length){
 			return -1;
+			//sizetoread = (DATA_CONTEXT(context)->offset + sizetoread) - DATA_CONTEXT(context)->length;
 		}
 		
 		readbuf += DATA_CONTEXT(context)->offset;
 		memcpy(inbuf,readbuf,sizetoread);
 		
+		DATA_CONTEXT(context)->total += sizetoread;
 		DATA_CONTEXT(context)->offset += sizetoread;
 		
 		return sizetoread;
