@@ -45,6 +45,7 @@
 #include "filetree.h"
 #include "archive.h"
 #include "io.h"
+#include "arcmod.h"
 
 #ifndef O_EXLOCK
 #define O_EXLOCK 0
@@ -142,6 +143,9 @@ int32_t xar_data_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	xar_prop_t tmpp;
 	
 	memset(&context,0,sizeof(struct _data_context));
+
+	if( !xar_check_prop(x, "data") )
+		return 0;
 
 	xar_prop_get(f, "type", &opt);
 	if(!opt) return 0;

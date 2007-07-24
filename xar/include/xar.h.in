@@ -98,6 +98,9 @@ typedef int32_t (*xar_signer_callback)(xar_signature_t sig, void *context, uint8
 #define XAR_OPT_COALESCE    "coalesce"    /* Coalesce identical heap blocks */
 #define XAR_OPT_LINKSAME    "linksame"    /* Hardlink identical files */
 
+#define XAR_OPT_PROPINCLUDE "prop-include" /* File property to include */
+#define XAR_OPT_PROPEXCLUDE "prop-exclude" /* File property to exclude */
+
 /* xar signing algorithms */
 #define XAR_SIG_SHA1RSA		1
 
@@ -133,6 +136,7 @@ int32_t xar_verify(xar_t x, xar_file_t f);
 
 const char *xar_opt_get(xar_t x, const char *option);
 int32_t xar_opt_set(xar_t x, const char *option, const char *value);
+int32_t xar_opt_unset(xar_t x, const char *option);
 
 int32_t xar_prop_set(xar_file_t f, const char *key, const char *value);
 int32_t xar_prop_create(xar_file_t f, const char *key, const char *value);

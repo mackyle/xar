@@ -617,6 +617,8 @@ CLOSE_BAIL:
  * x: archive to get the option from
  * option: name of the option
  * Returns: a pointer to the value of the option
+ * In the case of more than one option with the same name, this will
+ * return the first match.
  */
 const char *xar_opt_get(xar_t x, const char *option) {
 	xar_attr_t i;
@@ -636,7 +638,7 @@ const char *xar_opt_get(xar_t x, const char *option) {
  * Returns: 0 for sucess, -1 for failure
  */
 int32_t xar_opt_set(xar_t x, const char *option, const char *value) {
-	xar_attr_t i, a;
+	xar_attr_t a;
 
 	if( (strcmp(option, XAR_OPT_TOCCKSUM) == 0) ) {
 		if( strcmp(value, XAR_OPT_VAL_NONE) == 0 ) {
@@ -649,18 +651,31 @@ int32_t xar_opt_set(xar_t x, const char *option, const char *value) {
 			XAR(x)->heap_offset = 16;
 		}
 	}
-	for(i = XAR(x)->attrs; i ; i = XAR_ATTR(i)->next) {
-		if(strcmp(XAR_ATTR(i)->key, option)==0) {
-			free((char*)XAR_ATTR(i)->value);
-			XAR_ATTR(i)->value = strdup(value);
-			return 0;
-		}
-	}
 	a = xar_attr_new();
 	XAR_ATTR(a)->key = strdup(option);
 	XAR_ATTR(a)->value = strdup(value);
 	XAR_ATTR(a)->next = XAR(x)->attrs;
 	XAR(x)->attrs = a;
+	return 0;
+}
+
+/* xar_opt_unset
+ * x: the archive to set the option of
+ * option: the name of the option to delete
+ * This will delete ALL instances of the option name
+ */
+int32_t xar_opt_unset(xar_t x, const char *option) {
+	xar_attr_t i, p = NULL;
+	for(i = XAR(x)->attrs; i ; p = i, i = XAR_ATTR(i)->next) {
+		if(strcmp(XAR_ATTR(i)->key, option)==0) {
+			if( p == NULL )
+				XAR(x)->attrs = XAR_ATTR(i)->next;
+			else
+				XAR_ATTR(p)->next = XAR_ATTR(i)->next;
+			xar_attr_free(i);
+			i = p;
+		}
+	}
 	return 0;
 }
 

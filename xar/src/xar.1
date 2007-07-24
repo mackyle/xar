@@ -81,6 +81,15 @@ When the data section of multiple files are identical, hardlink them within the 
 .TP
 \-\-no-compress
 Specifies a POSIX regular expression of files to archive, but not compress.  The archived files will be copied raw into the archive.  This can be used to exclude already gzipped files from being gzipped during the archival process.
+.TP
+\-\-prop-include
+Specifies a file property to be included in the archive.  When this option is specified, only the specified options will be included.  Anything not specifically included with this option will be omitted.  This option can be used multiple times.
+.TP
+\-\-prop-exclude
+Specifies a file property to be excluded from the archive.  When this option is specified, all file properties will be included except the specified properties.  This option can be used multiple times.
+.TP
+\-\-distribution
+Creates an archive to only contain file properties safe for file distribution.  Currently, only name, type, mode, and data are preserved with this option.
 .SH EXAMPLES
 .TP
 xar -cf sample.xar /home/uid

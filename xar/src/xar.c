@@ -76,6 +76,10 @@ struct lnode *Exclude = NULL;
 struct lnode *Exclude_Tail = NULL;
 struct lnode *NoCompress = NULL;
 struct lnode *NoCompress_Tail = NULL;
+struct lnode *PropInclude = NULL;
+struct lnode *PropInclude_Tail = NULL;
+struct lnode *PropExclude = NULL;
+struct lnode *PropExclude_Tail = NULL;
 
 static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx);
 
@@ -169,6 +173,13 @@ static int archive(const char *filename, int arglen, char *args[]) {
 		xar_opt_set(x, XAR_OPT_RSIZE, Rsize);
 
 	xar_register_errhandler(x, err_callback, NULL);
+
+	for( i = PropInclude; i; i=i->next ) {
+		xar_opt_set(x, XAR_OPT_PROPINCLUDE, i->str);
+	}
+	for( i = PropExclude; i; i=i->next ) {
+		xar_opt_set(x, XAR_OPT_PROPEXCLUDE, i->str);
+	}
 
 	if( Subdoc )
 		add_subdoc(x);
@@ -585,6 +596,10 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t--link-same      Hardlink identical files\n");
 	fprintf(stderr, "\t--no-compress    POSIX regular expression of files\n");
 	fprintf(stderr, "\t                      not to archive, but not compress.\n");
+	fprintf(stderr, "\t--prop-include   File properties to include in archive\n");
+	fprintf(stderr, "\t--prop-exclude   File properties to exclude in archive\n");
+	fprintf(stderr, "\t--distribution   Only includes a subset of file properties\n");
+	fprintf(stderr, "\t                      appropriate for archive distribution\n");
 	fprintf(stderr, "\t--version        Print xar's version number\n");
 
 	return;
@@ -619,6 +634,9 @@ int main(int argc, char *argv[]) {
 		{"coalesce-heap", 0, 0, 9},
 		{"link-same", 0, 0, 10},
 		{"no-compress", 1, 0, 11},
+		{"prop-include", 1, 0, 12},
+		{"prop-exclude", 1, 0, 13},
+		{"distribution", 0, 0, 14},
 		{ 0, 0, 0, 0}
 	};
 
@@ -729,6 +747,48 @@ int main(int argc, char *argv[]) {
 				NoCompress_Tail->next = tmp;
 				NoCompress_Tail = tmp;
 			}
+			break;
+		case 12 :
+			tmp = malloc(sizeof(struct lnode));
+			tmp->str = optarg;
+			tmp->next = NULL;
+			if( PropInclude == NULL ) {
+				PropInclude = tmp;
+				PropInclude_Tail = tmp;
+			} else {
+				PropInclude_Tail->next = tmp;
+				PropInclude_Tail = tmp;
+			}
+			break;
+		case 13 :
+			tmp = malloc(sizeof(struct lnode));
+			tmp->str = optarg;
+			tmp->next = NULL;
+			if( PropExclude == NULL ) {
+				PropExclude = tmp;
+				PropExclude_Tail = tmp;
+			} else {
+				PropExclude_Tail->next = tmp;
+				PropExclude_Tail = tmp;
+			}
+			break;
+		case 14 :
+		{
+			char *props[] = { "type", "data", "mode", "name" };
+			int i;
+			for( i = 0; i < 4; i++ ) {
+				tmp = malloc(sizeof(struct lnode));
+				tmp->str = strdup(props[i]);
+				tmp->next = NULL;
+				if( PropInclude == NULL ) {
+					PropInclude = tmp;
+					PropInclude_Tail = tmp;
+				} else {
+					PropInclude_Tail->next = tmp;
+					PropInclude_Tail = tmp;
+				}
+			}
+		}
 			break;
 		case 'c':
 		case 'x':

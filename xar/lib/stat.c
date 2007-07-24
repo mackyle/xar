@@ -118,7 +118,7 @@ static xar_file_t xar_link_lookup(xar_t x, dev_t dev, ino_t ino, xar_file_t f) {
 	return ret;
 }
 
-static int32_t aacls(xar_file_t f, const char *file) {
+static int32_t aacls(xar_t x, xar_file_t f, const char *file) {
 #ifdef HAVE_SYS_ACL_H
 #if !defined(__APPLE__)
 	acl_t a;
@@ -126,6 +126,9 @@ static int32_t aacls(xar_file_t f, const char *file) {
 
 	xar_prop_get(f, "type", &type);
 	if( !type || (strcmp(type, "symlink") == 0) )
+		return 0;
+
+	if( !xar_check_prop(x, "acl") )
 		return 0;
 
 	a = acl_get_file(file, ACL_TYPE_DEFAULT);
@@ -167,6 +170,9 @@ DONE:
 	acl_entry_t e = NULL;
 	acl_t a;
 	int i;
+
+	if( !xar_check_prop(x, "acl") )
+		return 0;
 
 	a = acl_get_file(file, ACL_TYPE_EXTENDED);
 	if( !a )
@@ -279,9 +285,12 @@ static void x_addflag(xar_file_t f, const char *name) {
 }
 #endif
 
-static int32_t flags_archive(xar_file_t f, const struct stat *sb) {
+static int32_t flags_archive(xar_t x, xar_file_t f, const struct stat *sb) {
 #ifdef HAVE_STRUCT_STAT_ST_FLAGS
 	if( !sb->st_flags )
+		return 0;
+	
+	if( !xar_check_prop(x, XAR_FLAG_FORK) )
 		return 0;
 #ifdef UF_NODUMP
 	if( sb->st_flags & UF_NODUMP )
@@ -390,7 +399,8 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 
 	/* no stat attributes for data from a buffer, it is just a file */
 	if(len){
-		xar_prop_set(f, "type", "file");
+		if( xar_check_prop(x, "type") )
+			xar_prop_set(f, "type", "file");
 		return 0;
 	}
 	
@@ -405,21 +415,24 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 			return -1;
 		}
 		tmpf = xar_link_lookup(x, XAR(x)->sbcache.st_dev, XAR(x)->sbcache.st_ino, f);
-		xar_prop_set(f, "type", "hardlink");
-		if( tmpf ) {
-			const char *id;
-			id = xar_attr_get(tmpf, NULL, "id");
-			xar_attr_set(f, "type", "link", id);
-		} else {
-			xar_attr_set(f, "type", "link", "original");
+		if( xar_check_prop(x, "type") ) {
+			xar_prop_set(f, "type", "hardlink");
+			if( tmpf ) {
+				const char *id;
+				id = xar_attr_get(tmpf, NULL, "id");
+				xar_attr_set(f, "type", "link", id);
+			} else {
+				xar_attr_set(f, "type", "link", "original");
+			}
 		}
 	} else {
 		type = filetype_name(XAR(x)->sbcache.st_mode & S_IFMT);
-		xar_prop_set(f, "type", type);
+		if( xar_check_prop(x, "type") )
+			xar_prop_set(f, "type", type);
 	}
 
 	/* Record major/minor device node numbers */
-	if( S_ISBLK(XAR(x)->sbcache.st_mode) || S_ISCHR(XAR(x)->sbcache.st_mode)) {
+	if( xar_check_prop(x, "device") && (S_ISBLK(XAR(x)->sbcache.st_mode) || S_ISCHR(XAR(x)->sbcache.st_mode))) {
 		uint32_t major, minor;
 		char tmpstr[12];
 		xar_devmake(XAR(x)->sbcache.st_rdev, &major, &minor);
@@ -446,47 +459,63 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 		}
 	}
 
-	asprintf(&tmpstr, "%04o", XAR(x)->sbcache.st_mode & (~S_IFMT));
-	xar_prop_set(f, "mode", tmpstr);
-	free(tmpstr);
+	if( xar_check_prop(x, "mode") ) {
+		asprintf(&tmpstr, "%04o", XAR(x)->sbcache.st_mode & (~S_IFMT));
+		xar_prop_set(f, "mode", tmpstr);
+		free(tmpstr);
+	}
 
-	asprintf(&tmpstr, "%"PRIu64, (uint64_t)XAR(x)->sbcache.st_uid);
-	xar_prop_set(f, "uid", tmpstr);
-	free(tmpstr);
+	if( xar_check_prop(x, "uid") ) {
+		asprintf(&tmpstr, "%"PRIu64, (uint64_t)XAR(x)->sbcache.st_uid);
+		xar_prop_set(f, "uid", tmpstr);
+		free(tmpstr);
+	}
 
-	pw = getpwuid(XAR(x)->sbcache.st_uid);
-	if( pw )
-		xar_prop_set(f, "user", pw->pw_name);
+	if( xar_check_prop(x, "user") ) {
+		pw = getpwuid(XAR(x)->sbcache.st_uid);
+		if( pw )
+			xar_prop_set(f, "user", pw->pw_name);
+	}
 
-	asprintf(&tmpstr, "%"PRIu64, (uint64_t)XAR(x)->sbcache.st_gid);
-	xar_prop_set(f, "gid", tmpstr);
-	free(tmpstr);
+	if( xar_check_prop(x, "gid") ) {
+		asprintf(&tmpstr, "%"PRIu64, (uint64_t)XAR(x)->sbcache.st_gid);
+		xar_prop_set(f, "gid", tmpstr);
+		free(tmpstr);
+	}
 
-	gr = getgrgid(XAR(x)->sbcache.st_gid);
-	if( gr )
-		xar_prop_set(f, "group", gr->gr_name);
+	if( xar_check_prop(x, "group") ) {
+		gr = getgrgid(XAR(x)->sbcache.st_gid);
+		if( gr )
+			xar_prop_set(f, "group", gr->gr_name);
+	}
 
-	gmtime_r(&XAR(x)->sbcache.st_atime, &t);
-	memset(time, 0, sizeof(time));
-	strftime(time, sizeof(time), "%FT%T", &t);
-	strcat(time, "Z");
-	xar_prop_set(f, "atime", time);
+	if( xar_check_prop(x, "atime") ) {
+		gmtime_r(&XAR(x)->sbcache.st_atime, &t);
+		memset(time, 0, sizeof(time));
+		strftime(time, sizeof(time), "%FT%T", &t);
+		strcat(time, "Z");
+		xar_prop_set(f, "atime", time);
+	}
 
-	gmtime_r(&XAR(x)->sbcache.st_mtime, &t);
-	memset(time, 0, sizeof(time));
-	strftime(time, sizeof(time), "%FT%T", &t);
-	strcat(time, "Z");
-	xar_prop_set(f, "mtime", time);
+	if( xar_check_prop(x, "mtime") ) {
+		gmtime_r(&XAR(x)->sbcache.st_mtime, &t);
+		memset(time, 0, sizeof(time));
+		strftime(time, sizeof(time), "%FT%T", &t);
+		strcat(time, "Z");
+		xar_prop_set(f, "mtime", time);
+	}
 
-	gmtime_r(&XAR(x)->sbcache.st_ctime, &t);
-	memset(time, 0, sizeof(time));
-	strftime(time, sizeof(time), "%FT%T", &t);
-	strcat(time, "Z");
-	xar_prop_set(f, "ctime", time);
+	if( xar_check_prop(x, "ctime") ) {
+		gmtime_r(&XAR(x)->sbcache.st_ctime, &t);
+		memset(time, 0, sizeof(time));
+		strftime(time, sizeof(time), "%FT%T", &t);
+		strcat(time, "Z");
+		xar_prop_set(f, "ctime", time);
+	}
 
-	flags_archive(f, &(XAR(x)->sbcache));
+	flags_archive(x, f, &(XAR(x)->sbcache));
 
-	aacls(f, file);
+	aacls(x, f, file);
 
 	return 0;
 }

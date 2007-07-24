@@ -41,6 +41,7 @@
 #endif
 #include "xar.h"
 #include "filetree.h"
+#include "arcmod.h"
 
 struct _script_context{
 	int initted;
@@ -59,6 +60,9 @@ int32_t xar_script_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *in
 	if( SCRIPT_CONTEXT(context)->initted )
 		return 0;
 
+	if( !xar_check_prop(x, "contents") )
+		return 0;
+
 	/*We only run on the begining of the file, so once we init, we don't run again*/
 	SCRIPT_CONTEXT(context)->initted = 1;
 	
@@ -75,7 +79,7 @@ int32_t xar_script_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *in
 			exe[i-2] = buf[i];
 		}
 
-		tmpp = xar_prop_pset(f, p, "content", NULL);
+		tmpp = xar_prop_pset(f, p, "contents", NULL);
 		if( tmpp ) {
 			xar_prop_pset(f, tmpp, "type", "script");
 			xar_prop_pset(f, tmpp, "interpreter", exe);

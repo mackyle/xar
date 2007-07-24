@@ -143,11 +143,14 @@ int32_t xar_linuxattr_archive(xar_t x, xar_file_t f, const char* file, const cha
 	struct _linuxattr_context context;
 	
 	memset(&context,0,sizeof(struct _linuxattr_context));
-	
+
 	/* data from buffers don't have linuxattr */
 	if(len)
 		return 0;
 	if( file == NULL )
+		return 0;
+
+	if( !xar_check_prop(x, "ea") )
 		return 0;
 	
 TRYAGAIN:
