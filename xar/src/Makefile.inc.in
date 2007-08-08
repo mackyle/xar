@@ -11,7 +11,7 @@ src_install : @objroot@src/ixar
 	@INSTALL@ -d $(DESTDIR)$(BINDIR)
 	@INSTALL@ -m 0755 $< $(DESTDIR)$(BINDIR)/xar
 	@INSTALL@ -d $(DESTDIR)$(MANDIR)/man1
-	@INSTALL@ -m 0444 @srcroot@src/xar.1 $(DESTDIR)$(MANDIR)/man1
+	@INSTALL@ -m 0644 @srcroot@src/xar.1 $(DESTDIR)$(MANDIR)/man1
 
 src_uninstall :
 	rm -f $(DESTDIR)/$(BINDIR)/xar

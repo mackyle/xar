@@ -354,7 +354,7 @@ int xar_close(xar_t x) {
 
 		t = time(NULL);
 		gmtime_r(&t, &tmptm);
-		memset(timestr, sizeof(timestr), 0);
+		memset(timestr, 0, sizeof(timestr));
 		strftime(timestr, sizeof(timestr), "%FT%T", &tmptm);
 		xar_prop_set(XAR_FILE(x), "creation-time", timestr);
 
