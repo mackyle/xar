@@ -61,6 +61,7 @@ cfgoutputs="cfgoutputs.stamp"
 cfgoutputs="${cfgoutputs} Makefile"
 cfgoutputs="${cfgoutputs} include/xar.h"
 cfgoutputs="${cfgoutputs} lib/Makefile.inc"
+cfgoutputs="${cfgoutputs} lib/libxar.la.in"
 cfgoutputs="${cfgoutputs} src/Makefile.inc"
 
 cfghdrs="${objroot}cfghdrs.stamp"
@@ -84,7 +85,29 @@ AC_PROG_CPP
 
 AC_PROG_INSTALL
 AC_PATH_PROG([LD], [ld], , [$PATH])
+AC_PATH_PROG([AR], [ar], , [$PATH])
+AC_PATH_PROG([RANLIB], [ranlib], , [$PATH])
 AC_PATH_PROG([AUTOCONF], [autoconf], , [$PATH])
+
+dnl Some libtool envy
+#AC_ENABLE_SHARED
+AC_MSG_CHECKING([whether to build shared libraries])
+AC_ARG_ENABLE([shared],
+    [AC_HELP_STRING([--enable-shared],
+	[build shared libraries @<:@default=yes@:>@])],
+	[shared=$enableval],[shared=yes])
+AC_MSG_RESULT($shared)
+AC_SUBST([shared])
+#AC_ENABLE_STATIC
+AC_MSG_CHECKING([whether to build static libraries])
+AC_ARG_ENABLE([static],
+    [AC_HELP_STRING([--enable-static],
+	[build static libraries @<:@default=yes@:>@])],
+	[static=$enableval],[static=yes])
+AC_MSG_RESULT($static)
+AC_SUBST([static])
+# Make sure either enable_shared or enable_static is yes.
+test "$shared" = "yes" || test "$static" = "yes"
 
 dnl Platform-specific settings.  abi and RPATH can probably be determined
 dnl programmatically, but doing so is error-prone, which makes it generally
