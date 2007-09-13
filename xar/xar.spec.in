@@ -1,6 +1,6 @@
 Summary: The XAR project aims to provide an easily extensible archive format.
 Name: xar
-Version: 1.5
+Version: @XAR_VERSION@
 Release: 0
 License: BSD
 Group: Applications/Archiving

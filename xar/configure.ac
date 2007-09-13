@@ -63,6 +63,7 @@ cfgoutputs="${cfgoutputs} include/xar.h"
 cfgoutputs="${cfgoutputs} lib/Makefile.inc"
 cfgoutputs="${cfgoutputs} lib/libxar.la.in"
 cfgoutputs="${cfgoutputs} src/Makefile.inc"
+cfgoutputs="${cfgoutputs} xar.spec"
 
 cfghdrs="${objroot}cfghdrs.stamp"
 cfghdrs="${cfghdrs} ${objroot}include/config.h"
