@@ -28,7 +28,7 @@
  */
 /*
  * 03-Apr-2005
- * DRI: Rob Braun <bbraun@opendarwin.org>
+ * DRI: Rob Braun <bbraun@synack.net>
  */
 
 #include <stdlib.h>
@@ -62,6 +62,7 @@ static char *Compression = NULL;
 static char *Rsize = NULL;
 
 static int Err = 0;
+static int List = 0;
 static int Verbose = 0;
 static int Coalesce = 0;
 static int LinkSame = 0;
@@ -83,8 +84,33 @@ struct lnode *PropExclude_Tail = NULL;
 
 static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx);
 
+char *xar_get_type(xar_file_t f) {
+	const char *type = NULL;
+	xar_prop_get(f, "type", &type);
+	if( type == NULL )
+		type = "unknown";
+	return strdup(type);
+}
+
+char *xar_get_size(xar_file_t f) {
+	const char *size = NULL;
+	xar_prop_get(f, "data/size", &size);
+	if( size == NULL )
+		size = "0";
+	return strdup(size);
+}
+
 static void print_file(xar_file_t f) {
-	if( Verbose ) {
+	if( List && (Verbose > 1) ) {
+		char *path = xar_get_path(f);
+		char *type = xar_get_type(f);
+		char *size = xar_get_size(f);
+		printf("%-20s %-10s %s\n", path, type, size);
+		free(size);
+		free(type);
+		free(path);
+
+	} else if( List || Verbose ) {
 		char *path = xar_get_path(f);
 		printf("%s\n", path);
 		free(path);
@@ -799,7 +825,7 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 			if( c == 't' )
-				Verbose++;
+				List = 1;
 			command = c;
 			break;
 		case 'f':
