@@ -48,6 +48,7 @@
 #include <getopt.h>
 #include <regex.h>
 #include <errno.h>
+#include <time.h>
 #include "xar.h"
 #include "config.h"
 
@@ -100,16 +101,97 @@ char *xar_get_size(xar_file_t f) {
 	return strdup(size);
 }
 
+char *xar_get_mode(xar_file_t f) {
+	const char *mode = NULL;
+	char *type = NULL;
+	char *ret;
+	mode_t m;
+	xar_prop_get(f, "mode", &mode);
+	if( mode == NULL )
+		return "??????????";
+	errno = 0;
+	m = strtoll(mode, 0, 8);
+	if( errno )
+		return "??????????";
+
+	ret = calloc(11,1);
+	memset(ret, '-', 10);
+	ret[0] = '-';
+	if( m & S_IXOTH ) ret[9] = 'x';
+	if( m & S_IWOTH ) ret[8] = 'w';
+	if( m & S_IROTH ) ret[7] = 'r';
+	
+	if( m & S_IXGRP ) ret[6] = 'x';
+	if( m & S_IWGRP ) ret[5] = 'w';
+	if( m & S_IRGRP ) ret[4] = 'r';
+	if( m & S_ISGID ) ret[6] = 's';
+
+	if( m & S_IXUSR ) ret[3] = 'x';
+	if( m & S_IWUSR ) ret[2] = 'w';
+	if( m & S_IRUSR ) ret[1] = 'r';
+	if( m & S_ISUID ) ret[3] = 's';
+
+	type = xar_get_type(f);
+	if( !type )
+		return ret;
+
+	if( strcmp(type, "directory") == 0 ) ret[0] = 'd';
+	if( strcmp(type, "symlink") == 0 )   ret[0] = 'l';
+	free(type);
+
+	return ret;
+}
+
+char *xar_get_owner(xar_file_t f) {
+	const char *user = NULL;
+
+	xar_prop_get(f, "user", &user);
+	if( !user )
+		return strdup("unknown");
+	return strdup(user);
+}
+
+char *xar_get_group(xar_file_t f) {
+	const char *group = NULL;
+
+	xar_prop_get(f, "group", &group);
+	if( !group )
+		return strdup("unknown");
+	return strdup(group);
+}
+
+char *xar_get_mtime(xar_file_t f) {
+	const char *mtime = NULL;
+	char *tmp;
+	struct tm tm;
+
+	xar_prop_get(f, "mtime", &mtime);
+	if( !mtime )
+		mtime = "1970-01-01T00:00:00Z";
+
+	strptime(mtime, "%FT%T", &tm);
+	tmp = calloc(128,1);
+	strftime(tmp, 127, "%F %T", &tm);
+	return tmp;
+}
+
 static void print_file(xar_file_t f) {
-	if( List && (Verbose > 1) ) {
+	if( List && Verbose ) {
 		char *path = xar_get_path(f);
 		char *type = xar_get_type(f);
 		char *size = xar_get_size(f);
-		printf("%-20s %-10s %s\n", path, type, size);
+		char *mode = xar_get_mode(f);
+		char *user = xar_get_owner(f);
+		char *group = xar_get_group(f);
+		char *mtime = xar_get_mtime(f);
+		printf("%s %8s/%-8s %10s %s %s\n", mode, user, group, size, mtime, path);
 		free(size);
 		free(type);
 		free(path);
-
+		free(mode);
+		free(user);
+		free(group);
+		free(mtime);
 	} else if( List || Verbose ) {
 		char *path = xar_get_path(f);
 		printf("%s\n", path);
