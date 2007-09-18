@@ -28,7 +28,7 @@
  */
 /*
  * 03-Apr-2005
- * DRI: Rob Braun <bbraun@opendarwin.org>
+ * DRI: Rob Braun <bbraun@synack.net>
  */
 /*
  * Portions Copyright 2003, Apple Computer, Inc.

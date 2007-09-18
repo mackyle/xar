@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Rob Braun
+ * Copyright (c) 2005-2007 Rob Braun
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
  */
 /*
  * 04-Apr-2005
- * DRI: Rob Braun <bbraun@opendarwin.org>
+ * DRI: Rob Braun <bbraun@synack.net>
  */
 
 #define _FILE_OFFSET_BITS 64
