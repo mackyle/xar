@@ -62,7 +62,23 @@ struct _bzip_context{
 #define BZIP2_CONTEXT(x) ((struct _bzip_context *)(*x))
 #endif
 
-int xar_bzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context);
+int xar_bzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
+#ifdef HAVE_LIBBZ2
+
+	if( !context || !BZIP2_CONTEXT(context) )
+		return 0;
+
+	if( BZIP2_CONTEXT(context)->bzipcompressed){
+		BZ2_bzDecompressEnd(&BZIP2_CONTEXT(context)->bz);
+	}
+	
+	/* free the context */
+	free(BZIP2_CONTEXT(context));
+	*context = NULL;
+	
+#endif /* HAVE_LIBBZ2 */
+	return 0;
+}
 
 int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
 #ifdef HAVE_LIBBZ2
@@ -89,8 +105,8 @@ int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 			return 0;
 	}else if( !(BZIP2_CONTEXT(context)->bzipcompressed) ){
 		/* once the context has been initialized, then we have already
-		checked the compression type, so we need only check if we
-		actually are compressed */
+		   checked the compression type, so we need only check if we
+		   actually are compressed */
 		return 0;
 	}
 
@@ -129,23 +145,6 @@ int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	return 0;
 }
 
-int xar_bzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
-#ifdef HAVE_LIBBZ2
-
-	if( !context || !BZIP2_CONTEXT(context) )
-		return 0;
-
-	if( BZIP2_CONTEXT(context)->bzipcompressed){
-		BZ2_bzDecompressEnd(&BZIP2_CONTEXT(context)->bz);
-	}
-	
-	free(BZIP2_CONTEXT(context));
-	*context = NULL;
-	
-#endif /* HAVE_LIBBZ2 */
-	return 0;
-}
-
 int xar_bzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 #ifdef HAVE_LIBBZ2
 	xar_prop_t tmpp;
@@ -158,6 +157,7 @@ int xar_bzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 			xar_attr_pset(f, tmpp, "style", "application/x-bzip2");
 	}
 	
+	/* free the context */
 	free(BZIP2_CONTEXT(context));
 	*context = NULL;
 	
@@ -207,7 +207,7 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		BZIP2_CONTEXT(context)->bz.next_out = ((char *)out) + offset;
 		BZIP2_CONTEXT(context)->bz.avail_out = outlen - offset;
 
-		if( (*inlen == 0) )
+		if( *inlen == 0 )
 			r = BZ2_bzCompress(&BZIP2_CONTEXT(context)->bz, BZ_FINISH);
 		else
 			r = BZ2_bzCompress(&BZIP2_CONTEXT(context)->bz, BZ_RUN);

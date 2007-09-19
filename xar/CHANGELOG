@@ -1,5 +1,7 @@
 devel
 	2007-09-19 Rob Braun bbraun@synack.net
+	* lib/zxar.c lib/bzxar.c: cleanup for more consistency between the two compression modules.  Patch contributed by Anders Björklund from the rpm5 project.
+	2007-09-19 Rob Braun bbraun@synack.net
 	* CHANGELOG: Added changelog
 	* include/xar.h.in src/xar.c lib/util.c: moved helper functions for retrieving and formating file properties such as size, mode, mtime, etc. from src/xar.c to lib/util.c and exported them in xar.h.
 	* lib/err.c lib/archive.h: Added the xar_t archive context to the error handler context to be able to retrieve archive level context within an error, such as archive level options, or being able to examine other files than the one the error occurred on.

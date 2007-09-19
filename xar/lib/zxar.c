@@ -35,28 +35,43 @@
  * Christopher Ryan <ryanc@apple.com>
 */
 
+
+#include "config.h"
+#ifndef HAVE_ASPRINTF
+#include "asprintf.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <zlib.h>
-#include "config.h"
-#ifndef HAVE_ASPRINTF
-#include "asprintf.h"
-#endif
 #include "xar.h"
 #include "filetree.h"
 #include "io.h"
 
-typedef struct _gzip_context{
+struct _gzip_context{
 	uint8_t		gzipcompressed;
 	uint64_t        count;
 	z_stream	z;
-} gzip_context;
+};
 
 #define GZIP_CONTEXT(x) ((struct _gzip_context *)(*x))
 
-int xar_gzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context);
+int xar_gzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
+
+	if( !context || !GZIP_CONTEXT(context) )
+		return 0;
+
+	if( GZIP_CONTEXT(context)->gzipcompressed){
+		inflateEnd(&GZIP_CONTEXT(context)->z);
+	}
+
+	/* free the context */
+	free(GZIP_CONTEXT(context));
+	*context = NULL;
+	
+	return 0;
+}
 
 int xar_gzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
 	const char *opt;
@@ -64,11 +79,11 @@ int xar_gzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	size_t outlen, offset = 0;
 	int r;
 	xar_prop_t tmpp;
-	
+
 	/* on first run, we init the context and check the compression type */
 	if( !GZIP_CONTEXT(context) ) {
 		*context = calloc(1,sizeof(struct _gzip_context));
-	
+		
 		opt = NULL;
 		tmpp = xar_prop_pget(p, "encoding");
 		if( tmpp )
@@ -76,15 +91,14 @@ int xar_gzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 		if( !opt ) return 0;
 		if( strcmp(opt, "application/x-gzip") != 0 ) return 0;
 		
-		GZIP_CONTEXT(context)->gzipcompressed = 1;
 		inflateInit(&GZIP_CONTEXT(context)->z);
+		GZIP_CONTEXT(context)->gzipcompressed = 1;
 	}else if( !GZIP_CONTEXT(context)->gzipcompressed ){
 		/* once the context has been initialized, then we have already
 		   checked the compression type, so we need only check if we
 		   actually are compressed */
 		return 0;
 	}
-		
 
 	outlen = *inlen;
 
@@ -120,21 +134,6 @@ int xar_gzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	return 0;
 }
 
-int xar_gzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
-
-	if( !context || !GZIP_CONTEXT(context) )
-		return 0;
-
-	if( GZIP_CONTEXT(context)->gzipcompressed){
-		inflateEnd(&GZIP_CONTEXT(context)->z);		
-	}
-
-	/* free the context */
-	free(GZIP_CONTEXT(context));
-	*context = NULL;
-	
-	return 0;
-}
 int xar_gzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 	xar_prop_t tmpp;
 	
@@ -172,8 +171,8 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		if( strcmp(opt, XAR_OPT_VAL_GZIP) != 0 )
 			return 0;
 		
-		GZIP_CONTEXT(context)->gzipcompressed = 1;
 		deflateInit(&GZIP_CONTEXT(context)->z, Z_BEST_COMPRESSION);
+		GZIP_CONTEXT(context)->gzipcompressed = 1;
 		if( *inlen == 0 )
 			return 0;
 	}else if( !GZIP_CONTEXT(context)->gzipcompressed ){
@@ -182,7 +181,7 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		actually are compressed */
 		return 0;
 	}
-		
+	
 	outlen = *inlen/2;
 	if(outlen == 0) outlen = 1024;
 	GZIP_CONTEXT(context)->z.next_in = *in;
