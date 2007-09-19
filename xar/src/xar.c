@@ -85,105 +85,15 @@ struct lnode *PropExclude_Tail = NULL;
 
 static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx);
 
-char *xar_get_type(xar_file_t f) {
-	const char *type = NULL;
-	xar_prop_get(f, "type", &type);
-	if( type == NULL )
-		type = "unknown";
-	return strdup(type);
-}
-
-char *xar_get_size(xar_file_t f) {
-	const char *size = NULL;
-	xar_prop_get(f, "data/size", &size);
-	if( size == NULL )
-		size = "0";
-	return strdup(size);
-}
-
-char *xar_get_mode(xar_file_t f) {
-	const char *mode = NULL;
-	char *type = NULL;
-	char *ret;
-	mode_t m;
-	xar_prop_get(f, "mode", &mode);
-	if( mode == NULL )
-		return  strdup("??????????");
-	errno = 0;
-	m = strtoll(mode, 0, 8);
-	if( errno )
-		return strdup("??????????");
-
-	ret = calloc(11,1);
-	memset(ret, '-', 10);
-	ret[0] = '-';
-	if( m & S_IXOTH ) ret[9] = 'x';
-	if( m & S_IWOTH ) ret[8] = 'w';
-	if( m & S_IROTH ) ret[7] = 'r';
-	
-	if( m & S_IXGRP ) ret[6] = 'x';
-	if( m & S_IWGRP ) ret[5] = 'w';
-	if( m & S_IRGRP ) ret[4] = 'r';
-	if( m & S_ISGID ) ret[6] = 's';
-
-	if( m & S_IXUSR ) ret[3] = 'x';
-	if( m & S_IWUSR ) ret[2] = 'w';
-	if( m & S_IRUSR ) ret[1] = 'r';
-	if( m & S_ISUID ) ret[3] = 's';
-
-	type = xar_get_type(f);
-	if( !type )
-		return ret;
-
-	if( strcmp(type, "directory") == 0 ) ret[0] = 'd';
-	if( strcmp(type, "symlink") == 0 )   ret[0] = 'l';
-	free(type);
-
-	return ret;
-}
-
-char *xar_get_owner(xar_file_t f) {
-	const char *user = NULL;
-
-	xar_prop_get(f, "user", &user);
-	if( !user )
-		return strdup("unknown");
-	return strdup(user);
-}
-
-char *xar_get_group(xar_file_t f) {
-	const char *group = NULL;
-
-	xar_prop_get(f, "group", &group);
-	if( !group )
-		return strdup("unknown");
-	return strdup(group);
-}
-
-char *xar_get_mtime(xar_file_t f) {
-	const char *mtime = NULL;
-	char *tmp;
-	struct tm tm;
-
-	xar_prop_get(f, "mtime", &mtime);
-	if( !mtime )
-		mtime = "1970-01-01T00:00:00Z";
-
-	strptime(mtime, "%FT%T", &tm);
-	tmp = calloc(128,1);
-	strftime(tmp, 127, "%F %T", &tm);
-	return tmp;
-}
-
-static void print_file(xar_file_t f) {
+static void print_file(xar_t x, xar_file_t f) {
 	if( List && Verbose ) {
+		char *size = xar_get_size(x, f);
 		char *path = xar_get_path(f);
-		char *type = xar_get_type(f);
-		char *size = xar_get_size(f);
-		char *mode = xar_get_mode(f);
-		char *user = xar_get_owner(f);
-		char *group = xar_get_group(f);
-		char *mtime = xar_get_mtime(f);
+		char *type = xar_get_type(x, f);
+		char *mode = xar_get_mode(x, f);
+		char *user = xar_get_owner(x, f);
+		char *group = xar_get_group(x, f);
+		char *mtime = xar_get_mtime(x, f);
 		printf("%s %8s/%-8s %10s %s %s\n", mode, user, group, size, mtime, path);
 		free(size);
 		free(type);
@@ -346,7 +256,7 @@ static int archive(const char *filename, int arglen, char *args[]) {
 		if( !f ) {
 			fprintf(stderr, "Error adding file %s\n", ent->fts_path);
 		} else {
-			print_file(f);
+			print_file(x, f);
 		}
 		if( !nocompress_match )
 			xar_opt_set(x, XAR_OPT_COMPRESSION, default_compression);
@@ -487,7 +397,7 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		
 		if( matched ) {
 			files_extracted++;
-			print_file(f);
+			print_file(x, f);
 			xar_extract(x, f);
 		}
 		free(path);
@@ -540,6 +450,32 @@ static int list(const char *filename, int arglen, char *args[]) {
 	xar_t x;
 	xar_iter_t i;
 	xar_file_t f;
+	int argi = 0;
+	struct lnode *list_files = NULL;
+	struct lnode *list_tail = NULL;
+	struct lnode *lnodei = NULL;
+
+	for(argi = 0; args[argi]; argi++) {
+		struct lnode *tmp;
+		int err;
+		tmp = malloc(sizeof(struct lnode));
+		tmp->str = strdup(args[argi]);
+		tmp->next = NULL;
+		err = regcomp(&tmp->reg, tmp->str, REG_NOSUB);
+		if( err ) {
+			char errstr[1024];
+			regerror(err, &tmp->reg, errstr, sizeof(errstr));
+			printf("Error with regular expression %s: %s\n", tmp->str, errstr);
+			exit(1);
+		}
+		if( list_files == NULL ) {
+			list_files = tmp;
+			list_tail = tmp;
+		} else {
+			list_tail->next = tmp;
+			list_tail = tmp;
+		}
+	}
 
 	x = xar_open(filename, READ);
 	if( !x ) {
@@ -554,11 +490,39 @@ static int list(const char *filename, int arglen, char *args[]) {
 	}
 
 	for(f = xar_file_first(x, i); f; f = xar_file_next(i)) {
-		print_file(f);
+		int matched = 0;
+
+		if( args[0] ) {
+			char *path = xar_get_path(f);
+			for(lnodei = list_files; lnodei != NULL; lnodei = lnodei->next) {
+				int list_match = 1;
+
+				list_match = regexec(&lnodei->reg, path, 0, NULL, 0);
+				if( !list_match ) {
+					matched = 1;
+					break;
+				}
+			}
+			free(path);
+		} else {
+			matched = 1;
+		}
+
+		if( matched )
+			print_file(x, f);
 	}
 
 	xar_iter_free(i);
 	xar_close(x);
+
+	for(lnodei = list_files; lnodei != NULL; ) {
+		struct lnode *tmp;
+		free(lnodei->str);
+		regfree(&lnodei->reg);
+		tmp = lnodei;
+		lnodei = lnodei->next;
+		free(tmp);
+	}
 
 	return Err;
 }
@@ -621,9 +585,11 @@ static int dump_header(const char *filename) {
 
 static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx) {
 	xar_file_t f;
+	xar_t x;
 	const char *str;
 	int e;
 
+	x = xar_err_get_archive(ctx);
 	f = xar_err_get_file(ctx);
 	str = xar_err_get_string(ctx);
 	e = xar_err_get_errno(ctx);
@@ -637,7 +603,7 @@ static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *us
 		break;
 	case XAR_SEVERITY_NORMAL:
 		if( (err = XAR_ERR_ARCHIVE_CREATION) && f )
-    			print_file(f);
+    			print_file(x, f);
 		break;
 	case XAR_SEVERITY_NONFATAL:
 	case XAR_SEVERITY_FATAL:
@@ -718,6 +684,7 @@ static void print_version() {
 }
 
 int main(int argc, char *argv[]) {
+	int ret;
 	char *filename = NULL;
 	char command = 0, c;
 	char **args;
@@ -980,10 +947,12 @@ int main(int argc, char *argv[]) {
 			return extract(filename, arglen, args);
 		case 't':
 			arglen = argc - optind;
-			args = malloc(sizeof(char*) * (arglen+1));
+			args = calloc(sizeof(char*) * (arglen+1),1);
 			for( i = 0; i < arglen; i++ )
 				args[i] = strdup(argv[optind + i]);
-			return list(filename, arglen, args);
+			ret = list(filename, arglen, args);
+			for( i = 0; i < arglen; i++ )
+				free(args[i]);
 		case  6 :
 		case 's':
 			x = xar_open(filename, READ);

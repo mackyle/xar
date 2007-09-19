@@ -51,6 +51,7 @@ struct errctx {
 	int         saved_errno;
 	xar_file_t  file;
 	void       *usrctx;
+	xar_t       x;
 };
 
 struct __xar_t {

@@ -184,10 +184,17 @@ int32_t xar_signature_get_x509certificate_data(xar_signature_t sig, int32_t inde
 
 uint8_t xar_signature_copy_signed_data(xar_signature_t sig, uint8_t **data, uint32_t *length, uint8_t **signed_data, uint32_t *signed_length);
 
-
+/* Helper functions - caller must free returned memory */
+char *xar_get_size(xar_t x, xar_file_t f);
+char *xar_get_type(xar_t x, xar_file_t f);
+char *xar_get_mode(xar_t x, xar_file_t f);
+char *xar_get_owner(xar_t x, xar_file_t f);
+char *xar_get_group(xar_t x, xar_file_t f);
+char *xar_get_mtime(xar_t x, xar_file_t f);
 
 /* These are for xar modules and should never be needed from a calling app */
 void xar_register_errhandler(xar_t x, err_handler callback, void *usrctx);
+xar_t xar_err_get_archive(xar_errctx_t ctx);
 xar_file_t xar_err_get_file(xar_errctx_t ctx);
 const char *xar_err_get_string(xar_errctx_t ctx);
 int xar_err_get_errno(xar_errctx_t ctx);

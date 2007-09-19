@@ -193,6 +193,7 @@ AC_CHECK_FUNCS(lchown)
 AC_CHECK_FUNCS(chflags)
 AC_CHECK_FUNCS(statvfs)
 AC_CHECK_FUNCS(statfs)
+AC_CHECK_FUNCS(strmode)
 
 AC_CHECK_MEMBERS([struct statfs.f_fstypename],,,[#include <sys/types.h>
 #include <sys/param.h>

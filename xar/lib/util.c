@@ -168,3 +168,129 @@ void xar_devmake(dev_t dev, uint32_t *out_major, uint32_t *out_minor)
 #endif
 	return;
 }
+
+
+#ifndef HAVE_STRMODE
+#include "strmode.h"
+#endif
+
+char *xar_get_type(xar_t x, xar_file_t f) {
+	const char *type = NULL;
+	xar_prop_get(f, "type", &type);
+	if( type == NULL )
+		type = "unknown";
+	return strdup(type);
+}
+
+char *xar_get_size(xar_t x, xar_file_t f) {
+	const char *size = NULL;
+	const char *type = NULL;
+
+	xar_prop_get(f, "type", &type);
+	if( type != NULL ) {
+		if( strcmp(type, "hardlink") == 0 ) {
+			const char *link = NULL;
+			link = xar_attr_get(f, "type", "link");
+			if( link ) {
+				if( strcmp(link, "original") != 0 ) {
+					xar_iter_t i;
+					i = xar_iter_new();
+					if( i ) {
+						xar_file_t tmpf;
+						for(tmpf = xar_file_first(x, i); tmpf; tmpf = xar_file_next(i)) {
+							const char *id;
+							id = xar_attr_get(tmpf, NULL, "id");
+							if( !id ) continue;
+							if( strcmp(id, link) == 0 ) {
+								f = tmpf;
+								break;
+							}
+						}
+					}
+					xar_iter_free(i);
+				}
+			}
+		}
+	}
+	xar_prop_get(f, "data/size", &size);
+	if( size == NULL )
+		size = "0";
+	return strdup(size);
+}
+
+char *xar_get_mode(xar_t x, xar_file_t f) {
+	const char *mode = NULL;
+	const char *type = NULL;
+	char *ret;
+	mode_t m;
+	xar_prop_get(f, "mode", &mode);
+	if( mode == NULL )
+		return  strdup("??????????");
+	errno = 0;
+	m = strtoll(mode, 0, 8);
+	if( errno )
+		return strdup("??????????");
+
+	xar_prop_get(f, "type", &type);
+	if( type == NULL )
+		return strdup("??????????");
+		
+	if( strcmp(type, "file") == 0 )
+		m |= S_IFREG;
+	else if( strcmp(type, "hardlink") == 0 )
+		m |= S_IFREG;
+	else if( strcmp(type, "directory") == 0 )
+		m |= S_IFDIR;
+	else if( strcmp(type, "symlink") == 0 )
+		m |= S_IFLNK;
+	else if( strcmp(type, "fifo") == 0 )
+		m |= S_IFIFO;
+	else if( strcmp(type, "character special") == 0 )
+		m |= S_IFCHR;
+	else if( strcmp(type, "block special") == 0 )
+		m |= S_IFBLK;
+	else if( strcmp(type, "socket") == 0 )
+		m |= S_IFSOCK;
+#ifdef S_IFWHT
+	else if( strcmp(type, "whiteout") == 0 )
+		m |= S_IFWHT;
+#endif
+
+	ret = calloc(12,1);
+	strmode(m, ret);
+
+	return ret;
+}
+
+char *xar_get_owner(xar_t x, xar_file_t f) {
+	const char *user = NULL;
+
+	xar_prop_get(f, "user", &user);
+	if( !user )
+		return strdup("unknown");
+	return strdup(user);
+}
+
+char *xar_get_group(xar_t x, xar_file_t f) {
+	const char *group = NULL;
+
+	xar_prop_get(f, "group", &group);
+	if( !group )
+		return strdup("unknown");
+	return strdup(group);
+}
+
+char *xar_get_mtime(xar_t x, xar_file_t f) {
+	const char *mtime = NULL;
+	char *tmp;
+	struct tm tm;
+
+	xar_prop_get(f, "mtime", &mtime);
+	if( !mtime )
+		mtime = "1970-01-01T00:00:00Z";
+
+	strptime(mtime, "%FT%T", &tm);
+	tmp = calloc(128,1);
+	strftime(tmp, 127, "%F %T", &tm);
+	return tmp;
+}
