@@ -1,5 +1,7 @@
 ﻿devel
 	2007-09-20 Rob Braun bbraun@synack.net
+	* lib/filetree.c: Fix a minor memory leak with xar_iter_free() not freeing all memory associated with a xar_iter_t.
+	2007-09-20 Rob Braun bbraun@synack.net
 	* ChangeLog: renamed from CHANGELOG.
 	2007-09-19 Dave Leimbach leimy2k@gmail.com
 	* xar/xar.c xar/xar.1: Added support for -j and -z as shortcuts for --compression=bzip2 or --compression=zlib respectively.

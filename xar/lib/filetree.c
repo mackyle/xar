@@ -279,6 +279,8 @@ xar_iter_t xar_iter_new() {
  */
 void xar_iter_free(xar_iter_t i) {
 	free(XAR_ITER(i)->node);
+	if( XAR_ITER(i)->path )
+		free(XAR_ITER(i)->path);
 	free(XAR_ITER(i));
 }
 
