@@ -459,6 +459,18 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 		}
 	}
 
+	if( xar_check_prop(x, "inode") ) {
+		asprintf(&tmpstr, "%d", XAR(x)->sbcache.st_ino);
+		xar_prop_set(f, "inode", tmpstr);
+		free(tmpstr);
+	}
+
+	if( xar_check_prop(x, "deviceno") ) {
+		asprintf(&tmpstr, "%d", XAR(x)->sbcache.st_dev);
+		xar_prop_set(f, "deviceno", tmpstr);
+		free(tmpstr);
+	}
+
 	if( xar_check_prop(x, "mode") ) {
 		asprintf(&tmpstr, "%04o", XAR(x)->sbcache.st_mode & (~S_IFMT));
 		xar_prop_set(f, "mode", tmpstr);
