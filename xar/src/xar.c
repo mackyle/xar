@@ -657,6 +657,8 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t--compression    Specifies the compression type to use.\n");
 	fprintf(stderr, "\t                      Valid values: none, gzip, bzip2\n");
 	fprintf(stderr, "\t                      Default: gzip\n");
+	fprintf(stderr, "\t-j               Synonym for \"--compression=bzip2\"\n");
+	fprintf(stderr, "\t-z               Synonym for \"--compression=gzip\"\n");
 	fprintf(stderr, "\t--list-subdocs   List the subdocuments in the xml header\n");
 	fprintf(stderr, "\t--extract-subdoc=name Extracts the specified subdocument\n");
 	fprintf(stderr, "\t                      to a document in cwd named <name>.xml\n");
@@ -720,7 +722,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	while( (c = getopt_long(argc, argv, "xcvtf:hpPln:s:d:v", o, &loptind)) != -1 ) {
+	while( (c = getopt_long(argc, argv, "xcvtjzf:hpPln:s:d:v", o, &loptind)) != -1 ) {
 		switch(c) {
 		case  1 : if( !optarg ) {
 		          	usage(argv[0]);
@@ -876,6 +878,12 @@ int main(int argc, char *argv[]) {
 			if( c == 't' )
 				List = 1;
 			command = c;
+			break;
+		case 'j':
+			Compression = "bzip2";
+			break;
+		case 'z':
+			Compression = "gzip";
 			break;
 		case 'f':
 		        required_dash_f = 1;
