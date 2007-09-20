@@ -1,8 +1,10 @@
-devel
+﻿devel
+	2007-09-20 Rob Braun bbraun@synack.net
+	* ChangeLog: renamed from CHANGELOG.
 	2007-09-19 Dave Leimbach leimy2k@gmail.com
 	* xar/xar.c xar/xar.1: Added support for -j and -z as shortcuts for --compression=bzip2 or --compression=zlib respectively.
 	2007-09-19 Rob Braun bbraun@synack.net
-	* lib/zxar.c lib/bzxar.c: cleanup for more consistency between the two compression modules.  Patch contributed by Anders Bj�rklund from the rpm5 project.
+	* lib/zxar.c lib/bzxar.c: cleanup for more consistency between the two compression modules.  Patch contributed by Anders Björklund from the rpm5 project.
 	2007-09-19 Rob Braun bbraun@synack.net
 	* CHANGELOG: Added changelog
 	* include/xar.h.in src/xar.c lib/util.c: moved helper functions for retrieving and formating file properties such as size, mode, mtime, etc. from src/xar.c to lib/util.c and exported them in xar.h.
