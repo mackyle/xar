@@ -1330,24 +1330,24 @@ static int32_t xar_unserialize(xar_t x) {
 	xmlTextReaderPtr reader;
 	xar_file_t f = NULL;
 	const xmlChar *name, *prefix, *uri;
-	int type, noattr;
+	int type, noattr, ret;
 
 	reader = xmlReaderForIO(toc_read_callback, close_callback, XAR(x), NULL, NULL, 0);
 	if( !reader ) return -1;
 
-	while( xmlTextReaderRead(reader) == 1 ) {
+	while( (ret = xmlTextReaderRead(reader)) == 1 ) {
 		type = xmlTextReaderNodeType(reader);
 		noattr = xmlTextReaderAttributeCount(reader);
 		name = xmlTextReaderConstLocalName(reader);
 		if( type == XML_READER_TYPE_ELEMENT ) {
 			if(strcmp((const char*)name, "xar") == 0) {
-				while( xmlTextReaderRead(reader) == 1 ) {
+				while( (ret = xmlTextReaderRead(reader)) == 1 ) {
 					type = xmlTextReaderNodeType(reader);
 					noattr = xmlTextReaderAttributeCount(reader);
 					name = xmlTextReaderConstLocalName(reader);
 					if( type == XML_READER_TYPE_ELEMENT ) {
 						if(strcmp((const char*)name, "toc") == 0) {
-							while( xmlTextReaderRead(reader) == 1 ) {
+							while( (ret = xmlTextReaderRead(reader)) == 1 ) {
 								type = xmlTextReaderNodeType(reader);
 								noattr = xmlTextReaderAttributeCount(reader);
 								name = xmlTextReaderConstLocalName(reader);
@@ -1372,6 +1372,10 @@ static int32_t xar_unserialize(xar_t x) {
 										xar_prop_unserialize(XAR_FILE(x), NULL, reader);
 									}
 								}
+							}
+							if( ret == -1 ) {
+								xmlFreeTextReader(reader);
+								return -1;
 							}
 						} else {
 							xar_subdoc_t s;
@@ -1408,8 +1412,17 @@ static int32_t xar_unserialize(xar_t x) {
 					}
 
 				}
+				if( ret == -1 ) {
+					xmlFreeTextReader(reader);
+					return -1;
+				}
 			}
 		}
+	}
+
+	if( ret == -1 ) {
+		xmlFreeTextReader(reader);
+		return -1;
 	}
 		
 	xmlFreeTextReader(reader);
