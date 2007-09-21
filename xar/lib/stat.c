@@ -460,13 +460,13 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	}
 
 	if( xar_check_prop(x, "inode") ) {
-		asprintf(&tmpstr, "%d", XAR(x)->sbcache.st_ino);
+		asprintf(&tmpstr, "%"INO_STRING, XAR(x)->sbcache.st_ino);
 		xar_prop_set(f, "inode", tmpstr);
 		free(tmpstr);
 	}
 
 	if( xar_check_prop(x, "deviceno") ) {
-		asprintf(&tmpstr, "%d", XAR(x)->sbcache.st_dev);
+		asprintf(&tmpstr, "%"DEV_STRING, XAR(x)->sbcache.st_dev);
 		xar_prop_set(f, "deviceno", tmpstr);
 		free(tmpstr);
 	}
@@ -541,6 +541,7 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 	struct tm t;
 	enum {ATIME=0, MTIME};
 	struct timeval tv[2];
+	char savesuid = 0;
 
 	/* when writing to a buffer, there are no permissions to set */
 	if ( len )
@@ -569,6 +570,7 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 				g = gr->gr_gid;
 			}
 		}
+		savesuid = 1;
 	}
 	if( opt && (strcmp(opt, XAR_OPT_VAL_NUMERIC) == 0) ) {
 		xar_prop_get(f, "uid", &opt);
@@ -590,8 +592,13 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 			}
 			g = (gid_t)tmp;
 		}
+		savesuid = 1;
 	}
 
+	opt = xar_opt_get(x, XAR_OPT_SAVESUID);
+	if( opt && (strcmp(opt, XAR_OPT_VAL_TRUE) == 0) ) {
+		savesuid = 1;
+	}
 
 	xar_prop_get(f, "mode", &opt);
 	if( opt ) {
@@ -601,6 +608,10 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 			return -1;
 		}
 		m = (mode_t)tmp;
+		if( !savesuid ) {
+			m &= ~S_ISUID;
+			m &= ~S_ISGID;
+		}
 		mset = 1;
 	}
 
@@ -622,6 +633,8 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 			xar_err_set_file(x, f);
 			xar_err_set_string(x, "perm: could not lchown symlink");
 			xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+			m &= ~S_ISUID;
+			m &= ~S_ISGID;
 		}
 #ifdef HAVE_LCHMOD
 		if( mset )
@@ -640,6 +653,8 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 			xar_err_set_string(x, "perm: could not chown file");
 			xar_err_set_errno(x, errno);
 			xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+			m &= ~S_ISUID;
+			m &= ~S_ISGID;
 		}
 		if( mset )
 			if( chmod(file, m) ) {

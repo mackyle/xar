@@ -59,10 +59,13 @@ Valid values: none, sha1, and md5.  Default value: sha1
 On archival, stay on the local device.
 .TP
 \-P
-On extract, set ownership based on uid/gid.
+On extract, set ownership based on uid/gid.  If the uid/gid can be set
+on the extracted file, setuid/setgid bits will also be preserved.
 .TP
 \-p
-On extract, set ownership based on symbolic names, if possible.
+On extract, set ownership based on symbolic names, if possible.  
+If the uid/gid can be set on the extracted file, setuid/setgid bits 
+will also be preserved.
 .TP
 \-s <filename>
 On extract, specifies the file to extract subdocuments to.
@@ -94,7 +97,7 @@ Specifies a file property to be included in the archive.  When this option is sp
 \-\-prop-exclude
 Specifies a file property to be excluded from the archive.  When this option is specified, all file properties will be included except the specified properties.  This option can be used multiple times.
 .TP
-\-\-distribution
+\\-\-distribution
 Creates an archive to only contain file properties safe for file distribution.  Currently, only name, type, mode, and data are preserved with this option.
 .TP
 \-\-keep-existing
@@ -102,6 +105,13 @@ Does not overwrite existing files during extraction.  Keeps any previously exist
 .TP
 \-k
 Synonym for \-\-keep-existing.
+.TP
+\-\-keep-setuid
+When extracting without -p or -P options, xar will extract files as the
+uid/gid of the extracting process.  In this situation, xar will strip
+setuid/setgid bits from the extracted files for security reasons.
+\-\-keep-setuid will preserve the setuid/setgid bits even though the
+uid/gid of the extracted file is not the same as the archived file.
 .SH EXAMPLES
 .TP
 xar -cf sample.xar /home/uid

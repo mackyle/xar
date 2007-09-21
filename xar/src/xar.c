@@ -68,6 +68,7 @@ static int Verbose = 0;
 static int Coalesce = 0;
 static int LinkSame = 0;
 static int NoOverwrite = 0;
+static int SaveSuid = 0;
 
 struct lnode {
 	char *str;
@@ -355,6 +356,9 @@ static int extract(const char *filename, int arglen, char *args[]) {
 	}
 	if ( Rsize != NULL ) {
 		xar_opt_set(x, XAR_OPT_RSIZE, Rsize);
+	}
+	if( SaveSuid ) {
+		xar_opt_set(x, XAR_OPT_SAVESUID, XAR_OPT_VAL_TRUE);
 	}
 	
 	i = xar_iter_new();
@@ -684,6 +688,7 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t                      appropriate for archive distribution\n");
 	fprintf(stderr, "\t--keep-existing  Do not overwrite existing files while extracting\n");
 	fprintf(stderr, "\t-k               Synonym for --keep-existing\n");
+	fprintf(stderr, "\t--keep-setuid    Preserve the suid/sgid bits when extracting\n");
 	fprintf(stderr, "\t--version        Print xar's version number\n");
 
 	return;
@@ -723,6 +728,7 @@ int main(int argc, char *argv[]) {
 		{"prop-exclude", 1, 0, 13},
 		{"distribution", 0, 0, 14},
 		{"keep-existing", 0, 0, 15},
+		{"keep-setuid", 0, 0, 16},
 		{ 0, 0, 0, 0}
 	};
 
@@ -879,6 +885,9 @@ int main(int argc, char *argv[]) {
 		case 'k':
 		case 15 :
 			NoOverwrite++;
+			break;
+		case 16 :
+			SaveSuid++;
 			break;
 		case 'c':
 		case 'x':

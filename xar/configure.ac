@@ -72,6 +72,7 @@ dnl If CFLAGS isn't defined and using gcc, set CFLAGS to something reasonable.
 dnl Otherwise, just prevent autoconf from molesting CFLAGS.
 CFLAGS=$CFLAGS
 AC_PROG_CC
+AC_SYS_LARGEFILE
 if test "x$CFLAGS" = "x" ; then
   no_CFLAGS="yes"
 fi
