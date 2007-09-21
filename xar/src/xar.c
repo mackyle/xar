@@ -67,6 +67,7 @@ static int List = 0;
 static int Verbose = 0;
 static int Coalesce = 0;
 static int LinkSame = 0;
+static int NoOverwrite = 0;
 
 struct lnode {
 	char *str;
@@ -396,9 +397,14 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		}
 		
 		if( matched ) {
-			files_extracted++;
-			print_file(x, f);
-			xar_extract(x, f);
+			struct stat sb;
+			if( NoOverwrite && (lstat(path, &sb) == 0) ) {
+				printf("%s already exists, not overwriting\n", path);
+			} else {
+				files_extracted++;
+				print_file(x, f);
+				xar_extract(x, f);
+			}
 		}
 		free(path);
 	}
@@ -676,6 +682,7 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t--prop-exclude   File properties to exclude in archive\n");
 	fprintf(stderr, "\t--distribution   Only includes a subset of file properties\n");
 	fprintf(stderr, "\t                      appropriate for archive distribution\n");
+	fprintf(stderr, "\t--keep-existing  Do not overwrite existing files while extracting\n");
 	fprintf(stderr, "\t--version        Print xar's version number\n");
 
 	return;
@@ -714,6 +721,7 @@ int main(int argc, char *argv[]) {
 		{"prop-include", 1, 0, 12},
 		{"prop-exclude", 1, 0, 13},
 		{"distribution", 0, 0, 14},
+		{"keep-existing", 0, 0, 15},
 		{ 0, 0, 0, 0}
 	};
 
@@ -866,6 +874,9 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		}
+			break;
+		case 15 :
+			NoOverwrite++;
 			break;
 		case 'c':
 		case 'x':

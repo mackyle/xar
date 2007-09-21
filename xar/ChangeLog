@@ -1,5 +1,7 @@
 ﻿devel
 	2007-09-20 Rob Braun bbraun@synack.net
+	* src/xar.c src/xar.1: Add --keep-existing flag which prevents existing files from being extracted.
+	2007-09-20 Rob Braun bbraun@synack.net
 	* lib/archive.c: Fix a bug in toc parsing where invalid tocs, particularly with mismatched closing tags, would still be processed.
 	2007-09-20 Rob Braun bbraun@synack.net
 	* lib/filetree.c: Fix a minor memory leak with xar_iter_free() not freeing all memory associated with a xar_iter_t.

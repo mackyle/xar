@@ -96,6 +96,9 @@ Specifies a file property to be excluded from the archive.  When this option is 
 .TP
 \-\-distribution
 Creates an archive to only contain file properties safe for file distribution.  Currently, only name, type, mode, and data are preserved with this option.
+.TP
+\-\-keep-existing
+Does not overwrite existing files during extraction.  Keeps any previously existing files while extracting.
 .SH EXAMPLES
 .TP
 xar -cf sample.xar /home/uid
