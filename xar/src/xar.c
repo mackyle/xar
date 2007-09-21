@@ -683,6 +683,7 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t--distribution   Only includes a subset of file properties\n");
 	fprintf(stderr, "\t                      appropriate for archive distribution\n");
 	fprintf(stderr, "\t--keep-existing  Do not overwrite existing files while extracting\n");
+	fprintf(stderr, "\t-k               Synonym for --keep-existing\n");
 	fprintf(stderr, "\t--version        Print xar's version number\n");
 
 	return;
@@ -730,7 +731,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	while( (c = getopt_long(argc, argv, "xcvtjzf:hpPln:s:d:v", o, &loptind)) != -1 ) {
+	while( (c = getopt_long(argc, argv, "xcvtjzf:hpPln:s:d:vk", o, &loptind)) != -1 ) {
 		switch(c) {
 		case  1 : if( !optarg ) {
 		          	usage(argv[0]);
@@ -875,6 +876,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 			break;
+		case 'k':
 		case 15 :
 			NoOverwrite++;
 			break;
