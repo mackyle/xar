@@ -108,6 +108,47 @@ struct datamod xar_datamods[] = {
 	}
 };
 
+static void xar_io_seek(xar_t x, xar_file_t f, off_t seekoff) {
+	int r;
+
+	if( XAR(x)->fd > 1 ) {
+		r = lseek(XAR(x)->fd, seekoff, SEEK_SET);
+		if( r == -1 ) {
+			if( errno == ESPIPE ) {
+				ssize_t rr;
+				char *buf;
+				unsigned int len;
+
+				len = seekoff - XAR(x)->toc_count;
+				len -= sizeof(xar_header_t);
+				if( XAR(x)->heap_offset > len ) {
+					xar_err_new(x);
+					xar_err_set_file(x, f);
+					xar_err_set_string(x, "Unable to seek");
+					xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+				} else {
+					len -= XAR(x)->heap_offset;
+					buf = malloc(len);
+					assert(buf);
+					rr = read(XAR(x)->fd, buf, len);
+					if( rr < len ) {
+						xar_err_new(x);
+						xar_err_set_file(x, f);
+						xar_err_set_string(x, "Unable to seek");
+						xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+					}
+					free(buf);
+				}
+			} else {
+				xar_err_new(x);
+				xar_err_set_file(x, f);
+				xar_err_set_string(x, "Unable to seek");
+				xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+			}
+		}
+	}
+}
+
 int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb, void *context) {
 	int modulecount = (sizeof(xar_datamods)/sizeof(struct datamod));
 	void	*modulecontext[modulecount];
@@ -320,42 +361,7 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, xar_prop_t p, write_callba
 	}
 
 	seekoff += XAR(x)->toc_count + sizeof(xar_header_t);
-	if( XAR(x)->fd > 1 ) {
-		r = lseek(XAR(x)->fd, seekoff, SEEK_SET);
-		if( r == -1 ) {
-			if( errno == ESPIPE ) {
-				ssize_t rr;
-				char *buf;
-				unsigned int len;
-
-				len = seekoff - XAR(x)->toc_count;
-				len -= sizeof(xar_header_t);
-				if( XAR(x)->heap_offset > len ) {
-					xar_err_new(x);
-					xar_err_set_file(x, f);
-					xar_err_set_string(x, "Unable to seek");
-					xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
-				} else {
-					len -= XAR(x)->heap_offset;
-					buf = malloc(len);
-					assert(buf);
-					rr = read(XAR(x)->fd, buf, len);
-					if( rr < len ) {
-						xar_err_new(x);
-						xar_err_set_file(x, f);
-						xar_err_set_string(x, "Unable to seek");
-						xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
-					}
-					free(buf);
-				}
-			} else {
-				xar_err_new(x);
-				xar_err_set_file(x, f);
-				xar_err_set_string(x, "Unable to seek");
-				xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
-			}
-		}
-	}
+	xar_io_seek(x, f, seekoff);
 
 	opt = NULL;
 	tmpp = xar_prop_pget(p, "length");
@@ -475,43 +481,7 @@ int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, xar_pr
 	}
 	
 	seekoff += XAR(xsource)->toc_count + sizeof(xar_header_t);
-	
-	if( XAR(xsource)->fd > 1 ) {
-		r = lseek(XAR(xsource)->fd, seekoff, SEEK_SET);
-		if( r == -1 ) {
-			if( errno == ESPIPE ) {
-				ssize_t rr;
-				char *buf;
-				unsigned int len;
-				
-				len = seekoff - XAR(xsource)->toc_count;
-				len -= sizeof(xar_header_t);
-				if( XAR(xsource)->heap_offset > len ) {
-					xar_err_new(xsource);
-					xar_err_set_file(xsource, fsource);
-					xar_err_set_string(xsource, "Unable to seek");
-					xar_err_callback(xsource, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
-				} else {
-					len -= XAR(xsource)->heap_offset;
-					buf = malloc(len);
-					assert(buf);
-					rr = read(XAR(xsource)->fd, buf, len);
-					if( rr < len ) {
-						xar_err_new(xsource);
-						xar_err_set_file(xsource, fsource);
-						xar_err_set_string(xsource, "Unable to seek");
-						xar_err_callback(xsource, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
-					}
-					free(buf);
-				}
-			} else {
-				xar_err_new(xsource);
-				xar_err_set_file(xsource, fsource);
-				xar_err_set_string(xsource, "Unable to seek");
-				xar_err_callback(xsource, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
-			}
-		}
-	}
+	xar_io_seek(xsource, fsource, seekoff);
 	
 	opt = NULL;
 	tmpp = xar_prop_pget(p, "length");
