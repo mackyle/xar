@@ -1189,6 +1189,29 @@ int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *siz
 	return xar_arcmod_extract(x,f,NULL,*buffer,*size);
 }
 
+int32_t xar_extract_tostream_init(xar_t x, xar_file_t f, xar_stream *stream) {
+	xar_prop_t tmpp;
+
+	if( !xar_check_prop(x, "data") )
+		return XAR_STREAM_OK;
+
+	tmpp = xar_prop_pfirst(f);
+	if( tmpp )
+		tmpp = xar_prop_find(tmpp, "data");
+	if( !tmpp )
+		return XAR_STREAM_OK;
+
+	return xar_attrcopy_from_heap_to_stream_init(x, f, tmpp, stream);
+}
+
+int32_t xar_extract_tostream(xar_stream *stream) {
+	return xar_attrcopy_from_heap_to_stream(stream);
+}
+
+int32_t xar_extract_tostream_end(xar_stream *stream) {
+	return xar_attrcopy_from_heap_to_stream_end(stream);
+}
+
 /* xar_extract
  * x: archive to extract from
  * path: path to file to extract

@@ -58,9 +58,26 @@ struct datamod {
 	toheap_done      th_done;
 };
 
+typedef struct xar_stream_state {
+        char      *pending_buf;
+        size_t     pending_buf_size;
+
+        void     **modulecontext;
+        int        modulecount;
+        size_t     bsize;
+        int64_t    fsize;
+        xar_t      x;
+        xar_file_t f;
+	xar_prop_t p;
+} xar_stream_state_t;
+
 int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb, void *context);
 int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, xar_prop_t p, write_callback wcb, void *context);
 int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, xar_prop_t p, xar_t xdest, xar_file_t fdest);
+int32_t xar_attrcopy_from_heap_to_stream_init(xar_t x, xar_file_t f, xar_prop_t p, xar_stream *stream);
+int32_t xar_attrcopy_from_heap_to_stream(xar_stream *stream);
+int32_t xar_attrcopy_from_heap_to_stream_end(xar_stream *stream);
+
 int32_t xar_heap_to_archive(xar_t x);
 
 #endif /* _XAR_IO_H_ */

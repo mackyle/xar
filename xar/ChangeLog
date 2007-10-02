@@ -1,4 +1,6 @@
 ﻿devel
+	2007-10-02 Rob Braun bbraun@synack.net
+	* include/xar.h.in lib/io.c lib/io.h lib/archive.c: Add a "streaming" API that allows for file data to be extracted incrementally, like the zlib decompression API, instead of requiring the entire file to fit in memory like xar_extract_tobuffer().  This is the inital commit of the API and may still change.  This change is based on a patch from Charles Srstka.
 	2007-09-26 Rob Braun bbraun@synack.net
 	* lib/io.c: Consolidate the lseek handling code into one function.
 		Contributed by Charles Srstka as part of Issue 2.

@@ -71,12 +71,27 @@ typedef const struct __xar_t *xar_t;
 typedef const struct __xar_subdoc_t *xar_subdoc_t;
 typedef const struct __xar_signature_t *xar_signature_t;
 
+typedef struct {
+        char *next_out;
+        unsigned int avail_out;
+
+        unsigned long long total_in;
+        unsigned long long total_out;
+
+        void *state;
+} xar_stream;
+
 typedef int32_t (*err_handler)(int32_t severit, int32_t instance, xar_errctx_t ctx, void *usrctx);
 /* the signed_data must be allocated durring the callback and will be released by the xar lib after the callback */
 typedef int32_t (*xar_signer_callback)(xar_signature_t sig, void *context, uint8_t *data, uint32_t length, uint8_t **signed_data, uint32_t *signed_len);
 
 #define READ 0
 #define WRITE 1
+
+/* xar stream return codes */
+#define XAR_STREAM_OK   0
+#define XAR_STREAM_END  1
+#define XAR_STREAM_ERR -1
 
 /* Valid xar options & values */
 #define XAR_OPT_OWNERSHIP    "ownership"  /* setting owner/group behavior */
@@ -134,6 +149,9 @@ int32_t xar_extract(xar_t x, xar_file_t f);
 int32_t xar_extract_tofile(xar_t x, xar_file_t f, const char *path);
 int32_t xar_extract_tobuffer(xar_t x, xar_file_t f, char **buffer);
 int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *size);
+int32_t xar_extract_tostream_init(xar_t x, xar_file_t f, xar_stream *stream);
+int32_t xar_extract_tostream(xar_stream *stream);
+int32_t xar_extract_tostream_end(xar_stream *stream);
 
 int32_t xar_verify(xar_t x, xar_file_t f);
 
