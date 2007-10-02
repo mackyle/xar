@@ -665,7 +665,7 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t                      specified file.\n");
 	fprintf(stderr, "\t--dump-header    Prints out the xar binary header information\n");
 	fprintf(stderr, "\t--compression    Specifies the compression type to use.\n");
-	fprintf(stderr, "\t                      Valid values: none, gzip, bzip2\n");
+	fprintf(stderr, "\t                      Valid values: none, gzip, bzip2, lzma\n");
 	fprintf(stderr, "\t                      Default: gzip\n");
 	fprintf(stderr, "\t-j               Synonym for \"--compression=bzip2\"\n");
 	fprintf(stderr, "\t-z               Synonym for \"--compression=gzip\"\n");
@@ -758,7 +758,8 @@ int main(int argc, char *argv[]) {
 		          }
 		          if( (strcmp(optarg, XAR_OPT_VAL_NONE) != 0) &&
 		              (strcmp(optarg, XAR_OPT_VAL_GZIP) != 0) &&
-		              (strcmp(optarg, XAR_OPT_VAL_BZIP) != 0) ) {
+		              (strcmp(optarg, XAR_OPT_VAL_BZIP) != 0) &&
+		              (strcmp(optarg, XAR_OPT_VAL_LZMA) != 0) ) {
 		          	usage(argv[0]);
 		          	exit(1);
 		          }

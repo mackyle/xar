@@ -199,21 +199,41 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	BZIP2_CONTEXT(context)->bz.next_out = out;
 	BZIP2_CONTEXT(context)->bz.avail_out = 0;
 
-	do {
-		outlen *= 2;
-		out = realloc(out, outlen);
-		if( out == NULL ) abort();
+	if( *inlen != 0 ) {
+		do {
+			outlen *= 2;
+			out = realloc(out, outlen);
+			if( out == NULL ) abort();
 
-		BZIP2_CONTEXT(context)->bz.next_out = ((char *)out) + offset;
-		BZIP2_CONTEXT(context)->bz.avail_out = outlen - offset;
+			BZIP2_CONTEXT(context)->bz.next_out = ((char *)out) + offset;
+			BZIP2_CONTEXT(context)->bz.avail_out = outlen - offset;
 
-		if( *inlen == 0 )
-			r = BZ2_bzCompress(&BZIP2_CONTEXT(context)->bz, BZ_FINISH);
-		else
 			r = BZ2_bzCompress(&BZIP2_CONTEXT(context)->bz, BZ_RUN);
-		offset = outlen - BZIP2_CONTEXT(context)->bz.avail_out;
-	} while( BZIP2_CONTEXT(context)->bz.avail_in != 0 );
+			offset = outlen - BZIP2_CONTEXT(context)->bz.avail_out;
+		} while( r == BZ_RUN_OK && BZIP2_CONTEXT(context)->bz.avail_in != 0 );
+	} else {
+		do {
+			outlen *= 2;
+			out = realloc(out, outlen);
+			if( out == NULL ) abort();
 
+			BZIP2_CONTEXT(context)->bz.next_out = ((char *)out) + offset;
+			BZIP2_CONTEXT(context)->bz.avail_out = outlen - offset;
+
+			r = BZ2_bzCompress(&BZIP2_CONTEXT(context)->bz, BZ_FINISH);
+			offset = outlen - BZIP2_CONTEXT(context)->bz.avail_out;
+		} while( (r == BZ_FINISH_OK) && (r != BZ_STREAM_END /* no-op */) );
+	}
+
+	if( (r != BZ_RUN_OK && r != BZ_STREAM_END && r != BZ_SEQUENCE_ERROR) ) {
+		xar_err_new(x);
+		xar_err_set_file(x, f);
+		xar_err_set_string(x, "Error compressing file");
+		xar_err_set_errno(x, r);
+		xar_err_callback(x, XAR_SEVERITY_FATAL, XAR_ERR_ARCHIVE_CREATION);
+		return -1;
+	}
+	
 	free(*in);
 	*in = out;
 	*inlen = offset;

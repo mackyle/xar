@@ -19,6 +19,7 @@
 #undef HAVE_LIBUTIL_H
 #undef HAVE_ASPRINTF
 #undef HAVE_LIBBZ2
+#undef HAVE_LIBLZMA
 #undef HAVE_LCHOWN
 #undef HAVE_LCHMOD
 #undef HAVE_STRMODE

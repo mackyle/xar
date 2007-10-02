@@ -115,7 +115,7 @@ int xar_gzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 		GZIP_CONTEXT(context)->z.next_out = ((unsigned char *)out) + offset;
 		GZIP_CONTEXT(context)->z.avail_out = outlen - offset;
 
-		r = inflate(&(GZIP_CONTEXT(context)->z), Z_SYNC_FLUSH);
+		r = inflate(&(GZIP_CONTEXT(context)->z), Z_NO_FLUSH);
 		if( (r != Z_OK) && (r != Z_STREAM_END) ) {
 			xar_err_new(x);
 			xar_err_set_file(x, f);
@@ -189,20 +189,40 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	GZIP_CONTEXT(context)->z.next_out = out;
 	GZIP_CONTEXT(context)->z.avail_out = 0;
 
-	do {
-		outlen *= 2;
-		out = realloc(out, outlen);
-		if( out == NULL ) abort();
+	if( *inlen != 0 ) {
+		do {
+			outlen *= 2;
+			out = realloc(out, outlen);
+			if( out == NULL ) abort();
 
-		GZIP_CONTEXT(context)->z.next_out = ((unsigned char *)out) + offset;
-		GZIP_CONTEXT(context)->z.avail_out = outlen - offset;
+			GZIP_CONTEXT(context)->z.next_out = ((unsigned char *)out) + offset;
+			GZIP_CONTEXT(context)->z.avail_out = outlen - offset;
 
-		if( *inlen == 0 )
+			r = deflate(&GZIP_CONTEXT(context)->z, Z_NO_FLUSH);
+			offset = outlen - GZIP_CONTEXT(context)->z.avail_out;
+		} while( r == Z_OK && GZIP_CONTEXT(context)->z.avail_in != 0 );
+	} else {
+		do {
+			outlen *= 2;
+			out = realloc(out, outlen);
+			if( out == NULL ) abort();
+
+			GZIP_CONTEXT(context)->z.next_out = ((unsigned char *)out) + offset;
+			GZIP_CONTEXT(context)->z.avail_out = outlen - offset;
+
 			r = deflate(&GZIP_CONTEXT(context)->z, Z_FINISH);
-		else
-			r = deflate(&GZIP_CONTEXT(context)->z, Z_SYNC_FLUSH);
-		offset = outlen - GZIP_CONTEXT(context)->z.avail_out;
-	} while( GZIP_CONTEXT(context)->z.avail_in != 0 );
+			offset = outlen - GZIP_CONTEXT(context)->z.avail_out;
+		} while( r == Z_OK && r != Z_STREAM_END /* no-op */);
+	}
+
+	if( (r != Z_OK && r != Z_STREAM_END) ) {
+		xar_err_new(x);
+		xar_err_set_file(x, f);
+		xar_err_set_string(x, "Error compressing file");
+		xar_err_set_errno(x, r);
+		xar_err_callback(x, XAR_SEVERITY_FATAL, XAR_ERR_ARCHIVE_CREATION);
+		return -1;
+	}
 
 	free(*in);
 	*in = out;

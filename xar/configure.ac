@@ -349,6 +349,16 @@ if test "x${have_libbz2}" = "x1" ; then
 fi
 
 dnl 
+dnl Configure liblzma.
+dnl 
+have_liblzma="1"
+AC_CHECK_HEADERS([lzma.h], , [have_liblzma="0"])
+AC_CHECK_LIB([lzma], [lzma_code], , [have_liblzma="0"])
+if test "x${have_liblzma}" = "x1" ; then
+  AC_DEFINE([HAVE_LIBLZMA])
+fi
+
+dnl 
 dnl Process .in files.
 dnl 
 AC_SUBST([cfghdrs])

@@ -58,6 +58,7 @@
 #include "io.h"
 #include "zxar.h"
 #include "bzxar.h"
+#include "lzmaxar.h"
 #include "hash.h"
 #include "script.h"
 #include "macho.h"
@@ -105,6 +106,13 @@ struct datamod xar_datamods[] = {
 	  xar_bzip_toheap_in,
 	  (toheap_out)NULL,
 	  xar_bzip_toheap_done
+	},
+	{ xar_lzma_fromheap_in,
+	  (fromheap_out)NULL,
+	  xar_lzma_fromheap_done,
+	  xar_lzma_toheap_in,
+	  (toheap_out)NULL,
+	  xar_lzma_toheap_done
 	}
 };
 
