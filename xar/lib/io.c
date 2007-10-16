@@ -221,7 +221,7 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback 
 	int64_t readsize=0, writesize=0, inc = 0;
 	void *inbuf;
 	char *tmpstr = NULL;
-	const char *opt, *csum;
+	const char *opt = NULL, *csum = NULL;
 	off_t orig_heap_offset = XAR(x)->heap_offset;
 	xar_file_t tmpf = NULL;
 	xar_prop_t tmpp = NULL;
@@ -295,7 +295,8 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback 
 	tmpp = xar_prop_pget(p, "archived-checksum");
 	if( tmpp )
 		csum = xar_prop_getvalue(tmpp);
-	tmpf = xmlHashLookup(XAR(x)->csum_hash, BAD_CAST(csum));
+	if( csum )
+		tmpf = xmlHashLookup(XAR(x)->csum_hash, BAD_CAST(csum));
 	if( tmpf ) {
 		const char *attr = xar_prop_getkey(p);
 		opt = xar_opt_get(x, XAR_OPT_LINKSAME);
@@ -348,8 +349,13 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback 
 			}
 			
 		}
-	} else {
+	} else if( csum ) {
 		xmlHashAddEntry(XAR(x)->csum_hash, BAD_CAST(csum), XAR_FILE(f));
+	} else {
+		xar_err_new(x);
+		xar_err_set_file(x, f);
+		xar_err_set_string(x, "No archived-checksum");
+		xar_err_callback(x, XAR_SEVERITY_WARNING, XAR_ERR_ARCHIVE_CREATION);
 	}
 
 	asprintf(&tmpstr, "%"PRIu64, readsize);
@@ -392,7 +398,7 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, xar_prop_t p, write_callba
 
 	memset(modulecontext, 0, sizeof(void*)*modulecount);
 
-	bsize = get_rsize(x);
+	def_bsize = get_rsize(x);
 
 	opt = NULL;
 	tmpp = xar_prop_pget(p, "offset");

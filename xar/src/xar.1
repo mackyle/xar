@@ -42,6 +42,10 @@ Synonym for \-\-compression=bzip2
 \-z
 Synonym for \-\-compression=gzip
 .TP
+\-\-compression-args=<arguments>
+Specifies arguments to the compression engine selected.
+gzip, bzip2, and lzma all take a single integer argument between 0 and 9 specifying the compression level to use.
+.TP
 \-\-dump\-toc=<filename>
 Has xar dump the xml header into the specified file.  "-" can be specified to mean stdout.
 .TP

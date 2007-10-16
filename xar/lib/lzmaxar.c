@@ -44,6 +44,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <errno.h>
 #ifdef HAVE_LIBLZMA
 #include <lzma.h>
 #endif
@@ -61,7 +62,7 @@ struct _lzma_context{
 	lzma_memory_limitter *limit;
 };
 
-#define preset_level 9
+#define preset_level 7
 #define memory_limit 400*1024*1024 /* 1=1M, 5=24M, 6=39M, 7=93M, 8=185M, 9=369M */
 
 #define LZMA_CONTEXT(x) ((struct _lzma_context *)(*x))
@@ -188,6 +189,7 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 
 	/* on first run, we init the context and check the compression type */
 	if( !LZMA_CONTEXT(context) ) {
+		int level = 9;
 		*context = calloc(1,sizeof(struct _lzma_context));
 		
 		opt = xar_opt_get(x, XAR_OPT_COMPRESSION);
@@ -196,6 +198,17 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		
 		if( strcmp(opt, XAR_OPT_VAL_LZMA) != 0 )
 			return 0;
+
+		opt = xar_opt_get(x, XAR_OPT_COMPRESSIONARG);
+		if( opt ) {
+			int tmp;
+			errno = 0;
+			tmp = strtol(opt, NULL, 10);
+			if( errno == 0 ) {
+				if( (level >= 0) && (level <= 9) )
+					level = tmp;
+			}
+		}
 		
 		lzma_init_encoder();
 		LZMA_CONTEXT(context)->options.check = LZMA_CHECK_CRC64;
@@ -210,7 +223,7 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 #endif
 		LZMA_CONTEXT(context)->options.filters[0].options = NULL;
 		LZMA_CONTEXT(context)->options.filters[1].id = LZMA_FILTER_LZMA;
-		LZMA_CONTEXT(context)->options.filters[1].options = (lzma_options_lzma *)(lzma_preset_lzma + preset_level - 1);
+		LZMA_CONTEXT(context)->options.filters[1].options = (lzma_options_lzma *)(lzma_preset_lzma + level - 1);
 		/* Terminate the filter options array. */
 		LZMA_CONTEXT(context)->options.filters[2].id = UINT64_MAX;
 		LZMA_CONTEXT(context)->lzma = LZMA_STREAM_INIT_VAR;

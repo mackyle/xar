@@ -104,22 +104,23 @@ typedef int32_t (*xar_signer_callback)(xar_signature_t sig, void *context, uint8
 #define XAR_OPT_VAL_SHA1 "sha1"
 #define XAR_OPT_VAL_MD5  "md5"
 
-#define XAR_OPT_COMPRESSION "compression" /* set the file compression type */
-#define XAR_OPT_VAL_GZIP    "gzip"
-#define XAR_OPT_VAL_BZIP    "bzip2"
-#define XAR_OPT_VAL_LZMA    "lzma"
+#define XAR_OPT_COMPRESSION    "compression" /* set the file compression type */
+#define XAR_OPT_COMPRESSIONARG "compression-arg" /* set the compression opts */
+#define XAR_OPT_VAL_GZIP       "gzip"
+#define XAR_OPT_VAL_BZIP       "bzip2"
+#define XAR_OPT_VAL_LZMA       "lzma"
 
-#define XAR_OPT_RSIZE       "rsize"       /* Read io buffer size */
+#define XAR_OPT_RSIZE          "rsize"       /* Read io buffer size */
 
-#define XAR_OPT_COALESCE    "coalesce"    /* Coalesce identical heap blocks */
-#define XAR_OPT_LINKSAME    "linksame"    /* Hardlink identical files */
+#define XAR_OPT_COALESCE       "coalesce"    /* Coalesce identical heap blocks */
+#define XAR_OPT_LINKSAME       "linksame"    /* Hardlink identical files */
 
-#define XAR_OPT_PROPINCLUDE "prop-include" /* File property to include */
-#define XAR_OPT_PROPEXCLUDE "prop-exclude" /* File property to exclude */
+#define XAR_OPT_PROPINCLUDE    "prop-include" /* File property to include */
+#define XAR_OPT_PROPEXCLUDE    "prop-exclude" /* File property to exclude */
 
-#define XAR_OPT_SAVESUID    "savesuid"     /* Preserve setuid/setgid bits */
-#define XAR_OPT_VAL_TRUE    "true"
-#define XAR_OPT_VAL_FALSE   "false"
+#define XAR_OPT_SAVESUID       "savesuid"     /* Preserve setuid/setgid bits */
+#define XAR_OPT_VAL_TRUE       "true"
+#define XAR_OPT_VAL_FALSE      "false"
 
 /* xar signing algorithms */
 #define XAR_SIG_SHA1RSA		1

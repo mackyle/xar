@@ -1168,6 +1168,7 @@ int32_t xar_extract_tobuffer(xar_t x, xar_file_t f, char **buffer) {
 */
 int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *size) {
 	const char *sizestring = NULL;
+	int32_t ret;
 	
 	if(0 != xar_prop_get(f,"data/size",&sizestring)){
 		if(0 != xar_prop_get(f, "type", &sizestring))
@@ -1186,7 +1187,14 @@ int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *siz
 		return -1;
 	}
 	
-	return xar_arcmod_extract(x,f,NULL,*buffer,*size);
+	ret = xar_arcmod_extract(x,f,NULL,*buffer,*size);
+	if( ret ) {
+		*size = 0;
+		free(buffer);
+		*buffer = NULL;
+	}
+
+	return ret;
 }
 
 int32_t xar_extract_tostream_init(xar_t x, xar_file_t f, xar_stream *stream) {

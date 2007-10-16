@@ -45,6 +45,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <zlib.h>
+#include <errno.h>
 #include "xar.h"
 #include "filetree.h"
 #include "io.h"
@@ -162,6 +163,7 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 
 	/* on first run, we init the context and check the compression type */
 	if( !GZIP_CONTEXT(context) ) {
+		int level = Z_BEST_COMPRESSION;
 		*context = calloc(1,sizeof(struct _gzip_context));
 		
 		opt = xar_opt_get(x, XAR_OPT_COMPRESSION);
@@ -170,8 +172,19 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		
 		if( strcmp(opt, XAR_OPT_VAL_GZIP) != 0 )
 			return 0;
+
+		opt = xar_opt_get(x, XAR_OPT_COMPRESSIONARG);
+		if( opt ) {
+			int tmp;
+			errno = 0;
+			tmp = strtol(opt, NULL, 10);
+			if( errno == 0 ) {
+				if( (level >= 0) && (level <= 9) )
+					level = tmp;
+			}
+		}
 		
-		deflateInit(&GZIP_CONTEXT(context)->z, Z_BEST_COMPRESSION);
+		deflateInit(&GZIP_CONTEXT(context)->z, level);
 		GZIP_CONTEXT(context)->gzipcompressed = 1;
 		if( *inlen == 0 )
 			return 0;

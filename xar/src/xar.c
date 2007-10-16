@@ -61,6 +61,7 @@ static char *SubdocName = NULL;
 static char *Toccksum = NULL;
 static char *Compression = NULL;
 static char *Rsize = NULL;
+static char *CompressionArg = NULL;
 
 static int Err = 0;
 static int List = 0;
@@ -182,6 +183,9 @@ static int archive(const char *filename, int arglen, char *args[]) {
 
 	if( Compression )
 		xar_opt_set(x, XAR_OPT_COMPRESSION, Compression);
+
+	if( CompressionArg )
+		xar_opt_set(x, XAR_OPT_COMPRESSIONARG, CompressionArg);
 
 	if( Coalesce )
 		xar_opt_set(x, XAR_OPT_COALESCE, "true");
@@ -669,6 +673,8 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t                      Default: gzip\n");
 	fprintf(stderr, "\t-j               Synonym for \"--compression=bzip2\"\n");
 	fprintf(stderr, "\t-z               Synonym for \"--compression=gzip\"\n");
+	fprintf(stderr, "\t--compression-args=arg Specifies arguments to be passed\n");
+	fprintf(stderr, "\t                       to the compression engine.\n");
 	fprintf(stderr, "\t--list-subdocs   List the subdocuments in the xml header\n");
 	fprintf(stderr, "\t--extract-subdoc=name Extracts the specified subdocument\n");
 	fprintf(stderr, "\t                      to a document in cwd named <name>.xml\n");
@@ -729,6 +735,7 @@ int main(int argc, char *argv[]) {
 		{"distribution", 0, 0, 14},
 		{"keep-existing", 0, 0, 15},
 		{"keep-setuid", 0, 0, 16},
+		{"compression-args", 1, 0, 17},
 		{ 0, 0, 0, 0}
 	};
 
@@ -889,6 +896,9 @@ int main(int argc, char *argv[]) {
 			break;
 		case 16 :
 			SaveSuid++;
+			break;
+		case 17 :
+			CompressionArg = optarg;
 			break;
 		case 'c':
 		case 'x':

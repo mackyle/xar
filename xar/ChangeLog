@@ -1,4 +1,9 @@
 ﻿devel
+	2007-10-16 Rob Braun bbraun@synack.net
+	* include/xar.h.in src/xar.c lib/io.c lib/lzmaxar.c lib/bzxar.c lib/archive.c lib/zxar.c: Added an option to pass arguments to the compression code.  This to allow specifying compression levels to gzip, bzip2, and lzma.
+	* lib/io.c: Issue 41, fixed a bug where rsize was being used uninitialized.
+	* lib/io.c: Issue 42, log a warning and continue if archived-checksum doesn't appear when archiving a file.
+	* lib/archive.c: Issue 43, free the buffer in xar_extract_tobuffersz() if there is an error extracting the file.
 	2007-10-02 Rob Braun bbraun@synack.net
 	*  test/compression test/data include/config.h.in include/xar.h.in src/xar.1 src/xar.c configure.ac lib/lzmaxar.c lib/lzmaxar.h lib/io.c lib/bzxar.c  lib/Makefile.inc.in lib/zxar.c INSTALL: Incorporate a patch from anders.f.bjorklund for adding lzma compression support.
 	2007-10-02 Rob Braun bbraun@synack.net

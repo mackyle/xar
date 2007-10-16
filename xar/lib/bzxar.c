@@ -44,6 +44,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <errno.h>
 #ifdef HAVE_LIBBZ2
 #include <bzlib.h>
 #endif
@@ -174,6 +175,7 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 
 	/* on first run, we init the context and check the compression type */
 	if( !BZIP2_CONTEXT(context) ) {
+		int level = 9;
 		*context = calloc(1,sizeof(struct _bzip_context));
 		
 		opt = xar_opt_get(x, XAR_OPT_COMPRESSION);
@@ -182,8 +184,19 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		
 		if( strcmp(opt, XAR_OPT_VAL_BZIP) != 0 )
 			return 0;
+
+		opt = xar_opt_get(x, XAR_OPT_COMPRESSIONARG);
+		if( opt ) {
+			int tmp;
+			errno = 0;
+			tmp = strtol(opt, NULL, 10);
+			if( errno == 0 ) {
+				if( (level >= 0) && (level <= 9) )
+					level = tmp;
+			}
+		}
 		
-		BZ2_bzCompressInit(&BZIP2_CONTEXT(context)->bz, 9, 0, 30);
+		BZ2_bzCompressInit(&BZIP2_CONTEXT(context)->bz, level, 0, 30);
 		BZIP2_CONTEXT(context)->bzipcompressed = 1;
 	}else if( !BZIP2_CONTEXT(context)->bzipcompressed ){
 		/* once the context has been initialized, then we have already
