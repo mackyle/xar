@@ -124,6 +124,9 @@ int32_t xar_fbsdattr_archive(xar_t x, xar_file_t f, const char* file, const char
 		return 0;
 	if(file == NULL)
 		return 0;
+
+	if( !xar_check_prop(x, "ea") )
+		return 0;
 	
 TRYAGAIN:
 	/* extattr_list_link()'s man page does not define the return

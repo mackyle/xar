@@ -671,6 +671,7 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t--compression    Specifies the compression type to use.\n");
 	fprintf(stderr, "\t                      Valid values: none, gzip, bzip2, lzma\n");
 	fprintf(stderr, "\t                      Default: gzip\n");
+	fprintf(stderr, "\t-a               Synonym for \"--compression=lzma\"\n");
 	fprintf(stderr, "\t-j               Synonym for \"--compression=bzip2\"\n");
 	fprintf(stderr, "\t-z               Synonym for \"--compression=gzip\"\n");
 	fprintf(stderr, "\t--compression-args=arg Specifies arguments to be passed\n");
@@ -744,7 +745,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	while( (c = getopt_long(argc, argv, "xcvtjzf:hpPln:s:d:vk", o, &loptind)) != -1 ) {
+	while( (c = getopt_long(argc, argv, "axcvtjzf:hpPln:s:d:vk", o, &loptind)) != -1 ) {
 		switch(c) {
 		case  1 : if( !optarg ) {
 		          	usage(argv[0]);
@@ -911,6 +912,9 @@ int main(int argc, char *argv[]) {
 			if( c == 't' )
 				List = 1;
 			command = c;
+			break;
+		case 'a':
+			Compression = "lzma";
 			break;
 		case 'j':
 			Compression = "bzip2";

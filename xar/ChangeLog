@@ -1,4 +1,7 @@
 ﻿devel
+	2007-10-22 Rob Braun bbraun@synack.net
+	* src/xar.c src/xar.1: Add -a as a synonym for --compression=lzma
+	* lib/darwinattr.c lib/fbsdattr.c: Add --prop-exclude support for darwin and fbsd EAs.
 	2007-10-16 Rob Braun bbraun@synack.net
 	* include/xar.h.in src/xar.c lib/io.c lib/lzmaxar.c lib/bzxar.c lib/archive.c lib/zxar.c: Added an option to pass arguments to the compression code.  This to allow specifying compression levels to gzip, bzip2, and lzma.
 	* lib/io.c: Issue 41, fixed a bug where rsize was being used uninitialized.

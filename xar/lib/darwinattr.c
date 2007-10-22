@@ -653,6 +653,9 @@ static int32_t stragglers_archive(xar_t x, xar_file_t f, const char* file, void 
 	struct attrlist attrs;
 	int ret;
 
+	if( !xar_check_prop(x, "FinderCreateTime") )
+		return 0;
+
 	memset(&attrs, 0, sizeof(attrs));
 	attrs.bitmapcount = ATTR_BIT_MAP_COUNT;
 	attrs.commonattr = ATTR_CMN_CRTIME;
@@ -713,6 +716,10 @@ int32_t xar_darwinattr_archive(xar_t x, xar_file_t f, const char* file, const ch
 	if( len )
 		return 0;
 	stragglers_archive(x, f, file, (void *)&context);
+
+	/* From here on out, props are only EA's */
+	if( !xar_check_prop(x, "ea") )
+		return 0;
 
 #if defined(HAVE_GETXATTR)
 	if( ea_archive(x, f, file, (void *)&context) == 0 )
