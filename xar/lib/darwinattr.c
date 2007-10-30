@@ -502,13 +502,19 @@ static int32_t underbar_archive(xar_t x, xar_file_t f, const char* file, void *c
 	memset(&ash, 0, sizeof(ash));
 	memset(&ase, 0, sizeof(ase));
 	r = read(DARWINATTR_CONTEXT(context)->fd, &ash, XAR_ASH_SIZE);
-	if( r < XAR_ASH_SIZE )
+	if( r < XAR_ASH_SIZE ) {
+		close(DARWINATTR_CONTEXT(context)->fd);
 		return -1;
+	}
 
-	if( ntohl(ash.magic) != APPLEDOUBLE_MAGIC )
+	if( ntohl(ash.magic) != APPLEDOUBLE_MAGIC ) {
+		close(DARWINATTR_CONTEXT(context)->fd);
 		return -1;
-	if( ntohl(ash.version) != APPLEDOUBLE_VERSION )
+	}
+	if( ntohl(ash.version) != APPLEDOUBLE_VERSION ) {
+		close(DARWINATTR_CONTEXT(context)->fd);
 		return -1;
+	}
 
 	off = XAR_ASH_SIZE;
 	num_entries = ntohs(ash.entries);
@@ -516,36 +522,48 @@ static int32_t underbar_archive(xar_t x, xar_file_t f, const char* file, void *c
 	for(i = 0; i < num_entries; i++) {
 		off_t entoff;
 		r = read(DARWINATTR_CONTEXT(context)->fd, &ase, sizeof(ase));
-		if( r < sizeof(ase) )
+		if( r < sizeof(ase) ) {
+			close(DARWINATTR_CONTEXT(context)->fd);
 			return -1;
+		}
 		off+=r;
 
 		if( ntohl(ase.entry_id) == AS_ID_FINDER ) {
 			xar_ea_t e;
 			entoff = (off_t)ntohl(ase.offset);
-			if( lseek(DARWINATTR_CONTEXT(context)->fd, entoff, SEEK_SET) == -1 )
+			if( lseek(DARWINATTR_CONTEXT(context)->fd, entoff, SEEK_SET) == -1 ) {
+				close(DARWINATTR_CONTEXT(context)->fd);
 				return -1;
+			}
 			r = read(DARWINATTR_CONTEXT(context)->fd, z, sizeof(z));
-			if( r < sizeof(z) )
+			if( r < sizeof(z) ) {
+				close(DARWINATTR_CONTEXT(context)->fd);
 				return -1;
+			}
 			
 			DARWINATTR_CONTEXT(context)->finfo = z;
 			e = xar_ea_new(f, "com.apple.FinderInfo");
 			xar_attrcopy_to_heap(x, f, xar_ea_root(e), finfo_read, context);
-			if( lseek(DARWINATTR_CONTEXT(context)->fd, (off_t)off, SEEK_SET) == -1 )
+			if( lseek(DARWINATTR_CONTEXT(context)->fd, (off_t)off, SEEK_SET) == -1 ) {
+				close(DARWINATTR_CONTEXT(context)->fd);
 				return -1;
+			}
 		}
 		if( ntohl(ase.entry_id) == AS_ID_RESOURCE ) {
 			xar_ea_t e;
 			entoff = (off_t)ntohl(ase.offset);
-			if( lseek(DARWINATTR_CONTEXT(context)->fd, entoff, SEEK_SET) == -1 )
+			if( lseek(DARWINATTR_CONTEXT(context)->fd, entoff, SEEK_SET) == -1 ) {
+				close(DARWINATTR_CONTEXT(context)->fd);
 				return -1;
+			}
 
 			e = xar_ea_new(f, "com.apple.ResourceFork");
 			xar_attrcopy_to_heap(x, f, xar_ea_root(e), xar_rsrc_read, context);
 
-			if( lseek(DARWINATTR_CONTEXT(context)->fd, (off_t)off, SEEK_SET) == -1 )
+			if( lseek(DARWINATTR_CONTEXT(context)->fd, (off_t)off, SEEK_SET) == -1 ) {
+				close(DARWINATTR_CONTEXT(context)->fd);
 				return -1;
+			}
 		}
 	}
 
