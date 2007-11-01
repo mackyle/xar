@@ -1,6 +1,7 @@
 ﻿devel
 	2007-11-1 Dave Leimbach leimy2k@gmail.com
 	* lib/data.c: fixed a file descriptor leak by adding a close before return
+	* src/xar.1: Added man page text for --extract-subdoc
 	2007-10-22 Rob Braun bbraun@synack.net
 	* src/xar.c src/xar.1: Add -a as a synonym for --compression=lzma
 	* lib/darwinattr.c lib/fbsdattr.c: Add --prop-exclude support for darwin and fbsd EAs.
