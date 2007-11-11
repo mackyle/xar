@@ -177,6 +177,13 @@ LT_LIBXAR_ANAME :=
 endif
 
 $(LIBXAR_LA) : $(LIBXAR_LA).in
+	@mkdir -p @objroot@lib/.libs
+ifeq (yes, @shared@)
+	@ln -sf ../$(LIBXAR_LNAME) @objroot@lib/.libs/$(LIBXAR_LNAME)
+endif
+ifeq (yes, @static@)
+	@ln -sf ../$(LIBXAR_ANAME) @objroot@lib/.libs/$(LIBXAR_ANAME)
+endif
 	sed -e s/@LIBXAR_SNAME@/$(LT_LIBXAR_SNAME)/ -e s/@LIBXAR_LNAME@/$(LT_LIBXAR_LNAME)/ -e s/@LIBXAR_ANAME@/$(LT_LIBXAR_ANAME)/ < $< > $@
 
 $(LIBXAR_A) : $(LIBXAR_SRCS:@srcroot@%.c=@objroot@%.static.o)

@@ -1,5 +1,8 @@
 ﻿devel
 	2007-11-11 Rob Braun bbraun@synack.net
+	* lib/archive.c: Add a #define for a mising function in Mac OS X's old version of libxml2 from Anders F Björklund.
+	* lib/Makefile.inc.in: Be a little more gnu libtool friendly from Anders F Björklund.
+	2007-11-11 Rob Braun bbraun@synack.net
 	* lib/archive.c: Some memory leak cleanups from Anders F Björklund.
 	2007-11-1 Dave Leimbach leimy2k@gmail.com
 	* lib/data.c: fixed a file descriptor leak by adding a close before return

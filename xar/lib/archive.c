@@ -79,6 +79,10 @@
 #define LONG_MIN INT32_MIN
 #endif
 
+#if LIBXML_VERSION < 20618
+#define xmlDictCleanup()	/* function doesn't exist in older API */
+#endif
+
 static int32_t xar_unserialize(xar_t x);
 void xar_serialize(xar_t x, const char *file);
 
