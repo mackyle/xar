@@ -1,4 +1,6 @@
 ﻿devel
+	2007-11-11 Rob Braun bbraun@synack.net
+	* lib/archive.c: Some memory leak cleanups from Anders F Björklund.
 	2007-11-1 Dave Leimbach leimy2k@gmail.com
 	* lib/data.c: fixed a file descriptor leak by adding a close before return
 	* src/xar.1: Added man page text for --extract-subdoc
