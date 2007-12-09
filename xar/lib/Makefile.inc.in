@@ -111,6 +111,9 @@ lib_clean :
 	rm -f $(LIBRXAR_S) $(LIBRXAR_L)
 	rm -f $(LIBXAR_S) $(LIBXAR_L)
 	rm -f $(LIBXAR_A) $(LIBXAR_LA)
+	@rm -f @objroot@lib/.libs/$(LIBXAR_LNAME)
+	@rm -f @objroot@lib/.libs/$(LIBXAR_ANAME)
+	@-rmdir @objroot@lib/.libs
 	rm -f $(LIBXAR_SRCS:@srcroot@%.c=@objroot@%.o)
 	rm -f $(LIBXAR_SRCS:@srcroot@%.c=@objroot@%.d)
 	rm -f $(LIBXAR_SRCS:@srcroot@%.c=@objroot@%.static.o)
