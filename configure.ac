@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([OpenDarwin Xar], [1.5.1], [xar@opendarwin.org], [xar])
+AC_INIT([Xar], [1.5.2a1], [xar-devel@googlegroups.com], [xar])
 AC_CONFIG_SRCDIR([LICENSE])
 
 dnl Revision number for libxar.
@@ -8,7 +8,7 @@ AC_SUBST([LIB_REV])
 
 dnl xar version variables.
 XAR_MAJOR_VERSION="1"
-XAR_MINOR_VERSION="5.1"
+XAR_MINOR_VERSION="5.2a1"
 XAR_VERSION="${XAR_MAJOR_VERSION}.${XAR_MINOR_VERSION}"
 AC_SUBST([XAR_MAJOR_VERSION])
 AC_SUBST([XAR_MINOR_VERSION])
@@ -61,7 +61,9 @@ cfgoutputs="cfgoutputs.stamp"
 cfgoutputs="${cfgoutputs} Makefile"
 cfgoutputs="${cfgoutputs} include/xar.h"
 cfgoutputs="${cfgoutputs} lib/Makefile.inc"
+cfgoutputs="${cfgoutputs} lib/libxar.la.in"
 cfgoutputs="${cfgoutputs} src/Makefile.inc"
+cfgoutputs="${cfgoutputs} xar.spec"
 
 cfghdrs="${objroot}cfghdrs.stamp"
 cfghdrs="${cfghdrs} ${objroot}include/config.h"
@@ -70,6 +72,7 @@ dnl If CFLAGS isn't defined and using gcc, set CFLAGS to something reasonable.
 dnl Otherwise, just prevent autoconf from molesting CFLAGS.
 CFLAGS=$CFLAGS
 AC_PROG_CC
+AC_SYS_LARGEFILE
 if test "x$CFLAGS" = "x" ; then
   no_CFLAGS="yes"
 fi
@@ -84,7 +87,29 @@ AC_PROG_CPP
 
 AC_PROG_INSTALL
 AC_PATH_PROG([LD], [ld], , [$PATH])
+AC_PATH_PROG([AR], [ar], , [$PATH])
+AC_PATH_PROG([RANLIB], [ranlib], , [$PATH])
 AC_PATH_PROG([AUTOCONF], [autoconf], , [$PATH])
+
+dnl Some libtool envy
+#AC_ENABLE_SHARED
+AC_MSG_CHECKING([whether to build shared libraries])
+AC_ARG_ENABLE([shared],
+    [AC_HELP_STRING([--enable-shared],
+	[build shared libraries @<:@default=yes@:>@])],
+	[shared=$enableval],[shared=yes])
+AC_MSG_RESULT($shared)
+AC_SUBST([shared])
+#AC_ENABLE_STATIC
+AC_MSG_CHECKING([whether to build static libraries])
+AC_ARG_ENABLE([static],
+    [AC_HELP_STRING([--enable-static],
+	[build static libraries @<:@default=yes@:>@])],
+	[static=$enableval],[static=yes])
+AC_MSG_RESULT($static)
+AC_SUBST([static])
+# Make sure either enable_shared or enable_static is yes.
+test "$shared" = "yes" || test "$static" = "yes"
 
 dnl Platform-specific settings.  abi and RPATH can probably be determined
 dnl programmatically, but doing so is error-prone, which makes it generally
@@ -156,7 +181,8 @@ fi
 )
 AC_SUBST([enable_autogen])
 
-AC_CHECK_HEADERS(sys/acl.h ext2fs/ext2_fs.h sys/statfs.h sys/xattr.h sys/param.h sys/extattr.h libutil.h)
+AC_TRY_COMPILE([#include <sys/types.h> #include <sys/acl.h>], [acl_t a], [AC_DEFINE([HAVE_SYS_ACL_H],[1], [define if you have sys/acl.h and it has a working acl_t type])])
+AC_CHECK_HEADERS(ext2fs/ext2_fs.h sys/statfs.h sys/xattr.h sys/param.h sys/extattr.h libutil.h)
 AC_CHECK_FUNCS(lgetxattr)
 AC_CHECK_FUNCS(lsetxattr)
 AC_CHECK_FUNCS(getxattr)
@@ -168,6 +194,7 @@ AC_CHECK_FUNCS(lchown)
 AC_CHECK_FUNCS(chflags)
 AC_CHECK_FUNCS(statvfs)
 AC_CHECK_FUNCS(statfs)
+AC_CHECK_FUNCS(strmode)
 
 AC_CHECK_MEMBERS([struct statfs.f_fstypename],,,[#include <sys/types.h>
 #include <sys/param.h>

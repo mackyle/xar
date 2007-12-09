@@ -354,7 +354,7 @@ int xar_close(xar_t x) {
 
 		t = time(NULL);
 		gmtime_r(&t, &tmptm);
-		memset(timestr, sizeof(timestr), 0);
+		memset(timestr, 0, sizeof(timestr));
 		strftime(timestr, sizeof(timestr), "%FT%T", &tmptm);
 		xar_prop_set(XAR_FILE(x), "creation-time", timestr);
 
@@ -1309,88 +1309,112 @@ static int32_t xar_unserialize(xar_t x) {
 	xmlTextReaderPtr reader;
 	xar_file_t f = NULL;
 	const xmlChar *name, *prefix, *uri;
-	int type, noattr;
+	int type, noattr, ret;
 
 	reader = xmlReaderForIO(toc_read_callback, close_callback, XAR(x), NULL, NULL, 0);
 	if( !reader ) return -1;
 
-	while( xmlTextReaderRead(reader) == 1 ) {
+	while( (ret = xmlTextReaderRead(reader)) == 1 ) {
 		type = xmlTextReaderNodeType(reader);
 		noattr = xmlTextReaderAttributeCount(reader);
 		name = xmlTextReaderConstLocalName(reader);
-		if( type == XML_READER_TYPE_ELEMENT ) {
-			if(strcmp((const char*)name, "xar") == 0) {
-				while( xmlTextReaderRead(reader) == 1 ) {
-					type = xmlTextReaderNodeType(reader);
-					noattr = xmlTextReaderAttributeCount(reader);
-					name = xmlTextReaderConstLocalName(reader);
-					if( type == XML_READER_TYPE_ELEMENT ) {
-						if(strcmp((const char*)name, "toc") == 0) {
-							while( xmlTextReaderRead(reader) == 1 ) {
-								type = xmlTextReaderNodeType(reader);
-								noattr = xmlTextReaderAttributeCount(reader);
-								name = xmlTextReaderConstLocalName(reader);
-								if( type == XML_READER_TYPE_ELEMENT ) {
-									if(strcmp((const char*)name, "file") == 0) {
-										f = xar_file_unserialize(x, NULL, reader);
-										XAR_FILE(f)->next = XAR(x)->files;
-										XAR(x)->files = f;
-									} else if( strcmp((const char*)name, "signature") == 0 ){
-										xar_signature_t sig = NULL;			
-										sig = xar_signature_unserialize(x, reader );
-										
-										if( !sig )
-											return -1;
-										
-										if( XAR(x)->signatures )
-											XAR_SIGNATURE(XAR(x)->signatures)->next = XAR_SIGNATURE(sig);
-										else
-											XAR(x)->signatures = sig;
-											
-									} else {
-										xar_prop_unserialize(XAR_FILE(x), NULL, reader);
-									}
+		if( type != XML_READER_TYPE_ELEMENT )
+			continue;
+		if(strcmp((const char*)name, "xar") != 0)
+			continue;
+		while( (ret = xmlTextReaderRead(reader)) == 1 ) {
+			type = xmlTextReaderNodeType(reader);
+			noattr = xmlTextReaderAttributeCount(reader);
+			name = xmlTextReaderConstLocalName(reader);
+			if( type == XML_READER_TYPE_ELEMENT ) {
+				if(strcmp((const char*)name, "toc") == 0) {
+					while( (ret = xmlTextReaderRead(reader)) == 1 ) {
+						type = xmlTextReaderNodeType(reader);
+						noattr = xmlTextReaderAttributeCount(reader);
+						name = xmlTextReaderConstLocalName(reader);
+						if( type == XML_READER_TYPE_ELEMENT ) {
+							if(strcmp((const char*)name, "file") == 0) {
+								f = xar_file_unserialize(x, NULL, reader);
+								XAR_FILE(f)->next = XAR(x)->files;
+								XAR(x)->files = f;
+							} else if( strcmp((const char*)name, "signature") == 0 ){
+								xar_signature_t sig = NULL;			
+								sig = xar_signature_unserialize(x, reader );
+								
+								if( !sig ) {
+									xmlFreeTextReader(reader);
+									xmlDictCleanup();
+									xmlCleanupCharEncodingHandlers();
+									return -1;
 								}
-							}
-						} else {
-							xar_subdoc_t s;
-							int i;
-
-							prefix = xmlTextReaderPrefix(reader);
-							uri = xmlTextReaderNamespaceUri(reader);
-
-							i = xmlTextReaderAttributeCount(reader);
-							if( i > 0 ) {
-								for(i = xmlTextReaderMoveToFirstAttribute(reader); i == 1; i = xmlTextReaderMoveToNextAttribute(reader)) {
-									xar_attr_t a;
-									const char *aname = (const char *)xmlTextReaderConstLocalName(reader);
-									const char *avalue = (const char *)xmlTextReaderConstValue(reader);
+								
+								if( XAR(x)->signatures )
+									XAR_SIGNATURE(XAR(x)->signatures)->next = XAR_SIGNATURE(sig);
+								else
+									XAR(x)->signatures = sig;
 									
-									if( aname && (strcmp("subdoc_name", aname) == 0) ) {
-										name = (const unsigned char *)avalue;
-									} else {
-										a = xar_attr_new();
-										XAR_ATTR(a)->key = strdup(aname);
-										XAR_ATTR(a)->value = strdup(avalue);
-										XAR_ATTR(a)->next = XAR_SUBDOC(s)->attrs;
-										XAR_SUBDOC(s)->attrs = XAR_ATTR(a);
-									}
-								}
+							} else {
+								xar_prop_unserialize(XAR_FILE(x), NULL, reader);
 							}
-
-							s = xar_subdoc_new(x, (const char *)name);
-							xar_subdoc_unserialize(s, reader);
 						}
 					}
-					if( (type == XML_READER_TYPE_END_ELEMENT) && (strcmp((const char *)name, "toc")==0) ) {
-						break;
+					if( ret == -1 ) {
+						xmlFreeTextReader(reader);
+						xmlDictCleanup();
+						xmlCleanupCharEncodingHandlers();
+						return -1;
+					}
+				} else {
+					xar_subdoc_t s;
+					int i;
+
+					prefix = xmlTextReaderPrefix(reader);
+					uri = xmlTextReaderNamespaceUri(reader);
+
+					i = xmlTextReaderAttributeCount(reader);
+					if( i > 0 ) {
+						for(i = xmlTextReaderMoveToFirstAttribute(reader); i == 1; i = xmlTextReaderMoveToNextAttribute(reader)) {
+							xar_attr_t a;
+							const char *aname = (const char *)xmlTextReaderConstLocalName(reader);
+							const char *avalue = (const char *)xmlTextReaderConstValue(reader);
+							
+							if( aname && (strcmp("subdoc_name", aname) == 0) ) {
+								name = (const unsigned char *)avalue;
+							} else {
+								a = xar_attr_new();
+								XAR_ATTR(a)->key = strdup(aname);
+								XAR_ATTR(a)->value = strdup(avalue);
+								XAR_ATTR(a)->next = XAR_SUBDOC(s)->attrs;
+								XAR_SUBDOC(s)->attrs = XAR_ATTR(a);
+							}
+						}
 					}
 
+					s = xar_subdoc_new(x, (const char *)name);
+					xar_subdoc_unserialize(s, reader);
 				}
 			}
+			if( (type == XML_READER_TYPE_END_ELEMENT) && (strcmp((const char *)name, "toc")==0) ) {
+				break;
+			}
 		}
+		if( ret == -1 ) {
+			xmlFreeTextReader(reader);
+			xmlDictCleanup();
+			xmlCleanupCharEncodingHandlers();
+			return -1;
+		}
+	}
+
+	if( ret == -1 ) {
+		xmlFreeTextReader(reader);
+		xmlDictCleanup();
+		xmlCleanupCharEncodingHandlers();
+		return -1;
 	}
 		
 	xmlFreeTextReader(reader);
+	xmlDictCleanup();
+	xmlCleanupCharEncodingHandlers();
 	return 0;
 }

@@ -84,6 +84,7 @@ int32_t xar_data_read(xar_t x, xar_file_t f, void *inbuf, size_t bsize, void *co
 		readbuf += DATA_CONTEXT(context)->offset;
 		memcpy(inbuf,readbuf,sizetoread);
 		
+		DATA_CONTEXT(context)->total += sizetoread;
 		DATA_CONTEXT(context)->offset += sizetoread;
 		
 		return sizetoread;
