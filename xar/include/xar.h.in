@@ -166,7 +166,7 @@ int32_t xar_prop_set(xar_file_t f, const char *key, const char *value);
 int32_t xar_prop_create(xar_file_t f, const char *key, const char *value);
 int32_t xar_prop_get(xar_file_t f, const char *key, const char **value);
 
-xar_iter_t xar_iter_new();
+xar_iter_t xar_iter_new(void);
 void xar_iter_free(xar_iter_t i);
 
 const char *xar_prop_first(xar_file_t f, xar_iter_t i);

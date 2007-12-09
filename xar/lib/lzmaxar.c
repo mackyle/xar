@@ -63,7 +63,7 @@ struct _lzma_context{
 };
 
 #define preset_level 7
-#define memory_limit 400*1024*1024 /* 1=1M, 5=24M, 6=39M, 7=93M, 8=185M, 9=369M */
+#define memory_limit 93*1024*1024 /* 1=1M, 5=24M, 6=39M, 7=93M, 8=185M, 9=369M */
 
 #define LZMA_CONTEXT(x) ((struct _lzma_context *)(*x))
 #endif
@@ -189,7 +189,7 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 
 	/* on first run, we init the context and check the compression type */
 	if( !LZMA_CONTEXT(context) ) {
-		int level = 9;
+		int level = preset_level;
 		*context = calloc(1,sizeof(struct _lzma_context));
 		
 		opt = xar_opt_get(x, XAR_OPT_COMPRESSION);

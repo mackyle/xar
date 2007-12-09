@@ -263,7 +263,7 @@ const char *xar_attr_next(xar_iter_t i) {
  * Returns a newly allocated iterator for use on files, properties, or
  * attributes.
  */
-xar_iter_t xar_iter_new() {
+xar_iter_t xar_iter_new(void) {
 	xar_iter_t ret = malloc(sizeof(struct __xar_iter_t));
 	if(!ret) return NULL;
 

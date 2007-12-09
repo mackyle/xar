@@ -780,7 +780,7 @@ int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 			if( errno == ENOENT ) {
 				xar_iter_t i;
 				const char *ptr;
-				i = xar_iter_new(x);
+				i = xar_iter_new();
 				for(ptr = xar_prop_first(tmpf, i); ptr; ptr = xar_prop_next(i)) {
 					xar_iter_t a;
 					const char *val = NULL;
@@ -792,7 +792,7 @@ int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 						continue;
 	
 					xar_prop_set(f, ptr, val);
-					a = xar_iter_new(x);
+					a = xar_iter_new();
 					for(akey = xar_attr_first(tmpf, ptr, a); akey; akey = xar_attr_next(a)) {
 						aval = xar_attr_get(tmpf, ptr, akey);
 						xar_attr_set(f, ptr, akey, aval);

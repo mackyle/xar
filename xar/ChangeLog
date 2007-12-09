@@ -1,4 +1,9 @@
 ﻿devel
+	2007-12-09 Rob Braun bbraun@synack.net
+	* include/xar.h.in lib/filetree.c lib/stat.c test/validate.c: Make sure xar_iter_new() takes no parameters.  From rpm5.
+	* lib/libxar.la.in.in: set the libxir to @LIBDIR@ from autoconf.  From rpm5.
+	* configure.ac: Allow specifying the path to lzma with --with-lzma=PATH
+	* lib/lzmaxar.c: Use the global macro for compression level.
 	2007-11-11 Rob Braun bbraun@synack.net
 	* lib/archive.c: Add a #define for a mising function in Mac OS X's old version of libxml2 from Anders F Björklund.
 	* lib/Makefile.inc.in: Be a little more gnu libtool friendly from Anders F Björklund.
