@@ -1,4 +1,6 @@
 ﻿devel
+	2007-12-14 Rob Braun bbraun@synack.net
+	* configure.ac: Fix a broken configure check for sys/acl.h and acl_t
 	2007-12-09 Rob Braun bbraun@synack.net
 	* include/xar.h.in lib/filetree.c lib/stat.c test/validate.c: Make sure xar_iter_new() takes no parameters.  From rpm5.
 	* lib/libxar.la.in.in: set the libxir to @LIBDIR@ from autoconf.  From rpm5.
