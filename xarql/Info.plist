@@ -64,5 +64,25 @@
     <real>800</real>
     <key>QLPreviewHeight</key>
     <real>600</real>
+    <key>UTImportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.archive</string>
+            </array>
+            <key>UTTypeDescription</key>
+            <string>XARchive</string>
+            <key>UTTypeIdentifier</key>
+            <string>xar.xar</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>xar</string>
+                </array>
+            </dict>
+        </dict>
+    </array>
 </dict>
 </plist>
