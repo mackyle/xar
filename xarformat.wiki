@@ -1,5 +1,5 @@
 <!-- SUMMARY: xarchive format -->
-<!-- LABELS: Phase-Implementation -->
+<!-- LABELS: Phase-Implementation,Featured -->
 
 == Format of a xar archive ==
 
