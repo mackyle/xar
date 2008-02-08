@@ -1,5 +1,5 @@
 <!-- SUMMARY: XAR API -->
-<!-- LABELS: Phase-Implementation -->
+<!-- LABELS: Phase-Implementation,Featured -->
 == API Documentation ==
 === Overview ===
 Below are some brief descriptions of the programming interface to xar, and some examples of how to use it.
