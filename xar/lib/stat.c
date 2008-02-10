@@ -53,7 +53,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <time.h>
 #include <pwd.h>
 #include <grp.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005-2007 Rob Braun
+ * Copyright (c) 2005-2008 Rob Braun
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 
 #define _FILE_OFFSET_BITS 64
 
+#include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -46,7 +47,6 @@
 #include <libxml/xmlreader.h>
 #include <libxml/xmlstring.h>
 
-#include "config.h"
 #ifndef HAVE_ASPRINTF
 #include "asprintf.h"
 #endif

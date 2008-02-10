@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Rob Braun
+ * Copyright (c) 2008 Rob Braun
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <libgen.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <arpa/inet.h>
 #include "xar.h"
