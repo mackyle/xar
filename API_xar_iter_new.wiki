@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	i = xar_iter_new(x);
+	i = xar_iter_new();
 	if( !i ) {
 		fprintf(stderr, "Error obtaining a new iterator\n");
 		exit(1);
