@@ -20,7 +20,7 @@ Upon success, xar_iter_new() will return a reference to a new iterator. On failu
 int main(int argc, char *argv[]) {
 	xar_t x;
 	xar_file_t f;
-	xar_iter_i i;
+	xar_iter_t i;
 
 	x = xar_open(argv[1], READ);
 	if( x == NULL ) {
