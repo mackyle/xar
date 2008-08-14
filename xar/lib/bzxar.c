@@ -82,12 +82,12 @@ int xar_bzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) 
 }
 
 int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
-#ifdef HAVE_LIBBZ2
 	const char *opt;
+	xar_prop_t tmpp;
+#ifdef HAVE_LIBBZ2
 	void *out = NULL;
 	size_t outlen, offset = 0;
 	int r;
-	xar_prop_t tmpp;
 
 	/* on first run, we init the context and check the compression type */
 	if( !BZIP2_CONTEXT(context) ) {
@@ -142,6 +142,19 @@ int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	free(*in);
 	*in = out;
 	*inlen = offset;
+#else
+	opt = NULL;
+	tmpp = xar_prop_pget(p, "encoding");
+	if( tmpp )
+		opt = xar_attr_pget(f, tmpp, "style");
+	if( !opt ) return 0;
+	if( strcmp(opt, "application/x-bzip2") != 0 ) return 0;
+	xar_err_new(x);
+	xar_err_set_file(x, f);
+	xar_err_set_errno(x, 0);
+	xar_err_set_string(x, "bzip2 support not compiled in.");
+	xar_err_callback(x, XAR_SEVERITY_FATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+
 #endif /* HAVE_LIBBZ2 */
 	return 0;
 }
@@ -167,11 +180,11 @@ int xar_bzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 }
 
 int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
+	const char *opt;
 #ifdef HAVE_LIBBZ2
 	void *out = NULL;
 	size_t outlen, offset = 0;
 	int r;
-	const char *opt;
 
 	/* on first run, we init the context and check the compression type */
 	if( !BZIP2_CONTEXT(context) ) {
@@ -250,6 +263,17 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	free(*in);
 	*in = out;
 	*inlen = offset;
+#else
+	opt = xar_opt_get(x, XAR_OPT_COMPRESSION);
+	if( !opt )
+		return 0;
+	if( strcmp(opt, XAR_OPT_VAL_BZIP) != 0 )
+		return 0;
+	xar_err_new(x);
+	xar_err_set_file(x, f);
+	xar_err_set_errno(x, 0);
+	xar_err_set_string(x, "bzip2 support not compiled in.");
+	xar_err_callback(x, XAR_SEVERITY_FATAL, XAR_ERR_ARCHIVE_CREATION);
 #endif /* HAVE_LIBBZ2 */
 	return 0;
 }

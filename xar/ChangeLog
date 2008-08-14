@@ -1,5 +1,6 @@
 ﻿devel
 	2008-08-14 Rob Braun bbraun@synack.net
+	* lib/bzxar.c: if bzip2 compression is specified but not compiled in, throw an error.
 	* src/xar.c src/xar.1: Add -C to chdir before extraction.
 	* lib/script.c: Perform some input checking.
 	* lib/b64.c lib/b64.h: xar_to_base64() was never used, so it is removed.
