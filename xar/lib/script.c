@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <limits.h>
 
 #include "config.h"
 #ifndef HAVE_ASPRINTF
@@ -61,6 +62,12 @@ int32_t xar_script_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *in
 		return 0;
 
 	if( !xar_check_prop(x, "contents") )
+		return 0;
+
+	/* Sanity check *inlen, which really shouldn't be more than a 
+	 * few kbytes...
+	 */
+	if( *inlen > INT_MAX )
 		return 0;
 
 	/*We only run on the begining of the file, so once we init, we don't run again*/

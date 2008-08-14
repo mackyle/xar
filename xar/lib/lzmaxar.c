@@ -54,12 +54,23 @@
 
 #ifdef HAVE_LIBLZMA
 
+#ifndef UINT32_C
+#define UINT32_C(v)  (v ## U) /* from <stdint.h> normally */
+#endif
+#ifndef LZMA_VERSION
+#define LZMA_VERSION UINT32_C(40420000) /* = 4.42.0alpha6 */
+#endif
+
 struct _lzma_context{
 	uint8_t		lzmacompressed;
 	lzma_stream	lzma;
 	lzma_options_stream options;
 	lzma_allocator allocator;
+#if LZMA_VERSION < 40420010U
 	lzma_memory_limitter *limit;
+#else
+	lzma_memlimit *limit;
+#endif
 };
 
 #define preset_level 7
@@ -165,7 +176,11 @@ int xar_lzma_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 	
 	if( LZMA_CONTEXT(context)->lzmacompressed){
 		lzma_end(&LZMA_CONTEXT(context)->lzma);		
+#if LZMA_VERSION < 40420010U
 		lzma_memory_limitter_end(LZMA_CONTEXT(context)->limit, 1);
+#else
+		lzma_memlimit_end(LZMA_CONTEXT(context)->limit, 1);
+#endif
 
 		tmpp = xar_prop_pset(f, p, "encoding", NULL);
 		if( tmpp )
@@ -227,10 +242,16 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		/* Terminate the filter options array. */
 		LZMA_CONTEXT(context)->options.filters[2].id = UINT64_MAX;
 		LZMA_CONTEXT(context)->lzma = LZMA_STREAM_INIT_VAR;
+#if LZMA_VERSION < 40420010U
 		LZMA_CONTEXT(context)->limit = lzma_memory_limitter_create(memory_limit);
-		LZMA_CONTEXT(context)->allocator.opaque = LZMA_CONTEXT(context)->limit;
 		LZMA_CONTEXT(context)->allocator.alloc = (void*) lzma_memory_alloc;
 		LZMA_CONTEXT(context)->allocator.free = (void*) lzma_memory_free;
+#else
+		LZMA_CONTEXT(context)->limit = lzma_memlimit_create(memory_limit);
+		LZMA_CONTEXT(context)->allocator.alloc = (void*) lzma_memlimit_alloc;
+		LZMA_CONTEXT(context)->allocator.free = (void*) lzma_memlimit_free;
+#endif
+		LZMA_CONTEXT(context)->allocator.opaque = LZMA_CONTEXT(context)->limit;
 		LZMA_CONTEXT(context)->lzma.allocator = &LZMA_CONTEXT(context)->allocator;
 		r = lzma_stream_encoder_single(&LZMA_CONTEXT(context)->lzma, &(LZMA_CONTEXT(context)->options));
 		if( (r != LZMA_OK) ) {
