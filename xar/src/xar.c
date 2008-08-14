@@ -62,6 +62,7 @@ static char *Toccksum = NULL;
 static char *Compression = NULL;
 static char *Rsize = NULL;
 static char *CompressionArg = NULL;
+static char *Chdir = NULL;
 
 static int Err = 0;
 static int List = 0;
@@ -348,6 +349,13 @@ static int extract(const char *filename, int arglen, char *args[]) {
 	if( !x ) {
 		fprintf(stderr, "Error opening xar archive: %s\n", filename);
 		exit(1);
+	}
+
+	if(Chdir) {
+		if( chdir(Chdir) != 0 ) {
+			fprintf(stderr, "Unable to chdir to %s\n", Chdir);
+			exit(1);
+		}
 	}
 
 	xar_register_errhandler(x, err_callback, NULL);
@@ -652,6 +660,7 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t-t               Lists an archive\n");
 	fprintf(stderr, "\t-f <filename>    Specifies an archive to operate on [REQUIRED!]\n");
 	fprintf(stderr, "\t-v               Print filenames as they are archived\n");
+	fprintf(stderr, "\t-C <path>        On extract, chdir to this location\n");
 	fprintf(stderr, "\t-n name          Provides a name for a subdocument\n");
 	fprintf(stderr, "\t-s <filename>    On extract, specifies the file to extract\n");
 	fprintf(stderr, "\t                      subdocuments to.\n");
@@ -745,7 +754,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	while( (c = getopt_long(argc, argv, "axcvtjzf:hpPln:s:d:vk", o, &loptind)) != -1 ) {
+	while( (c = getopt_long(argc, argv, "axcC:vtjzf:hpPln:s:d:vk", o, &loptind)) != -1 ) {
 		switch(c) {
 		case  1 : if( !optarg ) {
 		          	usage(argv[0]);
@@ -901,6 +910,12 @@ int main(int argc, char *argv[]) {
 		case 17 :
 			CompressionArg = optarg;
 			break;
+		case 'C': if( !optarg ) {
+		          	usage(argv[0]);
+		          	exit(1);
+		          }
+		          Chdir = optarg;
+		          break;
 		case 'c':
 		case 'x':
 		case 't':

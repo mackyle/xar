@@ -36,6 +36,9 @@ The filename to use for creation, listing or extraction.  With extraction, this 
 Specifies the compression type to use.
 Valid values: none, gzip, bzip2, lzma.  Default value: gzip
 .TP
+\-C <path>
+On extract, xar will chdir to the specified path before extracting the archive.
+.TP
 \-a
 Synonym for \-\-compression=lzma
 .TP
