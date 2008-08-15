@@ -137,7 +137,7 @@ CPPFLAGS := -I@srcroot@include $(CPPFLAGS)
 $(LIBRXAR_S) : $(LIBXAR_SRCS:@srcroot@%.c=@objroot@%.o)
 	@mkdir -p $(@D)
 ifeq (elf, @abi@)
-	$(CC) -shared -Wl,-soname,$(LIBXAR_SNAME) -o $@ $+ @LIBS@
+	$(CC) -shared -Wl,-soname,$(LIBXAR_SNAME) -o $@ $+ $(LDFLAGS) @LIBS@
 endif
 ifeq (macho, @abi@)
 	$(CC) -dynamiclib -compatibility_version @LIB_REV@ -current_version @LIB_REV@ -install_name @abs_objroot@$(LIBRXAR_S) -o $@ $+ $(LDFLAGS) @LIBS@
@@ -153,7 +153,7 @@ endif
 $(LIBXAR_S) : $(LIBXAR_SRCS:@srcroot@%.c=@objroot@%.o)
 	@mkdir -p $(@D)
 ifeq (elf, @abi@)
-	$(CC) -shared -Wl,-soname,$(LIBXAR_SNAME) -o $@ $+ @LIBS@
+	$(CC) -shared -Wl,-soname,$(LIBXAR_SNAME) -o $@ $+ $(LDFLAGS) @LIBS@
 endif
 ifeq (macho, @abi@)
 	$(CC) -dynamiclib -compatibility_version @LIB_REV@ -current_version @LIB_REV@ -install_name $(LIBDIR)/$(LIBXAR_SNAME) -o $@ $+ $(LDFLAGS) @LIBS@
