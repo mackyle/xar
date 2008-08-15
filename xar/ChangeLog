@@ -1,4 +1,6 @@
 ﻿devel
+	2008-08-15 Rob Braun bbraun@synack.net
+	* src/xar.c: Fix a typo in the usage statement.
 	2008-08-14 Rob Braun bbraun@synack.net
 	* lib/bzxar.c: if bzip2 compression is specified but not compiled in, throw an error.
 	* src/xar.c src/xar.1: Add -C to chdir before extraction.

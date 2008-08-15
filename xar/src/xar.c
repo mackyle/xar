@@ -697,7 +697,7 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t                      is not streamable\n");
 	fprintf(stderr, "\t--link-same      Hardlink identical files\n");
 	fprintf(stderr, "\t--no-compress    POSIX regular expression of files\n");
-	fprintf(stderr, "\t                      not to archive, but not compress.\n");
+	fprintf(stderr, "\t                      to archive, but not compress.\n");
 	fprintf(stderr, "\t--prop-include   File properties to include in archive\n");
 	fprintf(stderr, "\t--prop-exclude   File properties to exclude in archive\n");
 	fprintf(stderr, "\t--distribution   Only includes a subset of file properties\n");
