@@ -62,6 +62,7 @@
 #include "hash.h"
 #include "script.h"
 #include "macho.h"
+#include "util.h"
 
 #if !defined(LLONG_MAX) && defined(LONG_LONG_MAX)
 #define LLONG_MAX LONG_LONG_MAX
@@ -175,7 +176,7 @@ static int64_t get_length(xar_prop_t p) {
 static void xar_io_seek(xar_t x, xar_file_t f, off_t seekoff) {
 	int r;
 
-	if( XAR(x)->fd > 1 ) {
+	if( XAR(x)->fd >= 0 ) {
 		r = lseek(XAR(x)->fd, seekoff, SEEK_SET);
 		if( r == -1 ) {
 			if( errno == ESPIPE ) {
@@ -194,13 +195,14 @@ static void xar_io_seek(xar_t x, xar_file_t f, off_t seekoff) {
 					len -= XAR(x)->heap_offset;
 					buf = malloc(len);
 					assert(buf);
-					rr = read(XAR(x)->fd, buf, len);
+					rr = xar_read_fd(XAR(x)->fd, buf, len);
 					if( rr < len ) {
 						xar_err_new(x);
 						xar_err_set_file(x, f);
 						xar_err_set_string(x, "Unable to seek");
 						xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
 					}
+					XAR(x)->heap_offset += rr;
 					free(buf);
 				}
 			} else {
