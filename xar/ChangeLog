@@ -1,4 +1,6 @@
 ﻿devel
+	2008-08-17 Rob Braun bbraun@synack.net
+	* lib/archive.c: Make sure the binary header and toc checksum types match.  Contributed by Apple.
 	2008-08-15 Rob Braun bbraun@synack.net
 	* lib/Makefile.inc.in: Add the $(LDFLAGS) variable when creating libxar
 	* src/xar.c: Fix a typo in the usage statement.
