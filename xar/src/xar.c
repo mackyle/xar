@@ -303,6 +303,7 @@ static int extract(const char *filename, int arglen, char *args[]) {
 	struct lnode *extract_files = NULL;
 	struct lnode *extract_tail = NULL;
 	struct lnode *lnodei = NULL;
+	struct lnode *dirs = NULL;
 
 	for(argi = 0; args[argi]; argi++) {
 		struct lnode *tmp;
@@ -417,12 +418,30 @@ static int extract(const char *filename, int arglen, char *args[]) {
 			if( NoOverwrite && (lstat(path, &sb) == 0) ) {
 				printf("%s already exists, not overwriting\n", path);
 			} else {
-				files_extracted++;
-				print_file(x, f);
-				xar_extract(x, f);
+				const char *prop = NULL;
+				int deferred = 0;
+				if( xar_prop_get(f, "type", &prop) == 0 ) {
+					if( strcmp(prop, "directory") == 0 ) {
+						struct lnode *tmpl = calloc(sizeof(struct lnode),1);
+						tmpl->str = (char *)f;
+						tmpl->next = dirs;
+						dirs = tmpl;
+						deferred = 1;
+					}
+				}
+				if( ! deferred ) {
+					files_extracted++;
+					print_file(x, f);
+					xar_extract(x, f);
+				}
 			}
 		}
 		free(path);
+	}
+	for(lnodei = dirs; lnodei; lnodei = lnodei->next) {
+		files_extracted++;
+		print_file(x,(xar_file_t)lnodei->str);
+		xar_extract(x, (xar_file_t)lnodei->str);
 	}
 	if( args[0] && (files_extracted == 0) ) {
 		fprintf(stderr, "No files matched extraction criteria.\n");
