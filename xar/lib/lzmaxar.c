@@ -98,12 +98,12 @@ int xar_lzma_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) 
 }
 
 int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
-#ifdef HAVE_LIBLZMA
 	const char *opt;
+	xar_prop_t tmpp;
+#ifdef HAVE_LIBLZMA
 	void *out = NULL;
 	size_t outlen, offset = 0;
 	lzma_ret r;
-	xar_prop_t tmpp;
 	
 	/* on first run, we init the context and check the compression type */
 	if( !LZMA_CONTEXT(context) ) {
@@ -166,6 +166,19 @@ int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	free(*in);
 	*in = out;
 	*inlen = offset;
+#else
+	opt = NULL;
+	tmpp = xar_prop_pget(p, "encoding");
+	if( tmpp )
+		opt = xar_attr_pget(f, tmpp, "style");
+	if( !opt ) return 0;
+	if( strcmp(opt, "application/x-lzma") != 0 ) return 0;
+	xar_err_new(x);
+	xar_err_set_file(x, f);
+	xar_err_set_errno(x, 0);
+	xar_err_set_string(x, "lzma support not compiled in.");
+	xar_err_callback(x, XAR_SEVERITY_FATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+
 #endif /* HAVE_LIBLZMA */
 	return 0;
 }
@@ -196,11 +209,11 @@ int xar_lzma_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 }
 
 int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
+	const char *opt;
 #ifdef HAVE_LIBLZMA
 	void *out = NULL;
 	size_t outlen, offset = 0;
 	lzma_ret r;
-	const char *opt;
 
 	/* on first run, we init the context and check the compression type */
 	if( !LZMA_CONTEXT(context) ) {
@@ -316,6 +329,18 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	free(*in);
 	*in = out;
 	*inlen = offset;
+#else
+	opt = xar_opt_get(x, XAR_OPT_COMPRESSION);
+	if( !opt )
+		return 0;
+	if( strcmp(opt, XAR_OPT_VAL_LZMA) != 0 )
+		return 0;
+	xar_err_new(x);
+	xar_err_set_file(x, f);
+	xar_err_set_errno(x, 0); 
+	xar_err_set_string(x, "lzma support not compiled in.");
+	xar_err_callback(x, XAR_SEVERITY_FATAL, XAR_ERR_ARCHIVE_CREATION);
+
 #endif /* HAVE_LIBLZMA */
 	return 0;
 }

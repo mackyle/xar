@@ -1,4 +1,6 @@
 ﻿devel
+	2008-08-19 Rob Braun bbraun@synack.net
+	* lib/lzmaxar.c: if lzma compression is specified but not compiled in, throw an error.
 	2008-08-17 Rob Braun bbraun@synack.net
 	* lib/archive.c: Make sure the binary header and toc checksum types match.  Contributed by Apple.
 	2008-08-15 Rob Braun bbraun@synack.net
