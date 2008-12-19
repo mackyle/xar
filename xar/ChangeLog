@@ -1,4 +1,6 @@
 ﻿devel
+	2008-12-19 Rob Braun bbraun@synack.net
+	* lib/lzmaxar.c include/xar.h.in src/xar.c: Update lzma support to reflect the new xz naming and adjust lzma to be the old lzma format.  Changes from Anders F Björklund.
 	2008-08-19 Rob Braun bbraun@synack.net
 	* lib/lzmaxar.c: if lzma compression is specified but not compiled in, throw an error.
 	* src/xar.c: When extracting, save directories until the end.  This lets timestamps get set correctly on directories and addresses issue #58.

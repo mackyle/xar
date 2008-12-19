@@ -63,8 +63,19 @@
 
 struct _lzma_context{
 	uint8_t		lzmacompressed;
+	uint8_t		lzmaalone;
 	lzma_stream	lzma;
+#if LZMA_VERSION < 49990050U
 	lzma_options_stream options;
+#elif LZMA_VERSION < 49990060U
+	lzma_check	check;
+	lzma_filter filters[2];
+#endif
+#if LZMA_VERSION < 49990050U
+	lzma_options_alone options2;
+#else
+	lzma_options_lzma options2;
+#endif
 	lzma_allocator allocator;
 #if LZMA_VERSION < 40420010U
 	lzma_memory_limitter *limit;
@@ -74,7 +85,7 @@ struct _lzma_context{
 };
 
 #define preset_level 7
-#define memory_limit 93*1024*1024 /* 1=1M, 5=24M, 6=39M, 7=93M, 8=185M, 9=369M */
+#define memory_limit 400*1024*1024 /* 1=1M, 5=24M, 6=39M, 7=93M, 8=185M, 9=369M */
 
 #define LZMA_CONTEXT(x) ((struct _lzma_context *)(*x))
 #endif
@@ -101,6 +112,7 @@ int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	const char *opt;
 	xar_prop_t tmpp;
 #ifdef HAVE_LIBLZMA
+	uint8_t alone;
 	void *out = NULL;
 	size_t outlen, offset = 0;
 	lzma_ret r;
@@ -114,11 +126,23 @@ int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 		if( tmpp )
 			opt = xar_attr_pget(f, tmpp, "style");
 		if( !opt ) return 0;
-		if( strcmp(opt, "application/x-lzma") != 0 ) return 0;
+		if( strcmp(opt, "application/x-lzma") == 0 )
+			alone = 1;
+		else if( strcmp(opt, "application/x-xz") == 0 )
+			alone = 0;
+		else
+			return 0;
 		
 		lzma_init_decoder();
+	#ifdef LZMA_STREAM_INIT_VAR
 		LZMA_CONTEXT(context)->lzma = LZMA_STREAM_INIT_VAR;
-		r = lzma_stream_decoder(&LZMA_CONTEXT(context)->lzma, NULL, NULL);
+	#endif
+	#if LZMA_VERSION < 49990050U
+		r = lzma_auto_decoder(&LZMA_CONTEXT(context)->lzma, NULL, NULL);
+	#else
+		r = lzma_auto_decoder(&LZMA_CONTEXT(context)->lzma,
+		        lzma_easy_memory_usage(preset_level), 0);
+	#endif
 		if( (r != LZMA_OK) ) {
 			xar_err_new(x);
 			xar_err_set_file(x, f);
@@ -127,6 +151,7 @@ int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 			return -1;
 		}
 		LZMA_CONTEXT(context)->lzmacompressed = 1;
+		LZMA_CONTEXT(context)->lzmaalone = alone;
 	}else if( !LZMA_CONTEXT(context)->lzmacompressed ){
 		/* once the context has been initialized, then we have already
 		   checked the compression type, so we need only check if we
@@ -172,7 +197,8 @@ int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	if( tmpp )
 		opt = xar_attr_pget(f, tmpp, "style");
 	if( !opt ) return 0;
-	if( strcmp(opt, "application/x-lzma") != 0 ) return 0;
+	if( strcmp(opt, "application/x-lzma") != 0 &&
+	    strcmp(opt, "application/x-xz") != 0) return 0;
 	xar_err_new(x);
 	xar_err_set_file(x, f);
 	xar_err_set_errno(x, 0);
@@ -196,8 +222,12 @@ int xar_lzma_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 #endif
 
 		tmpp = xar_prop_pset(f, p, "encoding", NULL);
-		if( tmpp )
+		if( tmpp ){
+			if( LZMA_CONTEXT(context)->lzmaalone )
 			xar_attr_pset(f, tmpp, "style", "application/x-lzma");
+			else
+			xar_attr_pset(f, tmpp, "style", "application/x-xz");
+		}
 	}
 
 	/* free the context */
@@ -211,6 +241,7 @@ int xar_lzma_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context) {
 	const char *opt;
 #ifdef HAVE_LIBLZMA
+	uint8_t alone;
 	void *out = NULL;
 	size_t outlen, offset = 0;
 	lzma_ret r;
@@ -224,7 +255,11 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		if( !opt )
 			return 0;
 		
-		if( strcmp(opt, XAR_OPT_VAL_LZMA) != 0 )
+		if( strcmp(opt, XAR_OPT_VAL_LZMA) == 0 )
+			alone = 1;
+		else if( strcmp(opt, XAR_OPT_VAL_XZ) == 0 )
+			alone = 0;
+		else
 			return 0;
 
 		opt = xar_opt_get(x, XAR_OPT_COMPRESSIONARG);
@@ -239,22 +274,26 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		}
 		
 		lzma_init_encoder();
+#if LZMA_VERSION < 49990050U
 		LZMA_CONTEXT(context)->options.check = LZMA_CHECK_CRC64;
 		LZMA_CONTEXT(context)->options.has_crc32 = 1; /* true */
 		LZMA_CONTEXT(context)->options.alignment = 0;
-#if defined (__ppc__) || defined (powerpc) || defined (__ppc64__)
-		LZMA_CONTEXT(context)->options.filters[0].id = LZMA_FILTER_POWERPC;
-#elif defined (__i386__) || defined (__amd64__) || defined(__x86_64__)
-		LZMA_CONTEXT(context)->options.filters[0].id = LZMA_FILTER_X86;
-#else
-		LZMA_CONTEXT(context)->options.filters[0].id = LZMA_FILTER_COPY;
-#endif
-		LZMA_CONTEXT(context)->options.filters[0].options = NULL;
-		LZMA_CONTEXT(context)->options.filters[1].id = LZMA_FILTER_LZMA;
-		LZMA_CONTEXT(context)->options.filters[1].options = (lzma_options_lzma *)(lzma_preset_lzma + level - 1);
+		/* don't use LZMA_FILTER_POWERPC or LZMA_FILTER_X86 filters,
+		   since they might make compression worse for regular files */
+		LZMA_CONTEXT(context)->options.filters[0].id = LZMA_FILTER_LZMA;
+		LZMA_CONTEXT(context)->options.filters[0].options = (lzma_options_lzma *)(lzma_preset_lzma + level - 1);
 		/* Terminate the filter options array. */
-		LZMA_CONTEXT(context)->options.filters[2].id = UINT64_MAX;
+		LZMA_CONTEXT(context)->options.filters[1].id = UINT64_MAX;
+#elif LZMA_VERSION < 49990060U
+		LZMA_CONTEXT(context)->check = LZMA_CHECK_CRC64;
+		LZMA_CONTEXT(context)->filters[0].id = LZMA_FILTER_LZMA;
+		LZMA_CONTEXT(context)->filters[0].options = (lzma_options_lzma *)(lzma_preset_lzma + level - 1);
+		/* Terminate the filter options array. */
+		LZMA_CONTEXT(context)->filters[1].id = UINT64_MAX;
+#endif
+#ifdef LZMA_STREAM_INIT_VAR
 		LZMA_CONTEXT(context)->lzma = LZMA_STREAM_INIT_VAR;
+#endif
 #if LZMA_VERSION < 40420010U
 		LZMA_CONTEXT(context)->limit = lzma_memory_limitter_create(memory_limit);
 		LZMA_CONTEXT(context)->allocator.alloc = (void*) lzma_memory_alloc;
@@ -266,15 +305,47 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 #endif
 		LZMA_CONTEXT(context)->allocator.opaque = LZMA_CONTEXT(context)->limit;
 		LZMA_CONTEXT(context)->lzma.allocator = &LZMA_CONTEXT(context)->allocator;
-		r = lzma_stream_encoder_single(&LZMA_CONTEXT(context)->lzma, &(LZMA_CONTEXT(context)->options));
+#if LZMA_VERSION < 49990050U
+		if (alone){
+		LZMA_CONTEXT(context)->options2.uncompressed_size = *inlen;
+		memcpy(&LZMA_CONTEXT(context)->options2.lzma,
+		       (lzma_options_lzma *)(lzma_preset_lzma + level - 1), sizeof(lzma_options_lzma));
+		r = lzma_alone_encoder(&LZMA_CONTEXT(context)->lzma,
+		                       &(LZMA_CONTEXT(context)->options2));
+		}
+		else
+		r = lzma_stream_encoder_single(&LZMA_CONTEXT(context)->lzma,
+		                               &(LZMA_CONTEXT(context)->options));
+#elif LZMA_VERSION < 49990060U
+		if (alone){
+		memcpy(&LZMA_CONTEXT(context)->options2,
+		       (lzma_options_lzma *)(lzma_preset_lzma + level - 1), sizeof(lzma_options_lzma));
+		r = lzma_alone_encoder(&LZMA_CONTEXT(context)->lzma,
+		                       &(LZMA_CONTEXT(context)->options2));
+		}
+		else
+		r = lzma_stream_encoder(&LZMA_CONTEXT(context)->lzma,
+		                        LZMA_CONTEXT(context)->filters, LZMA_CONTEXT(context)->check);
+#else
+		if (alone){
+		lzma_lzma_preset(&(LZMA_CONTEXT(context)->options2), level);
+		r = lzma_alone_encoder(&LZMA_CONTEXT(context)->lzma,
+		                       &(LZMA_CONTEXT(context)->options2));
+		}
+		else
+		r = lzma_easy_encoder(&LZMA_CONTEXT(context)->lzma,
+		                      (lzma_easy_level) level);
+#endif
 		if( (r != LZMA_OK) ) {
 			xar_err_new(x);
 			xar_err_set_file(x, f);
+			xar_err_set_errno(x, r);
 			xar_err_set_string(x, "Error compressing file");
 			xar_err_callback(x, XAR_SEVERITY_FATAL, XAR_ERR_ARCHIVE_CREATION);
 			return -1;
 		}
 		LZMA_CONTEXT(context)->lzmacompressed = 1;
+		LZMA_CONTEXT(context)->lzmaalone = alone;
 		if( *inlen == 0 )
 			return 0;
 	}else if( !LZMA_CONTEXT(context)->lzmacompressed ){
@@ -333,7 +404,8 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	opt = xar_opt_get(x, XAR_OPT_COMPRESSION);
 	if( !opt )
 		return 0;
-	if( strcmp(opt, XAR_OPT_VAL_LZMA) != 0 )
+	if( strcmp(opt, XAR_OPT_VAL_LZMA) != 0 &&
+	    strcmp(opt, XAR_OPT_VAL_XZ) != 0 )
 		return 0;
 	xar_err_new(x);
 	xar_err_set_file(x, f);

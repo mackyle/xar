@@ -109,6 +109,7 @@ typedef int32_t (*xar_signer_callback)(xar_signature_t sig, void *context, uint8
 #define XAR_OPT_VAL_GZIP       "gzip"
 #define XAR_OPT_VAL_BZIP       "bzip2"
 #define XAR_OPT_VAL_LZMA       "lzma"
+#define XAR_OPT_VAL_XZ         "xz"
 
 #define XAR_OPT_RSIZE          "rsize"       /* Read io buffer size */
 
