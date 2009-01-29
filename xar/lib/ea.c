@@ -32,6 +32,7 @@
 #include <string.h>
 #include <assert.h>
 #include <libgen.h>
+#include <inttypes.h>
  
 #ifndef HAVE_ASPRINTF
 #include "asprintf.h"
@@ -67,7 +68,7 @@ xar_ea_t xar_ea_new(xar_file_t f, const char *name)
 	xar_prop_setvalue(XAR_EA(ret)->prop, NULL);
 	XAR_PROP(XAR_EA(ret)->prop)->attrs = xar_attr_new();
 	XAR_ATTR(XAR_PROP(XAR_EA(ret)->prop)->attrs)->key = strdup("id");
-	asprintf((char **)&XAR_ATTR(XAR_PROP(XAR_EA(ret)->prop)->attrs)->value, "%lld", XAR_FILE(f)->nexteaid++);
+	asprintf((char **)&XAR_ATTR(XAR_PROP(XAR_EA(ret)->prop)->attrs)->value, "%" PRIu64, XAR_FILE(f)->nexteaid++);
 
 	xar_prop_pset(f, XAR_EA(ret)->prop, "name", name);
 	
