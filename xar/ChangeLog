@@ -1,4 +1,7 @@
 ﻿devel
+	2009-07-08 Rob Braun bbraun@synack.net
+	* lib/archive.c: Fix an invalid free, pointed out by Randy Saldinger
+	* lib/archive.c: Have xar_open() check if there are checksum properties in the toc and use that.  If not, fall back to static location.
 	2008-12-19 Rob Braun bbraun@synack.net
 	* lib/lzmaxar.c include/xar.h.in src/xar.c: Update lzma support to reflect the new xz naming and adjust lzma to be the old lzma format.  Changes from Anders F Björklund.
 	2008-08-19 Rob Braun bbraun@synack.net

@@ -330,6 +330,44 @@ xar_t xar_open(const char *file, int32_t flags) {
 
 		EVP_DigestFinal(&XAR(ret)->toc_ctx, toccksum, &tlen);
 
+		const char *value;
+		uint64_t offset = 0;
+		uint64_t length = tlen;
+		if( xar_prop_get( XAR_FILE(ret) , "checksum/offset", &value) == 0 ) {
+			errno = 0;
+			offset = strtoull( value, (char **)NULL, 10);
+			if( errno != 0 ) {
+				xar_close(ret);
+				return NULL;
+			}
+		} else if( xar_signature_first(ret) != NULL ) {
+			// All archives that have a signature also specify the location
+			// of the checksum.  If the location isn't specified, error out.
+			xar_close(ret);
+			return NULL;
+		}
+
+		XAR(ret)->heap_offset = xar_get_heap_offset(ret) + offset;
+		if( lseek(XAR(ret)->fd, XAR(ret)->heap_offset, SEEK_SET) == -1 ) {
+			xar_close(ret);
+			return NULL;
+		}
+		if( xar_prop_get( XAR_FILE(ret) , "checksum/size", &value) == 0 ) {
+			errno = 0;
+			length = strtoull( value, (char **)NULL, 10);
+			if( errno != 0 ) {
+				xar_close(ret);
+				return NULL;
+			}
+		} else if( xar_signature_first(ret) != NULL ) {
+			xar_close(ret);
+			return NULL;
+		}
+		if( length != tlen ) {
+			xar_close(ret);
+			return NULL;
+		}
+
 		xar_read_fd(XAR(ret)->fd, cval, tlen);
 		XAR(ret)->heap_offset += tlen;
 		if( memcmp(cval, toccksum, tlen) != 0 ) {
@@ -1234,7 +1272,7 @@ int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *siz
 	ret = xar_arcmod_extract(x,f,NULL,*buffer,*size);
 	if( ret ) {
 		*size = 0;
-		free(buffer);
+		free(*buffer);
 		*buffer = NULL;
 	}
 
