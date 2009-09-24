@@ -3,12 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 43;
+	objectVersion = 44;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		2C05A19C06CAA52B00D84F6F /* GeneratePreviewForURL.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C05A19B06CAA52B00D84F6F /* GeneratePreviewForURL.c */; };
 		3E161D2F0C25AB9F0071F417 /* libxar.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E161D2E0C25AB9F0071F417 /* libxar.dylib */; };
+		3E82DF4E106A700D005D1E54 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E82DF4D106A700D005D1E54 /* libxml2.dylib */; };
+		3E82DF50106A7028005D1E54 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E82DF4F106A7028005D1E54 /* libz.dylib */; };
 		61E3BCFB0870B4F2002186A0 /* GenerateThumbnailForURL.c in Sources */ = {isa = PBXBuildFile; fileRef = 61E3BCFA0870B4F2002186A0 /* GenerateThumbnailForURL.c */; };
 		8D576312048677EA00EA77CD /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 08FB77B6FE84183AC02AAC07 /* main.c */; settings = {ATTRIBUTES = (); }; };
 		8D576314048677EA00EA77CD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AA1909FFE8422F4C02AAC07 /* CoreFoundation.framework */; };
@@ -24,6 +26,8 @@
 		0AA1909FFE8422F4C02AAC07 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		2C05A19B06CAA52B00D84F6F /* GeneratePreviewForURL.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GeneratePreviewForURL.c; sourceTree = "<group>"; };
 		3E161D2E0C25AB9F0071F417 /* libxar.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxar.dylib; path = /usr/lib/libxar.dylib; sourceTree = "<absolute>"; };
+		3E82DF4D106A700D005D1E54 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = /usr/lib/libxml2.dylib; sourceTree = "<absolute>"; };
+		3E82DF4F106A7028005D1E54 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		61E3BCFA0870B4F2002186A0 /* GenerateThumbnailForURL.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = GenerateThumbnailForURL.c; sourceTree = "<group>"; };
 		8D576316048677EA00EA77CD /* xar.qlgenerator */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = xar.qlgenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D576317048677EA00EA77CD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -42,6 +46,8 @@
 				F28CFBFD0A3EC0AF000ABFF5 /* ApplicationServices.framework in Frameworks */,
 				F28CFC030A3EC0C6000ABFF5 /* QuickLook.framework in Frameworks */,
 				3E161D2F0C25AB9F0071F417 /* libxar.dylib in Frameworks */,
+				3E82DF4E106A700D005D1E54 /* libxml2.dylib in Frameworks */,
+				3E82DF50106A7028005D1E54 /* libz.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -51,6 +57,8 @@
 		089C166AFE841209C02AAC07 /* xar */ = {
 			isa = PBXGroup;
 			children = (
+				3E82DF4F106A7028005D1E54 /* libz.dylib */,
+				3E82DF4D106A700D005D1E54 /* libxml2.dylib */,
 				3E161D2E0C25AB9F0071F417 /* libxar.dylib */,
 				08FB77AFFE84173DC02AAC07 /* Source */,
 				089C167CFE841241C02AAC07 /* Resources */,
@@ -235,7 +243,8 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOTS = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				SDKROOT = "";
+				USER_HEADER_SEARCH_PATHS = /usr/include/libxml2;
 			};
 			name = Debug;
 		};
@@ -246,7 +255,8 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOTS = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				SDKROOT = "";
+				USER_HEADER_SEARCH_PATHS = /usr/include/libxml2;
 			};
 			name = Release;
 		};
