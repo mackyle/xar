@@ -1,4 +1,7 @@
 ﻿devel
+	2009-11-24 Rob Braun bbraun@synack.net
+	* src/xar.c: If a compression type is specified that we don't support/haven't been compiled with, spit out an error.
+	* configure.ac: Allow explicit disabling of bzip2 support.
 	2009-07-08 Rob Braun bbraun@synack.net
 	* lib/archive.c: Fix an invalid free, pointed out by Randy Saldinger
 	* lib/archive.c: Have xar_open() check if there are checksum properties in the toc and use that.  If not, fall back to static location.

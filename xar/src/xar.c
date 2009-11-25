@@ -793,10 +793,18 @@ int main(int argc, char *argv[]) {
 		          	exit(1);
 		          }
 		          if( (strcmp(optarg, XAR_OPT_VAL_NONE) != 0) &&
-		              (strcmp(optarg, XAR_OPT_VAL_GZIP) != 0) &&
-		              (strcmp(optarg, XAR_OPT_VAL_BZIP) != 0) &&
-		              (strcmp(optarg, XAR_OPT_VAL_LZMA) != 0) &&
-		              (strcmp(optarg, XAR_OPT_VAL_XZ) != 0) ) {
+		              (strcmp(optarg, XAR_OPT_VAL_GZIP) != 0)
+#ifdef HAVE_LIBBZ2
+		              && (strcmp(optarg, XAR_OPT_VAL_BZIP) != 0)
+#endif
+#ifdef HAVE_LIBLZMA
+		              && (strcmp(optarg, XAR_OPT_VAL_LZMA) != 0)
+#endif
+#ifdef HAVE_XZ
+		              && (strcmp(optarg, XAR_OPT_VAL_XZ) != 0)
+#endif
+                    ) {
+                    fprintf(stderr, "This instance of xar doesn't understand compression type %s\n", optarg);
 		          	usage(argv[0]);
 		          	exit(1);
 		          }

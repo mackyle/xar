@@ -341,12 +341,17 @@ fi
 
 dnl 
 dnl Configure libbz2.
-dnl 
+dnl This doesn't support specifying a path yet, but supports explicitly
+dnl enabling or disabling bzip2 support
 have_libbz2="1"
-AC_CHECK_HEADERS([bzlib.h], , [have_libbz2="0"])
-AC_CHECK_LIB([bz2], [BZ2_bzCompress], , [have_libbz2="0"])
-if test "x${have_libbz2}" = "x1" ; then
-  AC_DEFINE([HAVE_LIBBZ2])
+AC_ARG_WITH([bzip2], [AS_HELP_STRING([--with-bzip2], [Explicitly enable or disable bzip2 support.  Defaults to enabled if available.])], [], [with_bzip2="yes"])
+
+if test "x$with_bzip2" != "xno"; then
+	AC_CHECK_HEADERS([bzlib.h], , [have_libbz2="0"])
+	AC_CHECK_LIB([bz2], [BZ2_bzCompress], , [have_libbz2="0"])
+	if test "x${have_libbz2}" = "x1" ; then
+		AC_DEFINE([HAVE_LIBBZ2])
+	fi
 fi
 
 dnl 
