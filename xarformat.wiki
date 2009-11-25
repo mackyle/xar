@@ -29,7 +29,7 @@ struct xar_header {
 
 === The Table of Contents ===
 
-The table of contents is an XML document which should conform to the XAR DTD. The XAR DTD defines the terms necessary for basic filesystem representations. The table of contents should be encoded as UTF-8.
+The table of contents is an XML document. The table of contents should be encoded as UTF-8.
 
 <pre>
 <?xml version="1.0"?>
