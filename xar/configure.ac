@@ -181,6 +181,9 @@ fi
 )
 AC_SUBST([enable_autogen])
 
+AC_CHECK_HEADER([stdint.h], [C99_FIXED_WIDTH_TYPE_HEADER="#include <stdint.h>"], [AC_CHECK_HEADER([inttypes.h], [C99_FIXED_WIDTH_TYPE_HEADER="#include <inttypes.h>"], [])])
+AC_SUBST([C99_FIXED_WIDTH_TYPE_HEADER])
+
 AC_TRY_COMPILE([#include <sys/types.h> 
 #include <sys/acl.h>], [acl_t a], [AC_DEFINE([HAVE_SYS_ACL_H],[1], [define if you have sys/acl.h and it has a working acl_t type])])
 AC_CHECK_HEADERS(ext2fs/ext2_fs.h sys/statfs.h sys/xattr.h sys/param.h sys/extattr.h libutil.h)
