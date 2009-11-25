@@ -38,7 +38,6 @@
 #ifndef _XAR_UTIL_H_
 #define _XAR_UTIL_H_
 
-#include <stdint.h>
 #include "xar.h"
 
 

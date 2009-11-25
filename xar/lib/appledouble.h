@@ -8,7 +8,11 @@
 #define __APPLEDOUBLE__
 
 #include <sys/types.h>
+#if __STDC_VERSION__ >= 199901
 #include <stdint.h>
+#else
+#include <inttypes.h>
+#endif
 
 /* Structure of an AppleSingle file:
  *   ----------------------

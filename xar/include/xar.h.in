@@ -41,7 +41,11 @@
 #define XAR_VERSION "@XAR_VERSION@"
 
 #include <sys/types.h>
+#if __STDC_VERSION__ >= 199901
 #include <stdint.h>
+#else
+#include <inttypes.h>
+#endif
 #include <sys/stat.h>
 
 #pragma pack(4)

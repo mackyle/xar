@@ -1,5 +1,7 @@
 ﻿devel
 	2009-11-24 Rob Braun bbraun@synack.net
+	* lib/signature.c: fix a warning with a printf formatting string
+	* lib/util.c lib/util.h lib/appledouble.h include/xar.h.in: adjust the inclusion of stdint.h to hopefully avoid problems on proto-c99 systems that have inttypes.h but not stdint.h.  Issue #68
 	* src/xar.c: If a compression type is specified that we don't support/haven't been compiled with, spit out an error.
 	* configure.ac: Allow explicit disabling of bzip2 support.
 	2009-07-08 Rob Braun bbraun@synack.net
