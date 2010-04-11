@@ -381,7 +381,7 @@ int32_t xar_signature_serialize(xar_signature_t sig, xmlTextWriterPtr writer)
 
 	/* <size> */
 	xmlTextWriterStartElementNS( writer, NULL, BAD_CAST("size"), NULL);
-	xmlTextWriterWriteFormatString(writer, "%ld", (XAR_SIGNATURE(sig)->len));
+	xmlTextWriterWriteFormatString(writer, "%" PRId32, (XAR_SIGNATURE(sig)->len));
 	xmlTextWriterEndElement(writer);	
 
 	/* <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"> */
