@@ -1,3 +1,5 @@
+.SECONDARY :
+
 #
 # Include generated dependency files.
 #
