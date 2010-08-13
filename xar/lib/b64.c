@@ -71,12 +71,15 @@ static char b64revtb[256] = {
 };
 
 static unsigned int raw_base64_decode(
-  const unsigned char *input, unsigned char *output, int len)
+  const unsigned char *input, unsigned char *output, unsigned int len,
+  unsigned int *olen)
 {
 
-    unsigned int  x, i = 0, ignr = 0;
+    unsigned int  x, i = 0, ignr = 0, dummy;
     unsigned char buf[3], pad = 0;
 
+    if (!olen) olen = &dummy;
+    *olen = 0;
     while (i < len || !pad) {
         x = b64revtb[input[i++]];
         switch (x) {
@@ -116,18 +119,26 @@ static unsigned int raw_base64_decode(
                         break;
                     case 3:
                         buf[2] |= x;
-                        for (x = 0;  x < 3 - pad;  x++) *output++ = buf[x];
+                        for (x = 0;  x < 3 - pad;  x++) {
+                            *output++ = buf[x];
+                            (*olen)++;
+                        }
                         break;
                 }
                 break;
         }
     }
     if (i > len) return 2;
-    for (x = 0;  x < 3 - pad;  x++) *output++ = buf[x];
+    for (x = 0;  x < 3 - pad;  x++) {
+        *output++ = buf[x];
+        (*olen)++;
+    }
     return 0;
 }
 
-unsigned char* xar_from_base64(const unsigned char* input, int len)
+unsigned char* xar_from_base64(
+  const unsigned char* input, unsigned int len, unsigned int *olen
+)
 {
     int err;
     unsigned char *output;
@@ -135,7 +146,7 @@ unsigned char* xar_from_base64(const unsigned char* input, int len)
     output = malloc(3 * (len / 4 + 1));
     if (!output) return NULL;
 
-    err = raw_base64_decode(input, output, len);
+    err = raw_base64_decode(input, output, len, olen);
 
     if (err) {
         free(output);

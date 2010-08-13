@@ -347,7 +347,7 @@ xar_t xar_open(const char *file, int32_t flags) {
 			return NULL;
 		}
 
-		XAR(ret)->heap_offset = xar_get_heap_offset(ret) + offset;
+		XAR(ret)->heap_offset = (off_t)(xar_get_heap_offset(ret) + offset);
 		if( lseek(XAR(ret)->fd, XAR(ret)->heap_offset, SEEK_SET) == -1 ) {
 			xar_close(ret);
 			return NULL;
@@ -1501,6 +1501,7 @@ static int32_t xar_unserialize(xar_t x) {
 				} else {
 					xar_subdoc_t s;
 					int i;
+					struct __xar_attr_t *attrs = NULL;
 
 					prefix = xmlTextReaderPrefix(reader);
 					uri = xmlTextReaderNamespaceUri(reader);
@@ -1518,13 +1519,14 @@ static int32_t xar_unserialize(xar_t x) {
 								a = xar_attr_new();
 								XAR_ATTR(a)->key = strdup(aname);
 								XAR_ATTR(a)->value = strdup(avalue);
-								XAR_ATTR(a)->next = XAR_SUBDOC(s)->attrs;
-								XAR_SUBDOC(s)->attrs = XAR_ATTR(a);
+								XAR_ATTR(a)->next = attrs;
+								attrs = XAR_ATTR(a);
 							}
 						}
 					}
 
 					s = xar_subdoc_new(x, (const char *)name);
+					XAR_SUBDOC(s)->attrs = attrs;
 					xar_subdoc_unserialize(s, reader);
 				}
 			}

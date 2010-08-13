@@ -34,6 +34,10 @@
 #ifndef _XAR_SIGNATURE_H_
 #define _XAR_SIGNATURE_H_
 
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
+
 #include "xar.h"
 
 struct __xar_x509cert_t{

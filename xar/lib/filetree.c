@@ -1037,7 +1037,7 @@ int32_t xar_prop_unserialize(xar_file_t f, xar_prop_t parent, xmlTextReaderPtr r
 			value = (const char *)xmlTextReaderConstValue(reader);
 			free((char*)XAR_PROP(p)->value);
 			if( isencoded )
-				XAR_PROP(p)->value = (const char *)xar_from_base64(BAD_CAST(value), strlen(value));
+				XAR_PROP(p)->value = (const char *)xar_from_base64(BAD_CAST(value), strlen(value), NULL);
 			else
 				XAR_PROP(p)->value = strdup(value);
 			if( isname ) {

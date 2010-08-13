@@ -207,7 +207,7 @@ int32_t xar_signature_add_x509certificate(xar_signature_t sig, const uint8_t *ce
 int32_t xar_signature_get_x509certificate_count(xar_signature_t sig);
 int32_t xar_signature_get_x509certificate_data(xar_signature_t sig, int32_t index, const uint8_t **cert_data, uint32_t *cert_len);
 
-uint8_t xar_signature_copy_signed_data(xar_signature_t sig, uint8_t **data, uint32_t *length, uint8_t **signed_data, uint32_t *signed_length);
+int32_t xar_signature_copy_signed_data(xar_signature_t sig, uint8_t **data, uint32_t *length, uint8_t **signed_data, uint32_t *signed_length, uint64_t *signed_offset);
 
 /* Helper functions - caller must free returned memory */
 char *xar_get_size(xar_t x, xar_file_t f);
@@ -231,7 +231,7 @@ int32_t xar_err_callback(xar_t x, int32_t sev, int32_t err);
 
 void xar_serialize(xar_t x, const char *file);
 char *xar_get_path(xar_file_t f);
-off_t	xar_get_heap_offset(xar_t x);
+uint64_t xar_get_heap_offset(xar_t x);
 uint64_t xar_ntoh64(uint64_t num);
 
 #endif /* _XAR_H_ */

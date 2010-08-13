@@ -50,19 +50,29 @@
 #include <errno.h>
 #include <time.h>
 #include "xar.h"
+#include "../lib/filetree.h"
 #include "config.h"
 
 #define SYMBOLIC 1
 #define NUMERIC  2
+
+// error codes for B&I
+#define E_NOSIG     60
+#define E_SIGEXISTS 61
+
 static int Perms = 0;
 static int Local = 0;
 static char *Subdoc = NULL;
 static char *SubdocName = NULL;
 static char *Toccksum = NULL;
+static char *Filecksum = NULL;
 static char *Compression = NULL;
 static char *Rsize = NULL;
 static char *CompressionArg = NULL;
 static char *Chdir = NULL;
+static char *DataToSignDumpPath = NULL;
+static char *SigOffsetDumpPath = NULL;
+static char *SignatureDumpPath = NULL;
 
 static int Err = 0;
 static int List = 0;
@@ -71,12 +81,31 @@ static int Coalesce = 0;
 static int LinkSame = 0;
 static int NoOverwrite = 0;
 static int SaveSuid = 0;
+static int DoSign = 0;
+
+static long SigSize = 0;
 
 struct lnode {
 	char *str;
 	regex_t reg;
 	struct lnode *next;
 };
+struct cnode {
+	char *cert_path;
+	struct cnode *next;
+};
+struct __stack_element {
+	struct __stack_element *prev;
+	struct __stack_element *next;
+	void *data;
+};
+struct __stack {
+	struct __stack_element *bottom;
+	struct __stack_element *top;
+};
+
+typedef struct __stack_element *stack_element;
+typedef struct __stack *stack;
 
 struct lnode *Exclude = NULL;
 struct lnode *Exclude_Tail = NULL;
@@ -86,8 +115,12 @@ struct lnode *PropInclude = NULL;
 struct lnode *PropInclude_Tail = NULL;
 struct lnode *PropExclude = NULL;
 struct lnode *PropExclude_Tail = NULL;
+struct cnode *CertPath = NULL;
+struct cnode *CertPath_Tail = NULL;
 
 static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx);
+static int32_t signingCallback(xar_signature_t sig, void *context, uint8_t *data, uint32_t length, uint8_t **signed_data, uint32_t *signed_len);
+static void insert_cert(xar_signature_t sig, const char *cert_path);
 
 static void print_file(xar_t x, xar_file_t f) {
 	if( List && Verbose ) {
@@ -165,6 +198,667 @@ static void extract_subdoc(xar_t x, const char *name) {
 	return;
 }
 
+static void extract_data_to_sign(const char *filename) {
+	xar_signature_t sig;
+	uint64_t signatureOffset;
+	FILE *file;
+	xar_t x;
+	int i;
+	uint64_t dataToSignOffset = 0;
+	uint32_t dataToSignSize = 0;
+	char *buffer = NULL;
+	const char *value;
+
+	// find signature stub
+	x = xar_open(filename, READ);
+	if ( x == NULL ) {
+		fprintf(stderr, "Could not open %s to extract data to sign!\n", filename);
+		exit(1);
+	}
+	sig = xar_signature_first(x);
+	if ( !sig ) {
+		fprintf(stderr, "No signatures found to extract data from.\n");
+		exit(E_NOSIG);
+	}
+
+	// locate data to sign
+	if( 0 != xar_prop_get((xar_file_t)x, "checksum/offset" ,&value) ){
+		fprintf(stderr, "Could not locate checksum/offset in archive.\n");
+		exit(1);
+	}
+	dataToSignOffset = xar_get_heap_offset(x);
+	dataToSignOffset += strtoull(value, (char **)NULL, 10);
+	if( 0 != xar_prop_get((xar_file_t)x, "checksum/size" ,&value) ){
+		fprintf(stderr, "Could not locate checksum/size in archive.\n");
+		exit(1);
+	}
+	dataToSignSize = strtoull(value, (char **)NULL, 10);
+
+	// get signature offset (inject signature here) 
+	xar_signature_copy_signed_data(sig, NULL, NULL, NULL, NULL, &signatureOffset);
+	signatureOffset += xar_get_heap_offset(x);
+	xar_close(x);
+
+	// now get data to be signed, using offset and size
+	file = fopen(filename, "rb");
+	if (!file) {
+		fprintf(stderr, "Could not open %s for reading data to sign!\n", filename);
+		exit(1);
+	}
+	fseek(file, (long)dataToSignOffset, SEEK_SET);
+	buffer = malloc(dataToSignSize);
+	i = fread(buffer, dataToSignSize, 1, file);
+	if (i != 1) {
+		fprintf(stderr, "Failed to read data to sign from %s!\n", filename);
+		exit(1);
+	}
+	fclose(file);
+
+	// save data to sign
+	file = fopen(DataToSignDumpPath, "wb");
+	if (!file) {
+		fprintf(stderr, "Could not open %s for saving data to sign!\n", DataToSignDumpPath);
+		exit(1);
+	}
+	i = fwrite(buffer, dataToSignSize, 1, file);
+	if (i != 1) {
+		fprintf(stderr, "Failed to write data to sign to %s (fwrite() returned %i)!\n", DataToSignDumpPath, i);
+		exit(1);
+	}
+	fclose(file);
+
+	if (SigOffsetDumpPath) {
+		// save signature offset
+		file = fopen(SigOffsetDumpPath, "wb");
+		if (!file) {
+			fprintf(stderr, "Could not open %s for saving signature offset!\n", SigOffsetDumpPath);
+			exit(1);
+		}
+		i = fprintf(file, "%llu\n", (unsigned long long)signatureOffset);
+		if (i < 0) {
+			fprintf(stderr, "Failed to write signature offset to %s (fprintf() returned %i)!\n", SigOffsetDumpPath, i);
+			exit(1);
+		}
+		fclose(file);
+	}
+
+	free(buffer);
+}
+
+static const unsigned char b64_table[64] = {
+'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
+};
+
+static char *xar_to_base64(const void *input, unsigned int len, unsigned *ocnt)
+{
+#define INP(x) ((const unsigned char *)(x))
+    unsigned char b6;
+    unsigned int count = 0;
+    unsigned i=0;
+    unsigned char *output;
+    int outsize = (((float)len)*4/3)+5;
+
+    if (ocnt) *ocnt = 0;
+    output = (unsigned char *)malloc(outsize);
+    if( !output )
+        return NULL;
+
+    for(;;) {
+        if( i >= len ) {
+            output[count++] = '\n';
+            output[count++] = '\0';
+            if (ocnt) *ocnt = count;
+            return (char *)output;
+        }
+        b6 = INP(input)[i];
+        b6 >>= 2;
+        output[count++] = b64_table[b6];
+
+        b6 = INP(input)[i++];
+        b6 &= 0x03;
+        b6 <<= 4;
+        if( i >= len ) {
+            output[count++] = b64_table[b6];
+            output[count++] = '=';
+            output[count++] = '=';
+            output[count++] = '\n';
+            output[count++] = '\0';
+            if (ocnt) *ocnt = count;
+            return (char *)output;
+        }
+        b6 |= INP(input)[i] >> 4;
+        output[count++] = b64_table[b6];
+
+        b6 = INP(input)[i++] & 0x0F;
+        b6 <<= 2;
+        if( i >= len ) {
+            output[count++] = b64_table[b6];
+            output[count++] = '=';
+            output[count++] = '\n';
+            output[count++] = '\0';
+            if (ocnt) *ocnt = count;
+            return (char *)output;
+        }
+        b6 |= INP(input)[i] >> 6;
+        output[count++] = b64_table[b6];
+
+        b6 = INP(input)[i++] & 0x3F;
+        output[count++] = b64_table[b6];
+    }
+#undef INP
+}
+
+static void extract_certs(char *filename, char *cert_base_path, char *CApath) {
+	xar_signature_t sig;
+	xar_t x;
+	int32_t count;
+	int i, n;
+	const uint8_t *cert_data;
+	uint32_t cert_len;
+	FILE *file, *CAfile = NULL;
+	char *cert_path;
+
+	// open xar, get signature
+	x = xar_open(filename, READ);
+	if ( x == NULL ) {
+		fprintf(stderr, "Could not open %s to extract certificates!\n", filename);
+		exit(1);
+	}
+	sig = xar_signature_first(x);
+	if ( !sig ) {
+		fprintf(stderr, "No signatures found to extract data from.\n");
+		exit(E_NOSIG);
+	}
+
+	// iterate through all certificates associated with that signature, write them to disk
+	count = xar_signature_get_x509certificate_count(sig);
+	if (!count) {
+		fprintf(stderr, "Signature bears no certificates. Odd.\n");
+		exit(1);
+	}
+	if (CApath) {
+		CAfile = fopen(CApath, "wb");
+		if (!CAfile) {
+			fprintf(stderr, "Could not save certificates to %s.\n", CApath);
+			exit(1);
+		}
+	}
+	for (i=0; i<count; i++) {
+		xar_signature_get_x509certificate_data(sig, i, &cert_data, &cert_len);
+		if (cert_base_path) {
+			if (asprintf(&cert_path, "%s/cert%02i", cert_base_path, i) == -1) {
+				fprintf(stderr, "Could not save certificate %i to %s.\n", i, cert_path);
+				exit(1);
+			}
+			file = fopen(cert_path, "wb");
+			if (!file) {
+				fprintf(stderr, "Could not save certificate %i to %s.\n", i, cert_path);
+				exit(1);
+			}
+			n = fwrite(cert_data, cert_len, 1, file);
+			if (n < 0) {
+				fprintf(stderr, "Failed to write certificate to %s (fwrite() returned %i)!\n", cert_path, n);
+				exit(1);
+			}
+			fclose(file);
+			free(cert_path);
+		}
+		if (CAfile) {
+			unsigned cnt;
+			char *p;
+			char *b64 = xar_to_base64(cert_data, cert_len, &cnt);
+			if (!b64 || !cnt) {
+				fprintf(stderr, "Could not save certificates to %s.\n", CApath);
+				exit(1);
+			}
+			if (fputs("-----BEGIN CERTIFICATE-----\n", CAfile) == -1) {
+				fprintf(stderr, "Failed to write certificates to %s.\n", CApath);
+				exit(1);
+			}
+			--cnt; /* skip trailing nul */
+			for (p = b64; cnt > 64; p += 64, cnt -= 64) {
+				n = fwrite(p, 64, 1, CAfile);
+				if (n < 0 || fputs("\n", CAfile) == -1) {
+					fprintf(stderr, "Failed to write certificates to %s.\n", CApath);
+					exit(1);
+				}
+			}
+			if (cnt) {
+				n = fwrite(p, cnt, 1, CAfile);
+				if (n < 0) {
+					fprintf(stderr, "Failed to write certificates to %s.\n", CApath);
+					exit(1);
+				}
+			}
+			if (fputs("-----END CERTIFICATE-----\n", CAfile) == -1) {
+				fprintf(stderr, "Failed to write certificates to %s.\n", CApath);
+				exit(1);
+			}
+			free(b64);
+		}
+	}
+	if (CAfile) {
+		fclose(CAfile);
+	}
+
+	// clean up
+	xar_close(x);
+}
+
+static int32_t get_sig_info(xar_t x, uint64_t *sig_off, uint32_t *sig_len, uint8_t **sig_data) {
+	int32_t err;
+	uint64_t signedDataOffset = 0;
+
+	xar_signature_t sig = xar_signature_first(x);
+	err = xar_signature_copy_signed_data(sig,NULL,NULL,sig_data,sig_len,&signedDataOffset);
+	if (!err && sig_off) {
+		signedDataOffset += xar_get_heap_offset(x);
+		*sig_off = signedDataOffset;
+	}
+
+	return err;
+}
+
+static void write_sig_offset(const char *filename, uint64_t signedDataOffset) {
+	int i;
+	FILE *file = fopen(filename, "wb");
+	if (!file) {
+		fprintf(stderr, "Could not open %s for saving signature offset!\n", filename);
+		exit(1);
+	}
+	i = fprintf(file, "%llu\n", (unsigned long long)signedDataOffset);
+	if (i < 0) {
+		fprintf(stderr, "Failed to write signature offset to %s (fprintf() returned %i)!\n", filename, i);
+		exit(1);
+	}
+	fclose(file);
+}
+
+static void extract_sig_offset(xar_t x, const char *filename) {
+	uint64_t signedDataOffset;
+
+	// get offset
+	if (get_sig_info(x, &signedDataOffset, NULL, NULL) != 0) {
+		fprintf(stderr, "Could not read signature offset from %s!\n", filename);
+		exit(1);
+	}
+
+	// and save it to file
+	write_sig_offset(filename, signedDataOffset);
+}
+
+static void extract_signature(const char *filename, const char *sigfile) {
+	xar_t x;
+	xar_signature_t sig;
+	uint64_t signedDataOffset;
+	uint32_t signedDataLength;
+	uint8_t *signedData;
+	FILE *file;
+	int i;
+
+	// open xar, get signature
+	x = xar_open(filename, READ);
+	if ( x == NULL ) {
+		fprintf(stderr, "Could not open %s to extract signature data!\n", filename);
+		exit(1);
+	}
+	sig = xar_signature_first(x);
+	if ( !sig ) {
+		fprintf(stderr, "No signatures found to extract data from.\n");
+		exit(E_NOSIG);
+	}
+
+	// get the signature data
+	if (get_sig_info(x, &signedDataOffset, &signedDataLength, &signedData) != 0
+	    || !signedDataLength || !signedData) {
+		fprintf(stderr, "Could not read signature data from %s!\n", filename);
+		exit(1);
+	}
+	xar_close(x);
+
+	// and save it to file
+	file = fopen(sigfile, "wb");
+	if (!file) {
+		fprintf(stderr, "Could not open %s for saving signature data!\n", sigfile);
+		exit(1);
+	}
+	i = fwrite(signedData, signedDataLength, 1, file);
+	if (i < 0) {
+		fprintf(stderr, "Failed to write signature data to %s (fwrite() returned %i)!\n", filename, i);
+		exit(1);
+	}
+	fclose(file);
+
+	if( SigOffsetDumpPath )
+		// also save sig offset if --sig-offset present
+		write_sig_offset(SigOffsetDumpPath, signedDataOffset);
+
+}
+
+stack stack_new() {
+	stack s = (stack)malloc(sizeof(struct __stack));
+	s->bottom = s->top = NULL;
+	return s;
+}
+void stack_free(stack s) {
+	free(s);
+}
+void stack_push(stack s, void *data) {
+	stack_element e = malloc(sizeof(struct __stack_element));
+	e->data = data;
+	if (s->top) {
+		s->top->next = e;
+		e->prev = s->top;
+	} else {
+		s->top = s->bottom = e;
+		e->prev = NULL;
+	}
+	e->next = NULL;
+	s->top = e;
+}
+void *stack_pop(stack s) {
+	if (!s->top)
+		return NULL;
+	void *ret = s->top->data;
+	stack_element temp = s->top;
+	s->top = s->top->prev;
+	free(temp);
+	if (s->top)
+		s->top->next = NULL;
+	else 
+		s->bottom = NULL;
+	return ret;
+}
+
+/* replace_sign: rip out all current signatures and certs and insert a new pair
+		Since libxar is currently not capable of doing this directly, we have to create a new xar archive,
+		copy all the files and options from the current archive, and sign the new archive
+*/
+static void replace_sign(const char *filename) {
+
+	xar_t old_xar, new_xar;
+	xar_signature_t sig;
+	char *new_xar_path = (char *)malloc(16);
+	strncpy(new_xar_path, "/tmp/xar-XXXXXX", 16);
+	char *systemcall;
+	struct cnode *c;
+	int err, tempfd;
+
+	// open both archives
+	old_xar = xar_open(filename, READ);
+	if ( old_xar == NULL ) {
+		fprintf(stderr, "Could not open archive %s!\n", filename);
+		exit(1);
+	}
+
+	// create the temporary archive file
+	tempfd = mkstemp(new_xar_path);
+	if( tempfd == -1 ) {
+		fprintf(stderr, "Error creating new archive %s\n", new_xar_path);
+		exit(1);
+	}
+	close(tempfd);
+
+
+	new_xar = xar_open(new_xar_path, WRITE);
+	if( !new_xar ) {
+		fprintf(stderr, "Error creating new archive %s\n", new_xar_path);
+		exit(1);
+	}
+
+	// install new signature and new certs in new_xar
+	sig = xar_signature_new(new_xar, "RSA", SigSize, &signingCallback, NULL);
+	for( c = CertPath; c; c=c->next ) {
+		insert_cert(sig, c->cert_path);
+	}
+
+	// copy options
+	char *opts[6] = {XAR_OPT_TOCCKSUM, XAR_OPT_COMPRESSION, XAR_OPT_COALESCE, XAR_OPT_LINKSAME, XAR_OPT_RSIZE, XAR_OPT_OWNERSHIP};
+	int i;
+	const char *opt;
+	for (i=0; i<6; i++) {
+		opt = xar_opt_get(old_xar, opts[i]);
+		if (opt)
+			xar_opt_set(new_xar, opts[i], opt);
+	}
+
+	// skip copy subdocs for now since we don't use them yet
+
+	// copy files
+	xar_iter_t iter = xar_iter_new();
+	xar_file_t f = xar_file_first(old_xar, iter);
+		// xar_file_next iterates the archive depth-first, i.e. all children are enumerated before the siblings.
+	const char *name;
+	stack s_new = stack_new();
+	stack s_old = stack_new();
+	xar_file_t last_copied = NULL, last_added = NULL;
+
+	xar_iter_t loopIter = xar_iter_new();
+	xar_file_t current_xar_file;
+	for (current_xar_file = xar_file_first(old_xar, loopIter); current_xar_file; current_xar_file = xar_file_next(loopIter))
+	{
+		printf("old_xar -> %s (parent: %s)\n",xar_get_path(current_xar_file),XAR_FILE(current_xar_file)->parent?xar_get_path(XAR_FILE(current_xar_file)->parent):"(nil)");
+	}
+
+	do {
+		// parent is the parent in the new archive!
+		// 3 cases:
+		//  1. the file has no parent. Happens for every file at the top level of the archive.
+		//  2. the file's parent is the last file we added. Happens while descending down a path
+		//  3. the file's parent is one of the ancestors of the last file (and not NULL, that would be case 1)
+		//		that means we either go back up the tree and add a sibling of one of the ancestors, or we add a
+		//		sibling on the same level
+		xar_prop_get(f, "name", &name);	// filename, without any path info
+		if (!XAR_FILE(f)->parent) {	// case 1
+			printf("root: %s\n",xar_get_path(f));
+			last_added = xar_add_from_archive(new_xar, NULL, name, old_xar, f);
+			last_copied = f;
+			stack_push(s_new, (void *)last_added);
+			stack_push(s_old, (void *)last_copied);
+		} else if (f->parent == last_copied) {	// case 2			
+			printf("child: %s -> %s\n",xar_get_path(f->parent),xar_get_path(f));
+			last_added = xar_add_from_archive(new_xar, last_added, name, old_xar, f);
+			last_copied = f;
+			stack_push(s_new, (void *)last_added);
+			stack_push(s_old, (void *)last_copied);
+		} else {	// case 3
+			printf("searching for parent: %s ?\n",xar_get_path(f));
+			while (XAR_FILE(f)->parent != XAR_FILE(s_old->top->data)->parent) {
+				printf("popping: %s\n",xar_get_path(XAR_FILE(s_old->top->data)));
+				stack_pop(s_new);
+				stack_pop(s_old);
+			}
+			printf("found: %s -> %s\n",xar_get_path(XAR_FILE(s_new->top->data)),xar_get_path(f));
+			stack_pop(s_new);
+			stack_pop(s_old);
+			last_added = xar_add_from_archive(new_xar, (xar_file_t)(s_new->top->data), name, old_xar, f);
+			last_copied = f;
+			stack_push(s_new, (void *)last_added);
+			stack_push(s_old, (void *)last_copied);
+		}
+	} while ((f = xar_file_next(iter)));
+
+	loopIter = xar_iter_new();
+	for (current_xar_file = xar_file_first(new_xar, loopIter); current_xar_file; current_xar_file = xar_file_next(loopIter))
+	{
+		char * current_path = xar_get_path(current_xar_file);
+		printf("new_xar -> %s\n",current_path);
+	}
+
+	xar_iter_free(iter);
+	stack_free(s_new);
+	stack_free(s_old);
+	if( xar_close(new_xar) != 0 ) {
+		fprintf(stderr, "Error creating the archive\n");
+		if( !Err )
+			Err = 42;
+	}
+	xar_close(old_xar);
+
+	// write signature offset to file (have to re-open so xar_close can figure out the correct offset)
+	new_xar = xar_open(new_xar_path, READ);
+	if( !new_xar ) {
+		fprintf(stderr, "Error re-opening new archive %s\n", new_xar_path);
+		exit(1);
+	}
+	if( SigOffsetDumpPath )
+		extract_sig_offset(new_xar, SigOffsetDumpPath);
+	xar_close(new_xar);
+
+	// delete old archive, move new in its place
+	unlink(filename);
+	err = asprintf(&systemcall, "cp \"%s\" \"%s\"", new_xar_path, filename);
+	if (err == -1) {
+		fprintf(stderr, "Could not copy new archive to final location (asprintf() error %i)\n", errno);
+		exit(1);
+	}
+	err = system(systemcall);
+	if (err) {
+		fprintf(stderr, "Could not copy new archive to final location (system() returned %i)\n", err);
+		exit(1);
+	}
+	free(systemcall);
+	// delete temporary archive
+	unlink(new_xar_path);
+}
+
+/*	belated_sign
+	Prepare a previously unsigned archive for signing by creating a signature placeholder and inserting the certificates.
+	Since libxar is currently not capable of doing this directly, we have to create a new xar archive,
+	copy all the files and options from the current archive, and sign the new archive
+*/
+static void belated_sign(const char *filename) {
+	xar_t x = xar_open(filename, READ);
+	if ( x == NULL ) {
+		fprintf(stderr, "Could not open archive %s!\n", filename);
+		exit(1);
+	}
+	xar_signature_t sig = xar_signature_first(x);
+	if ( sig ) {
+		fprintf(stderr, "Archive has already been signed. Use --replace-sign instead.\n");
+		exit(E_SIGEXISTS);
+	}
+	xar_close(x);
+	replace_sign(filename);
+}
+
+static int32_t signingCallback(xar_signature_t sig, void *context, uint8_t *data, uint32_t length, uint8_t **signed_data, uint32_t *signed_len) {
+
+	// save data to file for later signature
+	if (DataToSignDumpPath) {
+		FILE *file = fopen(DataToSignDumpPath, "wb");
+		if (!file) {
+			fprintf(stderr, "Could not open %s for saving data to sign!\n", DataToSignDumpPath);
+			exit(1);
+		}
+		int i = fwrite(data, length, 1, file);
+		if (i != 1) {
+			fprintf(stderr, "Failed to write data to sign to %s (fwrite() returned %i)!\n", DataToSignDumpPath, i);
+			exit(1);
+		}
+		fclose(file);
+	}
+
+	// now return blank placeholder data
+	*signed_data = (uint8_t *)malloc(SigSize);
+	memset(*signed_data, 0, SigSize);
+	strncpy((char *)*signed_data, "helloworld", 10);	// debug
+	*signed_len = SigSize;
+	return 0;	// no error
+}
+
+static void insert_cert(xar_signature_t sig, const char *cert_path) {
+	struct stat *s = malloc(sizeof(struct stat));
+	if (stat(cert_path, s) == -1) {
+		fprintf(stderr, "Could not stat() certificate file %s (errno == %i)\n", cert_path, errno);
+		exit(1);
+	}
+	void *cert = malloc(s->st_size);
+	FILE *file = fopen(cert_path, "rb");
+	if (!file) {
+		fprintf(stderr, "Could not open %s for reading certificate!\n", cert_path);
+		exit(1);
+	}
+	int i = fread(cert, s->st_size, 1, file);
+	if (i != 1) {
+		fprintf(stderr, "Failed to read certificate from %s!\n", cert_path);
+		exit(1);
+	}
+	fclose(file);
+	xar_signature_add_x509certificate(sig, cert, s->st_size);
+	free(s);
+	free(cert);
+}
+
+static void inject_signature(const char *xar_path, const char *sig_path) {
+	// since there is no API to insert a signature other than during signingCallback time, we have to
+	// inject it by editing the raw file
+	int buffer_size = 1024;
+	void *buffer = malloc(buffer_size);
+	FILE *sig, *xar;
+	uint64_t signedDataOffset;
+        uint32_t signedDataLength, sig_data_len;
+	xar_t x;
+	int i;
+
+	printf("inject_signature(%s, %s)\n",xar_path,sig_path);
+
+	// open xar via the API first to determine the signature offset
+	x = xar_open(xar_path, READ);
+	if ( x == NULL ) {
+		fprintf(stderr, "Could not open xar archive %s to get signature offset!\n", xar_path);
+		exit(1);
+	}
+	if (get_sig_info(x, &signedDataOffset, &signedDataLength, NULL) != 0) {
+		fprintf(stderr, "Could not read xar archive %s to get signature offset!\n", xar_path);
+		exit(1);
+	}
+	xar_close(x);
+
+	// then re-open xar and signature files raw...
+	sig = fopen(sig_path, "rb");
+	if (!sig) {
+		fprintf(stderr, "Could not open %s for reading signature!\n", sig_path);
+		exit(1);
+	}
+	if (fseek(sig, 0, SEEK_END) == -1) {
+		fprintf(stderr, "Could not get length of %s!\n", sig_path);
+		exit(1);
+	}
+	sig_data_len = (uint32_t)ftell(sig);
+	if (fseek(sig, 0, SEEK_SET) == -1) {
+		fprintf(stderr, "Could not rewind %s!\n", sig_path);
+		exit(1);
+	}
+	if (!signedDataLength || !sig_data_len || signedDataLength != sig_data_len) {
+		fprintf(stderr, "Bad signature length!\n");
+		exit(1);
+	}
+
+	xar = fopen(xar_path, "r+b");
+	if (!xar) {
+		fprintf(stderr, "Could not open xar archive %s for injecting signature!\n", xar_path);
+		exit(1);
+	}
+	// ...and inject the signature
+	fseek(xar, (long)signedDataOffset, SEEK_SET);
+	do {
+		i = fread(buffer, 1, buffer_size, sig);
+		if (ferror(sig)) {
+			fprintf(stderr, "Failed to read signature from %s!\n", sig_path);
+			exit(1);
+		}
+		fwrite(buffer, 1, i, xar);
+	} while (!feof(sig));
+	fclose(sig);
+	fclose(xar);
+
+	free(buffer);
+}
+
 static int archive(const char *filename, int arglen, char *args[]) {
 	xar_t x;
 	FTS *fts;
@@ -179,8 +873,19 @@ static int archive(const char *filename, int arglen, char *args[]) {
 		exit(1);
 	}
 
+	if ( SigSize ) {
+		struct cnode *c;
+		xar_signature_t sig = xar_signature_new(x, "RSA", SigSize, &signingCallback, NULL);
+		for( c = CertPath; c; c=c->next ) {
+			insert_cert(sig, c->cert_path);
+		}
+	}
+
 	if( Toccksum )
 		xar_opt_set(x, XAR_OPT_TOCCKSUM, Toccksum);
+
+	if( Filecksum )
+		xar_opt_set(x, XAR_OPT_FILECKSUM, Filecksum);
 
 	if( Compression )
 		xar_opt_set(x, XAR_OPT_COMPRESSION, Compression);
@@ -291,6 +996,20 @@ static int archive(const char *filename, int arglen, char *args[]) {
 		free(tmp);
 	}
 
+	if ( SigOffsetDumpPath ) {
+		x = xar_open(filename, READ);
+		if( !x ) {
+			fprintf(stderr, "Error re-opening archive %s\n", filename);
+			exit(1);
+		}
+		extract_sig_offset(x, SigOffsetDumpPath);
+		if( xar_close(x) != 0 ) {
+			fprintf(stderr, "Error re-closing the archive\n");
+			if( !Err )
+				Err = 42;
+		}
+	}
+
 	return Err;
 }
 
@@ -328,7 +1047,10 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		
 		/* Add a clause for recursive extraction */
 		tmp = malloc(sizeof(struct lnode));
-		asprintf(&tmp->str, "%s/.*", args[argi]);
+		if (asprintf(&tmp->str, "%s/.*", args[argi]) == -1) {
+			printf("Error with asprintf()\n");
+			exit(1);
+		}
 		tmp->next = NULL;
 		err = regcomp(&tmp->reg, tmp->str, REG_NOSUB);
 		if( err ) {
@@ -595,7 +1317,7 @@ static int dump_header(const char *filename) {
 		}
 	}
 
-	if( read(fd, &xh, sizeof(xh)) < sizeof(xh) ) {
+	if( read(fd, &xh, sizeof(xh)) < (int)sizeof(xh) ) {
 		fprintf(stderr, "error reading header\n");
 		exit(1);
 	}
@@ -621,6 +1343,79 @@ static int dump_header(const char *filename) {
 	         break;
 	};
 
+	return 0;
+}
+
+static int dumptoc_raw(const char *filename, const char* tocfile) {
+	int fd, toc;
+	xar_header_t xh;
+	uint64_t clen;
+	uint16_t hlen;
+	unsigned buffer_size = 1024;
+	void *buffer = malloc(buffer_size);
+
+	if(filename == NULL)
+		fd = 0;
+	else {
+		fd = open(filename, O_RDONLY);
+		if( fd < 0 ) {
+			perror("open");
+			exit(1);
+		}
+	}
+
+	if( read(fd, &xh, sizeof(xh)) < (int)sizeof(xh) ) {
+		fprintf(stderr, "error reading header\n");
+		exit(1);
+	}
+
+	if( ntohl(xh.magic) != XAR_HEADER_MAGIC ) {
+		fprintf(stderr, "error reading header (bad magic number)\n");
+		exit(1);
+	}
+
+	hlen = ntohs(xh.size);
+	clen = xar_ntoh64(xh.toc_length_compressed);
+
+	if( hlen < sizeof(xh) ) {
+		fprintf(stderr, "error reading header (header size field value too small)\n");
+		exit(1);
+	}
+	if( hlen > sizeof(xh) && (hlen - sizeof(xh) > buffer_size) ) {
+		fprintf(stderr, "error reading header (bad header size field)\n");
+		exit(1);
+	}
+	if( hlen > sizeof(xh) &&
+		read(fd, buffer, hlen - sizeof(xh)) < (int)(hlen - sizeof(xh)) ) {
+		fprintf(stderr, "error reading header (premature EOF)\n");
+		exit(1);
+	}
+
+	toc = open(tocfile, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+	if( toc < 0 ) {
+		perror("open dump file for writing");
+		exit(1);
+	}
+
+	while (clen) {
+		ssize_t bytes;
+		if (buffer_size > clen)
+			buffer_size = (unsigned)clen;
+		bytes = read(fd, buffer, buffer_size);
+		if (bytes != (ssize_t)buffer_size) {
+			fprintf(stderr, "error reading toc (premature EOF)\n");
+			exit(1);
+		}
+		bytes = write(toc, buffer, buffer_size);
+		if (bytes != (ssize_t)buffer_size) {
+			fprintf(stderr, "error writing raw toc dump file\n");
+			exit(1);
+		}
+		clen -= (uint64_t)bytes;
+	}
+
+	close(fd);
+	close(toc);
 	return 0;
 }
 
@@ -677,6 +1472,30 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t-c               Creates an archive\n");
 	fprintf(stderr, "\t-x               Extracts an archive\n");
 	fprintf(stderr, "\t-t               Lists an archive\n");
+	fprintf(stderr, "\t--sign           Creates a placeholder signature and saves\n");
+	fprintf(stderr, "\t                 the data to sign to disk. Works with -c or -f, requires\n");
+	fprintf(stderr, "\t                 --sig-size and one or more --cert-loc to be set.\n");
+	fprintf(stderr, "\t                 Setting --data-to-sign and --sig-offset is optional.\n");
+	fprintf(stderr, "\t                 Fails with error code %i if the archive has already\n", E_SIGEXISTS);
+	fprintf(stderr, "\t                 been signed.\n");
+	fprintf(stderr, "\t--replace-sign   Rips out existing signature(s) and makes a new one.\n");
+	fprintf(stderr, "\t                 Same required parameter set as --sign, \n");
+	fprintf(stderr, "\t                 but -f instead of -c.\n");
+	fprintf(stderr, "\t--extract-data-to-sign Extracts data to be signed from an\n");
+	fprintf(stderr, "\t                 existing archive. Requires --data-to-sign (and -f)\n");
+	fprintf(stderr, "\t                 to be set.  Setting --sig-offset is optional.\n");
+	fprintf(stderr, "\t--extract-certs <dir> Extracts all certificates in DER format into the\n");
+	fprintf(stderr, "\t                 specified directory, naming them 'cert1', 'cert2' etc.\n");
+	fprintf(stderr, "\t                 Requires -f.\n");
+	fprintf(stderr, "\t--extract-CAfile <filename> Extracts all certificates in PEM format,\n");
+	fprintf(stderr, "\t                 concatenates them together and stores the result in the\n");
+	fprintf(stderr, "\t                 specified file.  Requires -f.\n");
+	fprintf(stderr, "\t--extract-sig <filename> Extracts the signature data and stores it into\n");
+	fprintf(stderr, "\t                 the specified file.  Requires -f.  Setting --sig-offset\n");
+	fprintf(stderr, "\t                 Setting --sig-offset is optional.\n");
+	fprintf(stderr, "\t--inject-sig <filename> After extracting the data to be signed and\n");
+	fprintf(stderr, "\t                 doing the signing externally, injects the\n");
+	fprintf(stderr, "\t                 signature. Requires -f.\n");
 	fprintf(stderr, "\t-f <filename>    Specifies an archive to operate on [REQUIRED!]\n");
 	fprintf(stderr, "\t-v               Print filenames as they are archived\n");
 	fprintf(stderr, "\t-C <path>        On extract, chdir to this location\n");
@@ -693,8 +1512,13 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t                      xml header verification.\n");
 	fprintf(stderr, "\t                      Valid values: none, sha1, and md5\n");
 	fprintf(stderr, "\t                      Default: sha1\n");
+	fprintf(stderr, "\t--file-cksum     Specifies the hashing algorithm to use for\n");
+	fprintf(stderr, "\t                      file verification.\n");
+	fprintf(stderr, "\t                      Same values and defaults as --toc-cksum.\n");
 	fprintf(stderr, "\t--dump-toc=<filename> Has xar dump the xml header into the\n");
 	fprintf(stderr, "\t                      specified file.\n");
+	fprintf(stderr, "\t--dump-toc-raw=<filename> Has xar dump the raw, compressed xml\n");
+	fprintf(stderr, "\t                      header data into the specified file.\n");
 	fprintf(stderr, "\t--dump-header    Prints out the xar binary header information\n");
 	fprintf(stderr, "\t--compression    Specifies the compression type to use.\n");
 	fprintf(stderr, "\t                      Valid values: none, gzip, bzip2, lzma, xz\n");
@@ -724,6 +1548,21 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t--keep-existing  Do not overwrite existing files while extracting\n");
 	fprintf(stderr, "\t-k               Synonym for --keep-existing\n");
 	fprintf(stderr, "\t--keep-setuid    Preserve the suid/sgid bits when extracting\n");
+	fprintf(stderr, "\t                      not to archive, but not compress.\n");
+	fprintf(stderr, "\t--sig-size n     Size (in bytes) of the signature placeholder\n");
+	fprintf(stderr, "\t                      to generate.\n");
+	fprintf(stderr, "\t--data-to-sign=file   Path where to dump the data to be signed.\n");
+	fprintf(stderr, "\t--sig-offset=file     Path where to dump the signature's offset\n");
+	fprintf(stderr, "\t                      within the xar.  Never required.\n");
+	fprintf(stderr, "\t--cert-loc=file  Location of a signing certificate to include in archive.\n");
+	fprintf(stderr, "\t                      May be repeated to include a certificate chain.\n");
+	fprintf(stderr, "\t                      The first cert-loc option should specify the leaf\n");
+	fprintf(stderr, "\t                      certificate, the next its issuer and so on so that the\n");
+	fprintf(stderr, "\t                      last cert-loc option specifies the top intermediate CA\n");
+	fprintf(stderr, "\t                      for the chain. Certificate files must be in DER format.\n");
+	fprintf(stderr, "\t                      --leaf-cert-loc= and --intermediate-cert-loc=\n");
+	fprintf(stderr, "\t                      are accepted as synonyms for --cert-loc= for\n");
+	fprintf(stderr, "\t                      historical reasons.\n");
 	fprintf(stderr, "\t--version        Print xar's version number\n");
 
 	return;
@@ -736,6 +1575,9 @@ static void print_version() {
 int main(int argc, char *argv[]) {
 	int ret;
 	char *filename = NULL;
+	char *sig_path = NULL;
+	char *cert_path = NULL;
+	char *cert_CAfile = NULL;
 	char command = 0, c;
 	char **args;
 	const char *tocfile = NULL;
@@ -744,7 +1586,9 @@ int main(int argc, char *argv[]) {
 	int loptind = 0;
 	int required_dash_f = 0;  /* This release requires us to use -f */
 	struct lnode *tmp;
+	struct cnode *ctmp;
 	long int longtmp;
+	struct stat stat_struct;
 	struct option o[] = { 
 		{"toc-cksum", 1, 0, 1},
 		{"dump-toc", 1, 0, 'd'},
@@ -765,6 +1609,21 @@ int main(int argc, char *argv[]) {
 		{"keep-existing", 0, 0, 15},
 		{"keep-setuid", 0, 0, 16},
 		{"compression-args", 1, 0, 17},
+		{"file-cksum", 1, 0, 18},
+		{"sig-size", 1, 0, 19},
+		{"data-to-sign", 1, 0, 20},
+		{"sig-offset", 1, 0, 21},
+		{"cert-loc", 1, 0, 22},
+		{"intermediate-cert-loc", 1, 0, 22}, // historical compatibility
+		{"leaf-cert-loc", 1, 0, 23}, // historical compatibility
+		{"extract-data-to-sign", 0, 0, 24},
+		{"sign", 0, 0, 25},
+		{"replace-sign", 0, 0, 26},
+		{"inject-sig", 1, 0, 27},
+		{"extract-certs", 1, 0, 28},
+		{"extract-CAfile", 1, 0, 29},
+		{"extract-sig", 1, 0, 30},
+		{"dump-toc-raw", 1, 0, 31},
 		{ 0, 0, 0, 0}
 	};
 
@@ -830,7 +1689,11 @@ int main(int argc, char *argv[]) {
 		          break;
 		case  6 :
 			SubdocName = optarg;
-			asprintf(&Subdoc, "%s.xml", SubdocName);
+			err = asprintf(&Subdoc, "%s.xml", SubdocName);
+			if( err == -1 ) {
+				printf("Error with asprintf()\n");
+				exit(1);
+			}
 			if( !command )
 				command = 6;
 			break;
@@ -938,6 +1801,129 @@ int main(int argc, char *argv[]) {
 		case 17 :
 			CompressionArg = optarg;
 			break;
+		case 18 : if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+		          }
+		          if( (strcmp(optarg, XAR_OPT_VAL_NONE) != 0) &&
+		              (strcmp(optarg, XAR_OPT_VAL_SHA1) != 0) &&
+		              (strcmp(optarg, XAR_OPT_VAL_MD5)  != 0) ) {
+				usage(argv[0]);
+				exit(1);
+		          }
+		          Filecksum = optarg;
+
+		          break;
+		case 19 :
+			if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			SigSize = strtol(optarg, (char **)NULL, 10);
+			break;
+		case 20 :
+			if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			DataToSignDumpPath = optarg;
+			break;
+		case 21 :
+			if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			SigOffsetDumpPath = optarg;
+			break;
+		case 22 :	// cert-loc & intermediate-cert-loc
+		case 23 :	// leaf-cert-loc
+			if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			ctmp = malloc(sizeof(struct cnode));
+			ctmp->cert_path = optarg;
+			ctmp->next = NULL;
+			if( CertPath == NULL ) {
+				CertPath = ctmp;
+				CertPath_Tail = ctmp;
+			} else {
+				if( c == 22 ) {
+					CertPath_Tail->next = ctmp;
+					CertPath_Tail = ctmp;
+				} else {
+					ctmp->next = CertPath;
+					CertPath = ctmp;
+				}
+			}
+			break;
+		case 24 :	// extract-data-to-sign
+			command = 'e';
+			break;
+		case 25 :	// sign
+			DoSign = 1;
+			break;
+		case 26 :	// replace-sign
+			command = 'r';
+			break;
+		case 27 :	// inject signature
+			if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			sig_path = optarg;
+			command = 'i';
+			break;
+		case 28 :	// extract-certs
+			if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			cert_path = optarg;
+			err = stat(cert_path, &stat_struct);
+			if (err || !(stat_struct.st_mode & S_IFDIR)) {
+				usage(argv[0]);
+				fprintf(stderr, "%s is not a directory.\n", cert_path);
+				exit(1);
+			}
+			command = 'j';
+			break;
+		case 29 :	// extract-CAfile
+			if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			cert_CAfile = optarg;
+			err = stat(cert_CAfile, &stat_struct);
+			if (!err && (stat_struct.st_mode & S_IFDIR)) {
+				usage(argv[0]);
+				fprintf(stderr, "%s is a directory.\n", cert_CAfile);
+				exit(1);
+			}
+			command = 'j';
+			break;
+		case 30 :	// extract-sig
+			if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			SignatureDumpPath = optarg;
+			err = stat(SignatureDumpPath, &stat_struct);
+			if (!err && (stat_struct.st_mode & S_IFDIR)) {
+				usage(argv[0]);
+				fprintf(stderr, "%s is a directory.\n", SignatureDumpPath);
+				exit(1);
+			}
+			command = 'g';
+			break;
+		case 31:
+			if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			tocfile = optarg;
+			command = 'w';
+			break;
 		case 'C': if( !optarg ) {
 		          	usage(argv[0]);
 		          	exit(1);
@@ -1002,6 +1988,50 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
+	// extract-data-to-sign
+	if ( (command == 'e') && ((!filename) || (!DataToSignDumpPath)) ) {
+		usage(argv[0]);
+		exit(1);
+	}
+
+	if ( DoSign ) {
+		if (  ( !SigSize || !CertPath ) 
+			  || ((command != 'c') && (!filename)) ) {
+			usage(argv[0]);
+			exit(1);
+		}
+		if (!command)
+			command = 'n';
+	}
+
+	if (command == 'r') {
+		/*if ( !SigSize || !CertPath || !filename) {
+			usage(argv[0]);
+			exit(1);
+		}
+		xar_t x = xar_open(filename, READ);
+		if ( x == NULL ) {
+			fprintf(stderr, "Could not open archive %s!\n", filename);
+			exit(1);
+		}
+		xar_signature_t sig = xar_signature_first(x);
+		if ( !sig ) {
+			fprintf(stderr, "No signature found to replace.\n");
+			exit(E_NOSIG);
+		}
+		xar_close(x);*/
+	}
+
+	if ((command == 'i') && ((!filename) || (!sig_path))) {
+		usage(argv[0]);
+		exit(1);
+	}
+
+	if ((command == 'j' || command == 'g') && (!filename)) {
+		usage(argv[0]);
+		exit(1);
+	}
+
 	switch(command) {
 		case  5 : 
 		        return dump_header(filename);
@@ -1026,6 +2056,12 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 			return dumptoc(filename, tocfile);
+		case 'w':
+			if( !tocfile ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			return dumptoc_raw(filename, tocfile);
 		case 'x':
 			arglen = argc - optind;
 			args = malloc(sizeof(char*) * (arglen+1));
@@ -1053,6 +2089,24 @@ int main(int argc, char *argv[]) {
 			xar_close(x);
 			exit(Err);
 			break;
+		case 'e':
+			extract_data_to_sign(filename);
+			exit(Err);
+		case 'g':
+			extract_signature(filename, SignatureDumpPath);
+			exit(Err);
+		case 'r':
+			replace_sign(filename);
+			exit(Err);
+		case 'i':
+			inject_signature(filename, sig_path);
+			exit(Err);
+		case 'n':
+			belated_sign(filename);
+			exit(Err);
+		case 'j':
+			extract_certs(filename, cert_path, cert_CAfile);
+			exit(Err);
 		default:
 			usage(argv[0]);
 			fprintf(stderr, "Unrecognized command.\n");

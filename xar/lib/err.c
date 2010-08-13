@@ -31,6 +31,8 @@
  * DRI: Rob Braun <bbraun@synack.net>
  */
 
+#define _FILE_OFFSET_BITS 64
+
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>

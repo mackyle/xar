@@ -235,6 +235,8 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 				case 0x07: typestr = "Mach-O Dylinker"; break;
 				case 0x08: typestr = "Mach-O Bundle"; break;
 				case 0x09: typestr = "Mach-O Stub"; break;
+				case 0x0A: typestr = "Mach-O dSYM Companion File"; break;
+				case 0x0B: typestr = "Mach-O K64 Kext Bundle"; break;
 				default: typestr = "Unknown"; break;
 				};
 

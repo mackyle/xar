@@ -26,10 +26,31 @@ Lists the contents of an archive
 \-x
 Extracts an archive
 .TP
-.B NOTE: all of the above require the use of the -f option (filename) as this release of xar doesn't correctly handle pipes or sockets.
+\-\-sign
+Creates a placeholder signature and saves the data to sign to disk. Works with \-c or just \-f, requires \-\-sig\-size and one or more \-\-cert\-loc options to be set. Setting the \-\-data\-to\-sign and/or \-\-sig\-offset option is optional.
+.TP
+\-\-replace\-sign
+Rips out existing signature(s) and makes a new one. Same required options as \-\-sign, but only works with \-f.
+.TP
+\-\-extract\-data\-to\-sign
+Extracts data to be signed from an existing archive. Requires \-\-data\-to\-sign (and \-f) options to be set. Setting the \-\-sig\-offset option is optional.
+.TP
+\-\-extract\-certs=<directory>
+Extracts all certificates into DER format into the specified directory naming them "cert1", "cert2" etc.
+.TP
+\-\-extract\-CAfile=<filename>
+Extracts all certificates into PEM format, concatenates them together and stores the result into the specified file.
+.TP
+\-\-extract\-sig=<filename>
+Extracts the signature and stores it into the specified file. Setting the \-\-sig\-offset option is optional.
+.TP
+\-\-inject\-sig=<filename>
+After extracting the data to be signed and doing the signing externally, injects the signature.
+.TP
+.B NOTE: all of the above require the use of the \-f option (filename) as this release of xar doesn't correctly handle pipes or sockets.
 .TP
 \-f
-The filename to use for creation, listing or extraction.  With extraction, this can be a POSIX regular expression.
+The filename to use for creation, listing, extraction or signing operations.  With extraction, this can be a POSIX regular expression.
 .SH OPTIONS
 .TP
 \-\-compression
@@ -53,7 +74,10 @@ Specifies arguments to the compression engine selected.
 gzip, bzip2, and lzma all take a single integer argument between 0 and 9 specifying the compression level to use.
 .TP
 \-\-dump\-toc=<filename>
-Has xar dump the xml header into the specified file.  "-" can be specified to mean stdout.
+Has xar dump the xml header into the specified file.  "\-" can be specified to mean stdout.
+.TP
+\-\-dump\-toc\-raw=<filename>
+Has xar dump the raw, compressed xml header data into the specified file.
 .TP
 \-\-dump\-header
 Has xar print out the xar binary header information to stdout.
@@ -67,6 +91,10 @@ List the subdocuments in the xml header
 \-\-toc\-cksum
 Specifies the hashing algorithm to use for xml header verification.
 Valid values: none, sha1, and md5.  Default value: sha1
+.TP
+\-\-file\-cksum
+Specifies the hashing algorithm to use for file verification.
+Same values and defaults as \-\-toc\-cksum.
 .TP
 \-l
 On archival, stay on the local device.
@@ -110,7 +138,7 @@ Specifies a file property to be included in the archive.  When this option is sp
 \-\-prop-exclude
 Specifies a file property to be excluded from the archive.  When this option is specified, all file properties will be included except the specified properties.  This option can be used multiple times.
 .TP
-\\-\-distribution
+\-\-distribution
 Creates an archive to only contain file properties safe for file distribution.  Currently, only name, type, mode, and data are preserved with this option.
 .TP
 \-\-keep-existing
@@ -120,20 +148,29 @@ Does not overwrite existing files during extraction.  Keeps any previously exist
 Synonym for \-\-keep-existing.
 .TP
 \-\-keep-setuid
-When extracting without -p or -P options, xar will extract files as the
+When extracting without \-p or \-P options, xar will extract files as the
 uid/gid of the extracting process.  In this situation, xar will strip
 setuid/setgid bits from the extracted files for security reasons.
 \-\-keep-setuid will preserve the setuid/setgid bits even though the
 uid/gid of the extracted file is not the same as the archived file.
+.TP
+\-\-sig\-size=n
+Specifies the size in bytes of the signature placeholder to generate when using the \-\-sign or \-\-replace-sign options.
+.TP
+\-\-cert\-loc=<filename>
+Specifies the location of a signing certificate in DER format to include in the archive.  This option can be used multiple times to include a certificate chain.  The first \-\-cert\-loc option should specify the leaf signing certificate, the next its issuer CA and so on so that the last \-\-cert\-loc= option specifies the top intermediate certificate authority for the chain.  \-\-leaf\-cert\-loc=<filename> and \-\-intermediate\-cert\-loc=<filename> are accepted as synonyms for \-\-cert\-loc= for historical reasons.
+.TP
+\-\-version
+Display the version number of xar.
 .SH EXAMPLES
 .TP
-xar -cf sample.xar /home/uid
+xar \-cf sample.xar /home/uid
 Create a xar archive of all files in /home/uid
 .TP
-xar -tf sample.xar
+xar \-tf sample.xar
 List the contents of the xar archive sample.xar
 .TP
-xar -xf sample.xar
+xar \-xf sample.xar
 Extract the contents of sample.xar to the current working directory
 .SH BUGS
 .TP
@@ -148,4 +185,3 @@ Landon Fuller <landonf AT bikemonkey DOT org>
 David Leimbach
 .br
 Kevin Van Vechten
-
