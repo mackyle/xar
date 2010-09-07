@@ -80,7 +80,7 @@ static unsigned int raw_base64_decode(
 
     if (!olen) olen = &dummy;
     *olen = 0;
-    while (i < len || !pad) {
+    while (i < len && !pad) {
         x = b64revtb[input[i++]];
         switch (x) {
             case -3: /* NULL TERMINATOR */
@@ -129,9 +129,13 @@ static unsigned int raw_base64_decode(
         }
     }
     if (i > len) return 2;
-    for (x = 0;  x < 3 - pad;  x++) {
-        *output++ = buf[x];
-        (*olen)++;
+    if (!pad) {
+        if ((i - ignr) % 4) return 1;
+    } else {
+        for (x = 0;  x < 3 - pad;  x++) {
+            *output++ = buf[x];
+            (*olen)++;
+        }
     }
     return 0;
 }

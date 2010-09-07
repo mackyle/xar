@@ -308,7 +308,6 @@ static char *xar_to_base64(const void *input, unsigned int len, unsigned *ocnt)
 
     for(;;) {
         if( i >= len ) {
-            output[count++] = '\n';
             output[count++] = '\0';
             if (ocnt) *ocnt = count;
             return (char *)output;
@@ -324,7 +323,6 @@ static char *xar_to_base64(const void *input, unsigned int len, unsigned *ocnt)
             output[count++] = b64_table[b6];
             output[count++] = '=';
             output[count++] = '=';
-            output[count++] = '\n';
             output[count++] = '\0';
             if (ocnt) *ocnt = count;
             return (char *)output;
@@ -337,7 +335,6 @@ static char *xar_to_base64(const void *input, unsigned int len, unsigned *ocnt)
         if( i >= len ) {
             output[count++] = b64_table[b6];
             output[count++] = '=';
-            output[count++] = '\n';
             output[count++] = '\0';
             if (ocnt) *ocnt = count;
             return (char *)output;
@@ -414,26 +411,24 @@ static void extract_certs(char *filename, char *cert_base_path, char *CApath) {
 				fprintf(stderr, "Could not save certificates to %s.\n", CApath);
 				exit(1);
 			}
-			if (fputs("-----BEGIN CERTIFICATE-----\n", CAfile) == -1) {
+			if (fputs("-----BEGIN CERTIFICATE-----", CAfile) == -1) {
 				fprintf(stderr, "Failed to write certificates to %s.\n", CApath);
 				exit(1);
 			}
 			--cnt; /* skip trailing nul */
 			for (p = b64; cnt > 64; p += 64, cnt -= 64) {
-				n = fwrite(p, 64, 1, CAfile);
-				if (n < 0 || fputs("\n", CAfile) == -1) {
+				if (fputs("\n", CAfile) == -1 || (n = fwrite(p, 64, 1, CAfile)) < 0) {
 					fprintf(stderr, "Failed to write certificates to %s.\n", CApath);
 					exit(1);
 				}
 			}
 			if (cnt) {
-				n = fwrite(p, cnt, 1, CAfile);
-				if (n < 0) {
+				if (fputs("\n", CAfile) == -1 || (n = fwrite(p, cnt, 1, CAfile)) < 0) {
 					fprintf(stderr, "Failed to write certificates to %s.\n", CApath);
 					exit(1);
 				}
 			}
-			if (fputs("-----END CERTIFICATE-----\n", CAfile) == -1) {
+			if (fputs("\n-----END CERTIFICATE-----\n", CAfile) == -1) {
 				fprintf(stderr, "Failed to write certificates to %s.\n", CApath);
 				exit(1);
 			}
