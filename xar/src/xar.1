@@ -1,4 +1,4 @@
-.TH XAR "1" "November 1, 2007" "version 1.6" "User Commands"
+.TH XAR "1" "November 1, 2007" "version 1.6_sig" "User Commands"
 .SH NAME
 xar \- eXtensible ARchiver
 .SH SYNOPSIS
@@ -36,7 +36,7 @@ Rips out existing signature(s) and makes a new one. Same required options as \-\
 Extracts data to be signed from an existing archive. Requires \-\-data\-to\-sign (and \-f) options to be set. Setting the \-\-sig\-offset option is optional.
 .TP
 \-\-extract\-certs=<directory>
-Extracts all certificates into DER format into the specified directory naming them "cert1", "cert2" etc.
+Extracts all certificates into DER (binary) format into the specified directory naming them "cert00", "cert01" etc.  The specified directory must already exist.  "cert00" is always the leaf certificate.  "cert01", "cert02", etc. are only written if the xar file contains a certificate chain (i.e. more than the leaf signing certificate).  Any pre-existing files in the specified directory of the same name as the certificates being written will be overwritten without warning.
 .TP
 \-\-extract\-CAfile=<filename>
 Extracts all certificates into PEM format, concatenates them together and stores the result into the specified file.

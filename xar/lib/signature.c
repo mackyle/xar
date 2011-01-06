@@ -90,8 +90,15 @@ xar_signature_t xar_signature_new(xar_t x,const char *type, int32_t length, xar_
 		for( sig = XAR_SIGNATURE(XAR(x)->signatures); sig->next; sig = sig->next);
 
 		sig->next = XAR_SIGNATURE(ret);
-	} else
+	} else {
+		char tmpstr[32];
+		time_t t = time(NULL) - 978307200 /* Convert from Unix EPOCH to 3rd Millenium EPOCH */;
+		/* (3rd Millenium EPOCH is seconds since Jan 1 2001 0000 UTC) */
+		memset(tmpstr, 0, sizeof(tmpstr));
+		snprintf(tmpstr, sizeof(tmpstr)-1, "%ld", (long) t);
+		xar_prop_set(XAR_FILE(x), "signature-creation-time", tmpstr);
 		XAR(x)->signatures = ret;
+	}
 
 	XAR_SIGNATURE(ret)->x = x;
 	

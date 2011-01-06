@@ -35,6 +35,8 @@
  * Christopher Ryan <ryanc@apple.com>
 */
 
+#define _FILE_OFFSET_BITS 64
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
