@@ -9,6 +9,10 @@
 #include <zlib.h>
 #include <syslog.h>
 
+#if LIBXML_VERSION < 20618
+#define xmlDictCleanup()	/* function doesn't exist in older API */
+#endif
+
 static int gCount = 0;
 static int gMax = 30;
 

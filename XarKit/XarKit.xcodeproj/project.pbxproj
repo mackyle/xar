@@ -1,0 +1,237 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DA1530BE081DA592007FFF4B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0867D69BFE84028FC02AAC07 /* Foundation.framework */; };
+		DA1531C2081DA5C1007FFF4B /* XarArchive.h in Headers */ = {isa = PBXBuildFile; fileRef = DA1531BB081DA5C1007FFF4B /* XarArchive.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DA1531C3081DA5C1007FFF4B /* XarArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1531BC081DA5C1007FFF4B /* XarArchive.m */; };
+		DA1531C4081DA5C1007FFF4B /* XarEnumerator.h in Headers */ = {isa = PBXBuildFile; fileRef = DA1531BD081DA5C1007FFF4B /* XarEnumerator.h */; };
+		DA1531C5081DA5C1007FFF4B /* XarEnumerator.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1531BE081DA5C1007FFF4B /* XarEnumerator.m */; };
+		DA1531C6081DA5C1007FFF4B /* XarFile.h in Headers */ = {isa = PBXBuildFile; fileRef = DA1531BF081DA5C1007FFF4B /* XarFile.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DA1531C7081DA5C1007FFF4B /* XarFile.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1531C0081DA5C1007FFF4B /* XarFile.m */; };
+		DA1531C8081DA5C1007FFF4B /* XarKit.h in Headers */ = {isa = PBXBuildFile; fileRef = DA1531C1081DA5C1007FFF4B /* XarKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DA1531E2081DA67D007FFF4B /* libxar.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DA1531E1081DA67D007FFF4B /* libxar.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0867D69BFE84028FC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8DC2EF5B0486A6940098B216 /* XarKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XarKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA1531BB081DA5C1007FFF4B /* XarArchive.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = XarArchive.h; sourceTree = "<group>"; };
+		DA1531BC081DA5C1007FFF4B /* XarArchive.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = XarArchive.m; sourceTree = "<group>"; };
+		DA1531BD081DA5C1007FFF4B /* XarEnumerator.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = XarEnumerator.h; sourceTree = "<group>"; };
+		DA1531BE081DA5C1007FFF4B /* XarEnumerator.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = XarEnumerator.m; sourceTree = "<group>"; };
+		DA1531BF081DA5C1007FFF4B /* XarFile.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = XarFile.h; sourceTree = "<group>"; };
+		DA1531C0081DA5C1007FFF4B /* XarFile.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = XarFile.m; sourceTree = "<group>"; };
+		DA1531C1081DA5C1007FFF4B /* XarKit.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = XarKit.h; sourceTree = "<group>"; };
+		DA1531E1081DA67D007FFF4B /* libxar.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxar.dylib; path = /usr/local/lib/libxar.dylib; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DC2EF560486A6940098B216 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA1530BE081DA592007FFF4B /* Foundation.framework in Frameworks */,
+				DA1531E2081DA67D007FFF4B /* libxar.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		034768DFFF38A50411DB9C8B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8DC2EF5B0486A6940098B216 /* XarKit.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0867D691FE84028FC02AAC07 /* XarKit */ = {
+			isa = PBXGroup;
+			children = (
+				8DC2EF5A0486A6940098B216 /* Info.plist */,
+				DA1531C1081DA5C1007FFF4B /* XarKit.h */,
+				08FB77AEFE84172EC02AAC07 /* Classes */,
+				0867D69AFE84028FC02AAC07 /* Frameworks and Libraries */,
+				034768DFFF38A50411DB9C8B /* Products */,
+			);
+			name = XarKit;
+			sourceTree = "<group>";
+		};
+		0867D69AFE84028FC02AAC07 /* Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				DA1531E1081DA67D007FFF4B /* libxar.dylib */,
+				0867D69BFE84028FC02AAC07 /* Foundation.framework */,
+			);
+			name = "Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		08FB77AEFE84172EC02AAC07 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				DA1531BB081DA5C1007FFF4B /* XarArchive.h */,
+				DA1531BC081DA5C1007FFF4B /* XarArchive.m */,
+				DA1531BD081DA5C1007FFF4B /* XarEnumerator.h */,
+				DA1531BE081DA5C1007FFF4B /* XarEnumerator.m */,
+				DA1531BF081DA5C1007FFF4B /* XarFile.h */,
+				DA1531C0081DA5C1007FFF4B /* XarFile.m */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		8DC2EF500486A6940098B216 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA1531C2081DA5C1007FFF4B /* XarArchive.h in Headers */,
+				DA1531C4081DA5C1007FFF4B /* XarEnumerator.h in Headers */,
+				DA1531C6081DA5C1007FFF4B /* XarFile.h in Headers */,
+				DA1531C8081DA5C1007FFF4B /* XarKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		8DC2EF4F0486A6940098B216 /* XarKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 27467F9015FAE89800336127 /* Build configuration list for PBXNativeTarget "XarKit" */;
+			buildPhases = (
+				8DC2EF500486A6940098B216 /* Headers */,
+				8DC2EF540486A6940098B216 /* Sources */,
+				8DC2EF560486A6940098B216 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = XarKit;
+			productInstallPath = "$(HOME)/Library/Frameworks";
+			productName = XarKit;
+			productReference = 8DC2EF5B0486A6940098B216 /* XarKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0867D690FE84028FC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 27467F8F15FAE89800336127 /* Build configuration list for PBXProject "XarKit" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 1;
+			mainGroup = 0867D691FE84028FC02AAC07 /* XarKit */;
+			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8DC2EF4F0486A6940098B216 /* XarKit */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DC2EF540486A6940098B216 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA1531C3081DA5C1007FFF4B /* XarArchive.m in Sources */,
+				DA1531C5081DA5C1007FFF4B /* XarEnumerator.m in Sources */,
+				DA1531C7081DA5C1007FFF4B /* XarFile.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		27467F8915FAE89800336127 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		27467F8A15FAE89800336127 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		27467F8C15FAE89800336127 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				PREBINDING = NO;
+				PRODUCT_NAME = XarKit;
+				WARNING_CFLAGS = "-Wall";
+				WRAPPER_EXTENSION = framework;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		27467F8D15FAE89800336127 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				PREBINDING = NO;
+				PRODUCT_NAME = XarKit;
+				WARNING_CFLAGS = "-Wall";
+				WRAPPER_EXTENSION = framework;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		27467F8F15FAE89800336127 /* Build configuration list for PBXProject "XarKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				27467F8915FAE89800336127 /* Debug */,
+				27467F8A15FAE89800336127 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		27467F9015FAE89800336127 /* Build configuration list for PBXNativeTarget "XarKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				27467F8C15FAE89800336127 /* Debug */,
+				27467F8D15FAE89800336127 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0867D690FE84028FC02AAC07 /* Project object */;
+}
