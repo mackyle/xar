@@ -40,6 +40,7 @@
 #include <libxml/xmlreader.h>
 #include <inttypes.h>  /* for PRIu64 */
 #include <unistd.h>
+#include <sys/time.h>
 
 #include "xar.h"
 #include "archive.h"
@@ -92,10 +93,13 @@ xar_signature_t xar_signature_new(xar_t x,const char *type, int32_t length, xar_
 		sig->next = XAR_SIGNATURE(ret);
 	} else {
 		char tmpstr[32];
-		time_t t = time(NULL) - 978307200 /* Convert from Unix EPOCH to 3rd Millenium EPOCH */;
+		struct timeval tv;
+		time_t t;
+		gettimeofday(&tv, NULL);
+		t = tv.tv_sec - 978307200 /* Convert from Unix EPOCH to 3rd Millenium EPOCH */;
 		/* (3rd Millenium EPOCH is seconds since Jan 1 2001 0000 UTC) */
 		memset(tmpstr, 0, sizeof(tmpstr));
-		snprintf(tmpstr, sizeof(tmpstr)-1, "%ld", (long) t);
+		snprintf(tmpstr, sizeof(tmpstr)-1, "%ld.%u", (long) t, (unsigned) (tv.tv_usec/100000));
 		xar_prop_set(XAR_FILE(x), "signature-creation-time", tmpstr);
 		XAR(x)->signatures = ret;
 	}

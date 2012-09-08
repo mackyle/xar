@@ -188,7 +188,7 @@ int32_t xar_hash_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 	if( CONTEXT(context)->unarchived ){
 		EVP_MD_CTX		*ctx = CONTEXT(context)->unarchived_cts;
 		const EVP_MD			*md = EVP_MD_CTX_md(ctx);
-		const char *type = EVP_MD_name(md);
+		const char *type = OBJ_nid2ln(EVP_MD_nid(md));
 
 		memset(hashstr, 0, sizeof(hashstr));
 		EVP_DigestFinal_ex(CONTEXT(context)->unarchived_cts, hashstr, &len);
@@ -204,7 +204,7 @@ int32_t xar_hash_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 	if( CONTEXT(context)->archived ){
 		EVP_MD_CTX				*ctx = CONTEXT(context)->archived_cts;
 		const EVP_MD			*md = EVP_MD_CTX_md(ctx);
-		const char		*type = EVP_MD_name(md);
+		const char		*type = OBJ_nid2ln(EVP_MD_nid(md));
 		
 		memset(hashstr, 0, sizeof(hashstr));
 		EVP_DigestFinal_ex(CONTEXT(context)->archived_cts, hashstr, &len);

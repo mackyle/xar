@@ -60,6 +60,11 @@
 #define E_NOSIG     60
 #define E_SIGEXISTS 61
 
+static const unsigned char Sha1DigestInfo[15] = {
+	0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E,
+	0x03, 0x02, 0x1A, 0x05, 0x00, 0x04, 0x14
+};
+
 static int Perms = 0;
 static int Local = 0;
 static char *Subdoc = NULL;
@@ -82,6 +87,7 @@ static int LinkSame = 0;
 static int NoOverwrite = 0;
 static int SaveSuid = 0;
 static int DoSign = 0;
+static int DumpSha1DigestInfo = 0;
 
 static long SigSize = 0;
 
@@ -259,6 +265,13 @@ static void extract_data_to_sign(const char *filename) {
 	if (!file) {
 		fprintf(stderr, "Could not open %s for saving data to sign!\n", DataToSignDumpPath);
 		exit(1);
+	}
+	if (DumpSha1DigestInfo) {
+		i = fwrite(Sha1DigestInfo, sizeof(Sha1DigestInfo), 1, file);
+		if (i != 1) {
+			fprintf(stderr, "Failed to write data to sign prefix to %s (fwrite() returned %i)!\n", DataToSignDumpPath, i);
+			exit(1);
+		}
 	}
 	i = fwrite(buffer, dataToSignSize, 1, file);
 	if (i != 1) {
@@ -745,11 +758,19 @@ static int32_t signingCallback(xar_signature_t sig, void *context, uint8_t *data
 	// save data to file for later signature
 	if (DataToSignDumpPath) {
 		FILE *file = fopen(DataToSignDumpPath, "wb");
+		int i;
 		if (!file) {
 			fprintf(stderr, "Could not open %s for saving data to sign!\n", DataToSignDumpPath);
 			exit(1);
 		}
-		int i = fwrite(data, length, 1, file);
+		if (DumpSha1DigestInfo) {
+			i = fwrite(Sha1DigestInfo, sizeof(Sha1DigestInfo), 1, file);
+			if (i != 1) {
+				fprintf(stderr, "Failed to write data to sign prefix to %s (fwrite() returned %i)!\n", DataToSignDumpPath, i);
+				exit(1);
+			}
+		}
+		i = fwrite(data, length, 1, file);
 		if (i != 1) {
 			fprintf(stderr, "Failed to write data to sign to %s (fwrite() returned %i)!\n", DataToSignDumpPath, i);
 			exit(1);
@@ -1544,19 +1565,24 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t--keep-existing  Do not overwrite existing files while extracting\n");
 	fprintf(stderr, "\t-k               Synonym for --keep-existing\n");
 	fprintf(stderr, "\t--keep-setuid    Preserve the suid/sgid bits when extracting\n");
-	fprintf(stderr, "\t                      not to archive, but not compress.\n");
 	fprintf(stderr, "\t--sig-size n     Size (in bytes) of the signature placeholder\n");
 	fprintf(stderr, "\t                      to generate.\n");
 	fprintf(stderr, "\t--data-to-sign=file   Path where to dump the data to be signed.\n");
+	fprintf(stderr, "\t--sha1-digestinfo-to-sign=file Path where to dump the SHA-1 DigestInfo\n");
+	fprintf(stderr, "\t                 data to be signed.  This option requires the\n");
+	fprintf(stderr, "\t                 --toc-cksum be set to sha1 (the default).  It produces\n");
+	fprintf(stderr, "\t                 the same output data as --data-to-sign does except that\n");
+	fprintf(stderr, "\t                 the output has the SHA-1 DigestInfo value prepended.\n");
+	fprintf(stderr, "\t                 May only be used in place of the --data-to-sign option.\n");
 	fprintf(stderr, "\t--sig-offset=file     Path where to dump the signature's offset\n");
 	fprintf(stderr, "\t                      within the xar.  Never required.\n");
 	fprintf(stderr, "\t--cert-loc=file  Location of a signing certificate to include in the\n");
-	fprintf(stderr, "\t                      archive.  May be repeated to include a certificate\n");
-	fprintf(stderr, "\t                      chain.  The first cert-loc option should specify\n");
-	fprintf(stderr, "\t                      the leaf certificate, the next its issuer and so\n");
-	fprintf(stderr, "\t                      on so that the last cert-loc option specifies the\n");
-	fprintf(stderr, "\t                      top intermediate CA for the chain. Certificate\n");
-	fprintf(stderr, "\t                      files must be in DER (binary) format.\n");
+	fprintf(stderr, "\t                      archive.  May be repeated to include a\n");
+	fprintf(stderr, "\t                      certificate chain.  The first cert-loc option\n");
+	fprintf(stderr, "\t                      should specify the leaf certificate, the next its\n");
+	fprintf(stderr, "\t                      issuer and so on so that the last cert-loc option\n");
+	fprintf(stderr, "\t                      specifies the top intermediate CA for the chain.\n");
+	fprintf(stderr, "\t                      Certificate files must be in DER (binary) format.\n");
 	fprintf(stderr, "\t                      --leaf-cert-loc= and --intermediate-cert-loc=\n");
 	fprintf(stderr, "\t                      are accepted as synonyms for --cert-loc= for\n");
 	fprintf(stderr, "\t                      historical reasons.\n");
@@ -1621,6 +1647,7 @@ int main(int argc, char *argv[]) {
 		{"extract-CAfile", 1, 0, 29},
 		{"extract-sig", 1, 0, 30},
 		{"dump-toc-raw", 1, 0, 31},
+		{"sha1-digestinfo-to-sign", 1, 0, 32},
 		{ 0, 0, 0, 0}
 	};
 
@@ -1823,6 +1850,14 @@ int main(int argc, char *argv[]) {
 				usage(argv[0]);
 				exit(1);
 			}
+			if (DumpSha1DigestInfo) {
+				fprintf(stderr, "--data-to-sign may not be used with --sha1-digestinfo-to-sign\n");
+				exit(1);
+			}
+			if (DataToSignDumpPath) {
+				fprintf(stderr, "--data-to-sign may only be used once\n");
+				exit(1);
+			}
 			DataToSignDumpPath = optarg;
 			break;
 		case 21 :
@@ -1921,6 +1956,22 @@ int main(int argc, char *argv[]) {
 			tocfile = optarg;
 			command = 'w';
 			break;
+		case 32 :
+			if( !optarg ) {
+				usage(argv[0]);
+				exit(1);
+			}
+			if (DataToSignDumpPath && !DumpSha1DigestInfo) {
+				fprintf(stderr, "--sha1-digestinfo-to-sign may not be used with --data-to-sign\n");
+				exit(1);
+			}
+			if (DataToSignDumpPath) {
+				fprintf(stderr, "--sha1-digestinfo-to-sign may only be used once\n");
+				exit(1);
+			}
+			DataToSignDumpPath = optarg;
+			DumpSha1DigestInfo = 1;
+			break;
 		case 'C': if( !optarg ) {
 		          	usage(argv[0]);
 		          	exit(1);
@@ -1988,6 +2039,11 @@ int main(int argc, char *argv[]) {
 	// extract-data-to-sign
 	if ( (command == 'e') && ((!filename) || (!DataToSignDumpPath)) ) {
 		usage(argv[0]);
+		exit(1);
+	}
+
+	if (DataToSignDumpPath && DumpSha1DigestInfo && Toccksum && strcmp(Toccksum, XAR_OPT_VAL_SHA1) != 0) {
+		fprintf(stderr, "--sha1-digestinfo-to-sign requires --toc-cksum sha1\n");
 		exit(1);
 	}
 
