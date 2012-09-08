@@ -1,0 +1,4 @@
+.gitattributes	export-ignore
+.gitignore	export-ignore
+*.strings	filter=utf8bom
+xar/ChangeLog	filter=utf8bom
