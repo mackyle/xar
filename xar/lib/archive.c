@@ -111,7 +111,13 @@ static xar_t xar_new() {
 	XAR(ret)->link_hash = xmlHashCreate(0);
 	XAR(ret)->csum_hash = xmlHashCreate(0);
 	XAR(ret)->subdocs = NULL;
-	
+	XAR(ret)->toc_ctx = EVP_MD_CTX_create();
+	if(!XAR(ret)->toc_ctx) {
+		free(XAR(ret)->readbuf);
+		free((void *)ret);
+		return NULL;
+	}
+
 	return ret;
 }
 
@@ -268,12 +274,12 @@ xar_t xar_open(const char *file, int32_t flags) {
 		case XAR_CKSUM_SHA1:
 			XAR(ret)->docksum = 1;
 			md = EVP_get_digestbyname("sha1");
-			EVP_DigestInit(&XAR(ret)->toc_ctx, md);
+			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
 			break;
 		case XAR_CKSUM_MD5:
 			XAR(ret)->docksum = 1;
 			md = EVP_get_digestbyname("md5");
-			EVP_DigestInit(&XAR(ret)->toc_ctx, md);
+			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
 			break;
 		default:
 			fprintf(stderr, "Unknown hashing algorithm, skipping\n");
@@ -328,7 +334,7 @@ xar_t xar_open(const char *file, int32_t flags) {
 		if( !XAR(ret)->docksum )
 			return ret;
 
-		EVP_DigestFinal(&XAR(ret)->toc_ctx, toccksum, &tlen);
+		EVP_DigestFinal_ex(XAR(ret)->toc_ctx, toccksum, &tlen);
 
 		const char *value;
 		uint64_t offset = 0;
@@ -414,14 +420,14 @@ int xar_close(xar_t x) {
 			xar_prop_set(XAR_FILE(x), "checksum", NULL);
 			if( strcmp(tmpser, XAR_OPT_VAL_SHA1) == 0 ) {
 				md = EVP_get_digestbyname("sha1");
-				EVP_DigestInit(&XAR(x)->toc_ctx, md);
+				EVP_DigestInit_ex(XAR(x)->toc_ctx, md, NULL);
 				XAR(x)->header.cksum_alg = htonl(XAR_CKSUM_SHA1);
 				xar_attr_set(XAR_FILE(x), "checksum", "style", XAR_OPT_VAL_SHA1);
 				xar_prop_set(XAR_FILE(x), "checksum/size", "20");
 			}
 			if( strcmp(tmpser, XAR_OPT_VAL_MD5) == 0 ) {
 				md = EVP_get_digestbyname("md5");
-				EVP_DigestInit(&XAR(x)->toc_ctx, md);
+				EVP_DigestInit_ex(XAR(x)->toc_ctx, md, NULL);
 				XAR(x)->header.cksum_alg = htonl(XAR_CKSUM_MD5);
 				xar_attr_set(XAR_FILE(x), "checksum", "style", XAR_OPT_VAL_MD5);
 				xar_prop_set(XAR_FILE(x), "checksum/size", "16");
@@ -517,7 +523,7 @@ int xar_close(xar_t x) {
 					goto CLOSEEND;
 				}
 				if( XAR(x)->docksum )
-					EVP_DigestUpdate(&XAR(x)->toc_ctx, ((char*)wbuf)+off, r);
+					EVP_DigestUpdate(XAR(x)->toc_ctx, ((char*)wbuf)+off, r);
 				off += r;
 				gztoc += r;
 			} while( off < wbytes );
@@ -533,7 +539,7 @@ int xar_close(xar_t x) {
 		r = write(tocfd, wbuf, wsize - zs.avail_out);
 		gztoc += r;
 		if( XAR(x)->docksum )
-			EVP_DigestUpdate(&XAR(x)->toc_ctx, wbuf, r);
+			EVP_DigestUpdate(XAR(x)->toc_ctx, wbuf, r);
 		
 		deflateEnd(&zs);
 
@@ -576,7 +582,7 @@ int xar_close(xar_t x) {
 			unsigned int l = r;
 			
 			memset(chkstr, 0, sizeof(chkstr));
-			EVP_DigestFinal(&XAR(x)->toc_ctx, chkstr, &l);
+			EVP_DigestFinal_ex(XAR(x)->toc_ctx, chkstr, &l);
 			r = l;
 			write(XAR(x)->fd, chkstr, r);
 		}
@@ -690,6 +696,7 @@ CLOSE_BAIL:
 	free((char *)XAR(x)->filename);
 	free((char *)XAR(x)->dirname);
 	free(XAR(x)->readbuf);
+	EVP_MD_CTX_destroy(XAR(x)->toc_ctx);
 	free((void *)x);
 
 	return retval;
@@ -1369,7 +1376,7 @@ static int toc_read_callback(void *context, char *buffer, int len) {
 			return ret;
 
 		if ( XAR(x)->docksum )
-			EVP_DigestUpdate(&XAR(x)->toc_ctx, XAR(x)->readbuf, ret);
+			EVP_DigestUpdate(XAR(x)->toc_ctx, XAR(x)->readbuf, ret);
 
 		XAR(x)->toc_count += ret;
 		off += ret;

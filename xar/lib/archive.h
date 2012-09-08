@@ -84,7 +84,7 @@ struct __xar_t {
 	xmlHashTablePtr ino_hash;   /* Hash for looking up hardlinked files (add)*/
 	xmlHashTablePtr link_hash;  /* Hash for looking up hardlinked files (extract)*/
 	xmlHashTablePtr csum_hash;  /* Hash for looking up checksums of files */
-	EVP_MD_CTX toc_ctx;
+	EVP_MD_CTX *toc_ctx;
 	int docksum;
 	int skipwarn;
 	struct stat sbcache;
