@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset='utf-8' />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+  <title>mackyle/xar — How To Sign an xar File</title>
+
+  <style type="text/css">
+    body {
+      margin-top: 1.0em;
+      background-color: white;
+      font-family: Times, "Times New Roman", serif;
+      color: black;
+      margin-bottom: 55em;
+    }
+    #container {
+      margin: 0 auto;
+      max-width: 90ex;
+      position: relative;
+    }
+    h1 { font-size: 3.8em; color: black; margin-bottom: 0.1em; }
+    h1 .small { font-size: 0.4em; }
+    h1 a { text-decoration: none; }
+    h2 { font-size: 1.5em; color: black; }
+    h3 { color: black; }
+    p.note:before, p.important:before, h1, h2, h3, th, .cert { font-family: Helvetica, Arial, FreeSans, sans-serif; font-weight: normal; }
+    a { color: black; }
+    .description { font-size: 1.2em; margin-bottom: 2em; margin-top: 2em; font-style: italic; }
+    .download { float: right; }
+    pre, ttx, .hash tdx { font-family: Menlo, Monaco, Consolas, Courier, "Courier New", monospace; }
+    pre { font-size: 75%;}
+    pre { padding: 0.5em 1ex; border: thin dotted silver; }
+    hr { border: 0; width: 80%; border-bottom: thin solid silver; }
+    p { text-align: justify; }
+    p.left { text-align: left; }
+    .inset { margin-left: 1ex; margin-right: 1ex; }
+    .footer { text-align:center; padding-top:2em; font-style: italic; }
+    p.note:before { content: "Note: "; }
+    p.important:before { content: "Important: "; }
+    .nobreak { white-space: nowrap; }
+    .left { text-align: left; }
+    .hash td { font-size: 80%; line-height: 1.0; font-family: monospace; }
+    .hash tr > td:first-child { text-align: right; }
+    .hash tr > td:first-child:after { content: ':'; }
+
+    table.chain, p span.cert {
+      font-size: 90%;
+    }
+    table.chain {
+      border-collapse: collapse;
+    }
+    table.chain td {
+      padding: 0 0.5ex;
+    }
+    table.chain td.uparrow, td.cert {
+      text-align: center;
+    }
+    table.chain td.certdesc {
+      text-align: justify;
+    }
+    .uparrow:before {
+      content: "\2191  ";
+    }
+
+    table.download-list {
+      border-collapse: separate;
+      border-spacing: 1.25ex 0;
+      width: 100%;
+      margin-bottom: 0.5em;
+    }
+
+    table.download-list > * > tr > td:first-child,
+    table.download-list > * > tr > td:first-child + td,
+    table.download-list > * > tr > td:first-child + td + td {
+      white-space: nowrap;
+    }
+
+    tr.header th {
+      text-align: left;
+      border-bottom: thin solid black;
+    }
+    tr.separator {
+      height: 0.25em;
+    }
+
+    .sidebar-fixed {
+      display: block;
+      position: absolute;
+      left: -40ex;
+      text-align: right;
+      font-size: 75%;
+      margin: 0;
+    }
+    .sidebar {
+      display: block;
+      position: fixed;
+      padding: 2px;
+      width: 36ex;
+    }
+    .sidebar a:visited, .sidebar a:link {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: thin dotted gray;
+    }
+    .sidebar a:active {
+      color: red;
+    }
+
+    #TOC span {
+      display: inline-block;
+      margin-left: 8px
+    }
+
+    span.down {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      margin-right: 2px;
+      vertical-align: baseline;
+      background-repeat: no-repeat;
+      background-position: 0% 100%;
+      background-size: 1em 1em;
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAQnRFWHRDb21tZW50AHRJTUUgY2h1bmtsZW4gNyBpZ25vcmVkDUFTQ0lJOiAuLi4uLjA3DUhFWDogMDdENjA5MTYxMDMwMzeLgNWuAAACTUlEQVR4nJRQW2iSYRj+tgq6k5BuDILdObqoYLBRxsjBsKvoIoKKokbrMMibrZsMNseojPJAbINg0zZlFVEi1Yi8aNJWiXlG51lvdOiNiBcefp++74tfZGzQXnh43+89PN/zvoTsYhfmeoQrr3oxsngSY0v9UFvPYLfeHe2c8Yjw5rcB7z0v8fHPLNTLA3sjGNIfFqw/n+PFVzUnufu6b28Ep59JBMu6Dk9Xx/DWbcTIwon/I+h5RIrHpruK1xZPYeHHE8x8HsWK2wDNh4u4v9yHByuKnYmi0agzHA7j6MN9uG4Zwuz3STp8D5OOGzB8G+cqphyXcYse1Ww2O7cPD6ZSKVQqFWwVt6AyHsfNpWHMrWmh/XQblg0dxt+dx6V5OcrlMux2O0wmk7JNEAqFnIVCAfF4HLlcDsl0Amf1coxaVZhfm8Yd6zAllcHlcsHv9yMQCECn0/1TEQwGBzc3N1EqlcBUUDW8YePXOhTaQ7hqVmDg8UG43W74fD4kk0mwz+ga0Gg0SuL1evnv+Xwe2WwWmUyGI51OIxqPoHfqABKJBB9knqlkdY/Hg4mJCWd3vV4n1WqV0GFCCxxUCaHNJJvKEX2/g8RiMRKJRAg9MgddmdB7ETbLCPgx2EMQBEJ35A10LUJ/42BkVAEnZj21Wo1IJBI2o+xmj2azycGKIsScmN8eNxoNjv2MQBxqtVpELpdzzwCgnWdxZ575NoFUKuWNrCBCbGTGYmaddZlMxpV02Wy2L3QXFbsBI+v0IkS5DJ2rUqLVvwAAAP//AwDkwh7q3xB35AAAAABJRU5ErkJggg==);
+    }
+  </style>
+</head>
+
+<body>
+  <a href="http://github.com/mackyle/xar"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+
+<div id="container">
+
+<div class="download">
+  <a href="http://github.com/mackyle/xar/zipball/master">
+    <img border="0" width="90" src="http://github.com/images/modules/download/zip.png" /></a>
+  <a href="http://github.com/mackyle/xar/tarball/master">
+    <img border="0" width="90" src="http://github.com/images/modules/download/tar.png" /></a>
+</div>
+
+<h1><a href="http://github.com/mackyle/xar">xar</a>
+  <!--<span class="small">by <a href="http://github.com/mackyle">mackyle</a></span>--></h1>
+
+<div class="description">
+  eXtensible ARchiver
+</div>
+
+<span class="sidebar-fixed"><span id="TOC" class="sidebar">
+<b>Table of Contents</b><br /><span>
+<a href="#"            >Overview</a><br />
+<a href="#howto"       >How To Sign an xar Archive</a><br />
+<a href="#compatible"  >Creating Compatible xar Archives</a><br />
+<a href="#extract"     >Extracting xar Certificates</a><br />
+<a href="#openssl"     >OpenSSL Command Tips</a><br />
+<a href="#safariextz"  >About Safari Extensions</a><br />
+<a href="#github"      >GitHub</a><br />
+</span></span></span>
+
+<p>A fork/clone of the subversion xar repository from <a href="http://xar.googlecode.com/svn/">http://xar.googlecode.com/svn/</a> that includes several enhancements and bug fixes including very basic command line signature support (master branch).  See <a href="https://mackyle.github.com/xar/">the xar project page</a> for more information.
+
+</p>
+
+<h2 id="howto">How To Sign an xar Archive</h2>
+
+<p>
+After building an xar tool with signature support, an xar archive (including <a href="http://www.apple.com/">Apple</a>’s .pkg flat-file format)
+can be signed.
+</p>
+
+<h3>Check Your xar Version</h3>
+
+<p>
+To verify that the <tt>xar</tt> tool has signature support try this:
+
+<pre>
+xar --version
+</pre>
+
+The output should be:
+<pre>
+xar 1.6dev_sigv4
+</pre>
+
+If the version does not end with “<tt>_sigv</tt><i>N</i>” where “<i>N</i>” is a digit,
+then your version of the <tt>xar</tt> tool does not have signature support.  If “<i>N</i>”
+is less than 4 then your version of the <tt>xar</tt> tool is too old to use these instructions
+and also has various bugs.
+</p>
+
+<h3>Collect Your Certificate(s) And Key</h3>
+
+<p>
+A signing certificate in DER (binary) format together with its signing key in PEM (ASCII) format
+will be needed to sign an xar archive file.
+</p>
+
+<p>
+Additionally, if your signing certificate was not signed directly by the root certificate, you
+should also have available any intermediate certificates (again in DER format) in the certificate
+chain between your signing certificate and the root certificate — you do not need any signing keys
+for these intermediate certificates.
+</p>
+
+<p>
+For example, suppose you had this certificate chain:
+
+<table id="example" class="chain">
+
+<tr>
+<td class="cert">root.crt</td>
+<td class="certdesc">Some root certificate that has already been pre-installed by the OS/browser vendor and is therefore implicitly trusted</td>
+</tr>
+
+<tr><td class="uparrow"></td><td></td></tr>
+
+<tr>
+<td class="cert">toporg.crt</td>
+<td class="certdesc">The top-level certificate for some organization (typically obtained by paying a certificate authority to sign it) that has been signed by <span class="cert">root.crt</span></td>
+</tr>
+
+<tr><td class="uparrow"></td><td></td></tr>
+
+<tr>
+<td class="cert">intorg.crt</td>
+<td class="certdesc">An intermediate certificate for some organization (perhaps for a developer division within that organization) that has been signed by <span class="cert">toporg.crt</span></td>
+</tr>
+
+<tr><td class="uparrow"></td><td></td></tr>
+
+<tr>
+<td class="cert">leaf.crt</td>
+<td class="certdesc">A leaf signing certificate for which you have the signing key (typically obtained by paying the owner of the certificate that signed it) that has been signed by <span class="cert">intorg.crt</span></td>
+</tr>
+
+</table>
+</p>
+<p class="note">This certificate chain is only an example.  Real certificate chains may contain a different number of certificates than shown here using either more certificates or fewer certificates in the chain.
+</p>
+
+<p>
+When the recipient of a signed xar archive attempts to verify the signature, all certificates in the chain must be available.  The leaf signing certificate will always be present in the xar archive and any trusted root certificates will always be present on the machine doing the verification.
+</p>
+
+<p>
+However, the recipient has no means to obtain any certificates in between the leaf signing certificate and the trusted root certificate; without them the signature verification will always fail.  It’s possible the recipient has already seen the intermediate certificates and stashed them away, but this behavior cannot be depended on.
+</p>
+
+<p>
+In the example certificate chain above, the <span class="cert">toporg.crt</span> certificate and the <span class="cert">intorg.crt</span> certificate are the intermediate certificates.
+</p>
+
+<p>
+To guarantee a successful signature verification, all intermediate certificates must always be included in the xar archive.  It’s good form to go ahead and include the root certificate as well so that if the recipient does not already have it (and therefore it’s not trusted), at least its full information can be displayed to help make an informed choice about whether or not to trust it.
+</p>
+
+<h3>Sign the xar File</h3>
+
+<p>
+These example signing commands are written for an <a href="http://pubs.opengroup.org/onlinepubs/009695399/utilities/sh.html">sh-compatible shell</a> and also require the <a href="http://openssl.org/docs/apps/openssl.html">openssl command</a> to be available.
+</p>
+
+<p>
+To successfully sign an xar file using the commands in this section, the xar archive must use
+<a href="http://www.itl.nist.gov/fipspubs/fip180-1.htm">SHA-1 checksum</a> hashes (the default) and the leaf
+signing certificate must use SHA-1 with RSA Encryption (aka sha1WithRSAEncryption — see 
+<a href="http://tools.ietf.org/html/rfc3447#appendix-A.2">RFC 3447 section A.2</a>) signature algorithm
+for signatures (see
+<a href="#checkalg">here</a> for instructions on checking a certificate’s signature algorithm).
+</p>
+
+<p>Given the <a href="#example">sample certificate chain above</a> with DER (binary) versions of the four certificates available in the files <tt>root.der</tt>, <tt>toporg.der</tt>, <tt>intorg.der</tt> and <tt>leaf.der</tt> and the private key for <tt>leaf.der</tt> available in PEM (ASCII) format in the file <tt>key.pem</tt> the following steps will sign an <tt>archive.xar</tt> file.
+
+<ol>
+
+<li>Determine the signature size in bytes<br />
+<p class="note">The characteristics of the signing key (bit length, algorithm, etc.) determine the size of the signatures it generates.  In order to sign an xar archive, the correct amount of space must be reserved for the signature so we must determine length of signatures produced by the signing key.</p>
+<pre>
+: | openssl dgst -sign key.pem -binary | wc -c > siglen.txt
+</pre>
+<p class="note">The above command is used to automate the signing process by storing the signature length in bytes (as an ASCII number) into the file <tt>siglen.txt</tt>.  However, the same thing can be accomplished by hand with only the <tt>openssl</tt> command by first creating a file named <tt>empty.txt</tt> that’s empty (a single blank line is fine too).  Then using<br /><tt class="nobreak left">openssl dgst -sign key.pem -binary -out sig.dat &lt; empty.txt</tt><br />and looking at the size in bytes of the generated <tt>sig.dat</tt> file which gives the number of bytes to reserve for the signature.
+</p>
+</li>
+
+<li>Extract the value to be signed and insert the certificates<br />
+<pre>
+xar --sign -f archive.xar --sha1-digestinfo-to-sign digestinfo.dat \
+  --sig-size `cat siglen.txt` \
+  --cert-loc leaf.der --cert-loc intorg.der \
+  --cert-loc toporg.der --cert-loc root.der
+</pre>
+It’s important that the <tt>--cert-loc</tt> options list the certificates in the certificate chain in bottom-up order (i.e. from leaf signing certificate to root).  Only the first <tt>--cert-loc</tt> option is required (which must be the signing certificate), but if the signing certificate is not a self-signed root certificate, the rest of the certificates in the certificate chain should be included as well or the recipient of the xar archive may not be able to verify the signature.
+<p class="note">If a <tt>siglen.txt</tt> file was not created in the previous step, replace the “<tt class="nobreak left">`cat siglen.txt`</tt>” part of the above command with the number of bytes to reserve for the signature as determined by hand in the previous step.
+</p>
+<p class="note">If the archive already has a signature use <tt class="nobreak">--replace-sign</tt> instead of
+<tt class="nobreak">--sign</tt> to rip out the old signature and replace it.
+</p>
+<p class="important">Despite the name, the <tt class="nobreak">--sign</tt> option does not create a signature, it only reserves space for one so that it can be injected later.
+</p>
+</li>
+
+<li>Create the RSA signature<br />
+<pre>
+openssl rsautl -sign -inkey key.pem -in digestinfo.dat -out signature.dat
+</pre>
+<p class="note">For the curious, the <tt>digestinfo.dat</tt> created in the previous step consists of the DigestInfo prefix for an SHA-1 digest (see <a href="http://tools.ietf.org/html/rfc3447#section-9.2">RFC 3447 section 9.2</a> and scroll down to the "Notes." and in note "1." the value for the SHA-1 DigestInfo prefix is given) followed by the actual SHA-1 hash (20 bytes) of the xar file’s table of contents.</p>
+</li>
+
+<li>Inject the RSA signature<br />
+<pre>
+xar --inject-sig signature.dat -f archive.xar
+</pre>
+<p class="note">Until this step is performed, the archive is not signed.  Even though the <tt>--sign</tt> option was used in a previous step, all that did was reserve the space (specified with the <tt>--sig-size</tt> option) so that the actual signature could be injected later (in this step) with the <tt>--inject-sig</tt> option.
+</p>
+</li>
+
+<li>Remove the temporary files<br />
+<pre>
+rm -f signature.dat digestinfo.dat siglen.txt sig.dat
+</pre>
+</li>
+
+</ol>
+The resulting <tt>archive.xar</tt> file is now signed and ready for distribution.  The <a href="#compatible">next section</a> provides important tips on creating the most compatible xar archive for distribution.
+</p>
+
+<p class="important">Steps 2–4 must be repeated whenever the content of the xar archive changes.  Omitting any of these steps will produce an xar archive with an invalid signature.
+</p>
+
+<h2 id="compatible">Creating Compatible xar Archives</h2>
+
+<p>Before signing an xar archive, the archive itself needs to be created.</p>
+
+<p>By default, when creating an xar archive, the <tt>xar</tt> command includes all kinds information about
+the files it contains including the owner user id, owner user name, group id, group name, inode number, device number, extended attributes and so on.</p>
+
+<p>Some recipient software can be confused by some of this extra information and do you really want to include things like the inode number, owner user name etc. for files you distribute?  Especially since some of that information (owner user name for example) might assist someone in compromising your computer.</p>
+
+<p>To get extremely fine-grained control over which properties are stored for each file in the xar archive, the <tt class="nobreak">--prop-include</tt> or <tt class="nobreak">--prop-exclude</tt> options can be used.
+</p>
+
+<p>Specifying all those <tt class="nobreak">--prop-include</tt> or <tt class="nobreak">--prop-exclude</tt> options can get tedious.  The simpler solution is to use the <tt>--distribution</tt> option which just keeps the file name and file mode.</p>
+
+<p>
+For example, if you have this directory structure:
+<pre>
+foo.ext/
+foo.ext/dir1/
+foo.ext/dir1/d1file1.txt
+foo.ext/dir1/d1file2.txt
+foo.ext/dir2/
+foo.ext/dir2/d2file1.txt
+foo.ext/file1.txt
+</pre>
+and you would like to create a maximally compressed xar archive of <tt>foo.ext/</tt> named <tt>foo.ext.xar</tt> that omits all the extra xar information that would be included by default, you can use this command:
+<pre>
+xar -czf foo.ext.xar --compression-args=9 --distribution foo.ext
+</pre>
+</p>
+<p class="note">The default compression level is embedded in the xar library and is set to high compression by default, but adding the <tt>--compression-args=9</tt> option ensures the highest compression level is used.
+</p>
+
+<h2 id="extract">Extracting xar Certificates</h2>
+
+<p>
+Given a signed xar file named <tt>signed.xar</tt> the contained certificates may be extracted
+using this command sequence:
+</p>
+<pre>
+mkdir certs
+xar -f signed.xar --extract-certs certs
+</pre>
+<p>
+The certificates are extracted in DER (binary) format and are named with a “<span class="cert">cert</span>” prefix and a two-digit suffix.  The leaf signing certificate is always named “<span class="cert">cert00</span>”.
+</p>
+
+<p>
+If the <a href="#example">example certificate chain</a> was used to sign the <tt>signed.xar</tt> file and all four certificates were passed to the <tt>xar</tt> command using <tt class="nobreak">--cert-loc</tt> options, then the
+<tt class="nobreak">--extract-certs</tt> option would produce four files.
+“<span class="cert">cert00</span>” would correspond to “<span class="cert">leaf.crt</span>”,
+“<span class="cert">cert01</span>” would correspond to “<span class="cert">intorg.crt</span>”,
+“<span class="cert">cert02</span>” would correspond to “<span class="cert">toporg.crt</span>”,
+and “<span class="cert">cert03</span>” would correspond to “<span class="cert">root.crt</span>”.
+</p>
+
+<h2 id="openssl">OpenSSL Command Tips</h2>
+
+<h3>Converting .p12 Format Private Keys</h3>
+
+<p>
+You may have a private key for your certificate available in a <tt>.p12</tt> (aka PKCS#12) format file.  (The OS X Keychain Access application can export private keys in the <tt>.p12</tt> format.)
+</p>
+
+<p>
+To convert a private key file named <tt>my_private_key.p12</tt> in PKCS#12 format to a standard RSA Private Key PEM format <tt>key.pem</tt> file use this sequence of commands:
+<pre>
+openssl pkcs12 -in my_private_key.p12 -nodes | openssl rsa -out key.pem
+</pre>
+</p>
+<p class="note">Trying to be clever and omitting the trailing “<tt class="nobreak">openssl rsa -out key.pem</tt>” command leaves extra stuff in the output file and fails to produce an RSA Private Key format output file so the resulting key file may not actually work to sign the archive.
+</p>
+
+<h3>Converting .p12 Format Certificates</h3>
+
+<p>
+You may have a certificate for your private key contained in the same <tt>.p12</tt> (aka PKCS#12) format file that the private key is in.  (The OS X Keychain Access application can export private keys together with their certificates in the <tt>.p12</tt> format if both are selected for export at the same time.)
+</p>
+
+<p>
+To extract the certificate contained within a private key file named <tt>my_private_key.p12</tt> in PKCS#12 format to a standard X509 DER certificate format <tt>cert.der</tt> file use this sequence of commands:
+<pre>
+openssl pkcs12 -in my_private_key.p12 -nodes | openssl x509 -outform der -out cert.der
+</pre>
+</p>
+<p class="note">Trying to be clever and omitting the trailing “<tt class="nobreak">openssl rsa -out key.pem</tt>” command leaves extra stuff in the output file and fails to produce an X509 certificate DER format output file so the resulting certificate file would not actually be usable with the <tt>--cert-loc</tt> xar option.
+</p>
+
+<p>Not all <tt>.p12</tt> files contain certificates.  If there’s no certificate in the file the above command sequence will produce an error.
+</p>
+
+<h3>Converting PEM Certificates to DER Format</h3>
+
+<p>If you have a certificate in PEM format (you can tell because you can open the file in your favorite text editor and one of the first lines of the file will be “-----BEGIN CERTIFICATE-----”) named <tt>cert.pem</tt> you can easily convert it to a DER format <tt>cert.der</tt> file like so:
+
+<pre>
+openssl x509 -in cert.pem -outform der -out cert.der
+</pre>
+</p>
+
+<p class="note">To do the reverse you would use the command<br />
+<tt class="nobreak left">openssl x509 -inform der -in cert.der -out cert.pem</tt><br />
+but PEM format certificates are not helpful in creating signed xar archives.
+</p>
+
+<p>(The OS X Keychain Access application can export certificates in both DER [shown as <tt>.cer</tt>] and PEM formats.)</p>
+
+<h3 id="view">Viewing an X.509 Certificate</h3>
+
+<p>
+Given a DER format certificate file named <tt>cert.der</tt> the following command will produce a text description of it:
+</p>
+<pre>
+openssl x509 -in cert.der -noout -text
+</pre>
+
+<p>
+Given a PEM format certificate file named <tt>cert.pem</tt> the following command will produce a text description of it:
+</p>
+<pre>
+openssl x509 -inform pem -in cert.pem -noout -text
+</pre>
+
+<h3 id="checkalg">Checking the Signature Algorithm</h3>
+
+<p>
+To check the signature algorithm of a certificate file, simply <a href="#view">generate the text description</a>
+and look for “Signature Algorithm:” in the output.
+</p>
+
+<p>A “Signature Algorithm:” value of “sha1WithRSAEncryption” is required to use
+<a href="#howto">the xar signing instructions</a> included in this document.
+</p>
+
+<h2 id="safariextz">About Safari Extensions</h2>
+
+<p>
+<a href="http://www.apple.com/safari/">Apple’s Safari browser</a> supports browser extensions starting with Safari version 5.  These extensions are packaged as signed xar archives using gzip compression named with a <tt>.safariextz</tt> extension.
+</p>
+
+<p>There has been a lot of interest in using the xar command line interface to sign <tt>.safariextz</tt> files.</p>
+
+<p>It may be possible to do this provided the version of xar is 1.6dev_sigv4 or later, the <tt class="nobreak">--distribution</tt> (or equivalent) and <tt class="nobreak">-z</tt> options are used when creating the initial xar archive and the full certificate chain (including the root certificate) is embedded using
+the <tt class="nobreak">--cert-loc</tt> options.  The full certificate chain may be extracted from a <tt>.safariextz</tt> file that has already been signed using Safari’s Extension Builder with the
+intended key (see <a href="#extract">here</a>).
+</p>
+
+<p>Please note that Safari seems to be hard-coded to require all extensions to be signed by a certificate whose certificate chain leads up to an Apple root certificate.  A normal code signing certificate simply will not
+produce loadable extensions.
+Furthermore, Safari Extension Signing certificates must have additional options set as described in
+<a href="http://images.apple.com/certificateauthority/pdf/Apple_WWDR_CPS_v1.8.pdf">Apple’s Certification Practice Statement</a>.  So don’t even think about trying it without a real Apple-issued Safari extension signing certificate.
+</p>
+
+<h2 id="github">GitHub</h2>
+<p class="left">
+  Visit the GitHub project page (source code etc.) at <a href="http://github.com/mackyle/xar">http://github.com/mackyle/xar</a>.
+</p>
+
+<!--
+<div class="footer">
+  get the xar source code on GitHub : <a href="http://github.com/mackyle/xar">mackyle/xar</a>
+</div>
+-->
+
+</div>
+
+</body>
+</html>
