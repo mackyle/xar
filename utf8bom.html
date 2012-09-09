@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset='utf-8' />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+  <title>mackyle/xar @ GitHub — utf8bom git filter</title>
+
+  <style type="text/css">
+    body {
+      margin-top: 1.0em;
+      background-color: white;
+      font-family: Times, "Times New Roman", serif;
+      color: black;
+    }
+    #container {
+      margin: 0 auto;
+      max-width: 90ex;
+    }
+    h1 { font-size: 3.8em; color: black; margin-bottom: 0.1em; }
+    h1 .small { font-size: 0.4em; }
+    h1 a { text-decoration: none; }
+    h2 { font-size: 1.5em; color: black; }
+    h3 { color: black; }
+    p.note:before, h1, h2, h3, th { font-family: Helvetica, Arial, FreeSans, sans-serif; font-weight: normal; }
+    a { color: black; }
+    .description { font-size: 1.2em; margin-bottom: 2em; margin-top: 2em; font-style: italic; }
+    .download { float: right; }
+    pre, ttx, .hash tdx { font-family: Menlo, Monaco, Consolas, Courier, "Courier New", monospace; }
+    pre { font-size: 75%;}
+    pre { padding: 0.5em 1ex; border: thin dotted silver; }
+    hr { border: 0; width: 80%; border-bottom: thin solid silver; }
+    p { text-align: justify; }
+    p.left { text-align: left; }
+    .inset { margin-left: 1ex; margin-right: 1ex; }
+    .footer { text-align:center; padding-top:2em; font-style: italic; }
+    p.note:before { content: "Note: "; }
+    .nobreak { white-space: nowrap; }
+    .hash td { font-size: 80%; line-height: 1.0; font-family: monospace; }
+    .hash tr > td:first-child { text-align: right; }
+    .hash tr > td:first-child:after { content: ':'; }
+
+    table.download-list {
+      border-collapse: separate;
+      border-spacing: 1.25ex 0;
+      width: 100%;
+      margin-bottom: 0.5em;
+    }
+
+    table.download-list > * > tr > td:first-child,
+    table.download-list > * > tr > td:first-child + td,
+    table.download-list > * > tr > td:first-child + td + td {
+      white-space: nowrap;
+    }
+
+    tr.header th {
+      text-align: left;
+      border-bottom: thin solid black;
+    }
+    tr.separator {
+      height: 0.25em;
+    }
+
+    span.down {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      margin-right: 2px;
+      vertical-align: baseline;
+      background-repeat: no-repeat;
+      background-position: 0% 100%;
+      background-size: 1em 1em;
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAQnRFWHRDb21tZW50AHRJTUUgY2h1bmtsZW4gNyBpZ25vcmVkDUFTQ0lJOiAuLi4uLjA3DUhFWDogMDdENjA5MTYxMDMwMzeLgNWuAAACTUlEQVR4nJRQW2iSYRj+tgq6k5BuDILdObqoYLBRxsjBsKvoIoKKokbrMMibrZsMNseojPJAbINg0zZlFVEi1Yi8aNJWiXlG51lvdOiNiBcefp++74tfZGzQXnh43+89PN/zvoTsYhfmeoQrr3oxsngSY0v9UFvPYLfeHe2c8Yjw5rcB7z0v8fHPLNTLA3sjGNIfFqw/n+PFVzUnufu6b28Ep59JBMu6Dk9Xx/DWbcTIwon/I+h5RIrHpruK1xZPYeHHE8x8HsWK2wDNh4u4v9yHByuKnYmi0agzHA7j6MN9uG4Zwuz3STp8D5OOGzB8G+cqphyXcYse1Ww2O7cPD6ZSKVQqFWwVt6AyHsfNpWHMrWmh/XQblg0dxt+dx6V5OcrlMux2O0wmk7JNEAqFnIVCAfF4HLlcDsl0Amf1coxaVZhfm8Yd6zAllcHlcsHv9yMQCECn0/1TEQwGBzc3N1EqlcBUUDW8YePXOhTaQ7hqVmDg8UG43W74fD4kk0mwz+ga0Gg0SuL1evnv+Xwe2WwWmUyGI51OIxqPoHfqABKJBB9knqlkdY/Hg4mJCWd3vV4n1WqV0GFCCxxUCaHNJJvKEX2/g8RiMRKJRAg9MgddmdB7ETbLCPgx2EMQBEJ35A10LUJ/42BkVAEnZj21Wo1IJBI2o+xmj2azycGKIsScmN8eNxoNjv2MQBxqtVpELpdzzwCgnWdxZ575NoFUKuWNrCBCbGTGYmaddZlMxpV02Wy2L3QXFbsBI+v0IkS5DJ2rUqLVvwAAAP//AwDkwh7q3xB35AAAAABJRU5ErkJggg==);
+    }
+  </style>
+</head>
+
+<body>
+  <a href="http://github.com/mackyle/xar"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+
+<div id="container">
+
+<div class="download">
+  <a href="http://github.com/mackyle/xar/zipball/master">
+    <img border="0" width="90" src="http://github.com/images/modules/download/zip.png" /></a>
+  <a href="http://github.com/mackyle/xar/tarball/master">
+    <img border="0" width="90" src="http://github.com/images/modules/download/tar.png" /></a>
+</div>
+
+<h1><a href="http://github.com/mackyle/xar">xar</a>
+  <!--<span class="small">by <a href="http://github.com/mackyle">mackyle</a></span>--></h1>
+
+<div class="description">
+  eXtensible ARchiver
+</div>
+
+<p>A fork/clone of the subversion xar repository from <a href="http://xar.googlecode.com/svn/">http://xar.googlecode.com/svn/</a> that includes several enhancements and bug fixes including very basic command line signature support (master branch).  See <a href="https://mackyle.github.com/xar/">the xar project page</a> for more information.
+
+</p>
+
+<h2>The <a href="http://git-scm.com/">Git</a> <tt>utf8bom</tt> Filter</h2>
+
+<p>The top-level
+<a href="https://github.com/mackyle/xar/blob/master/xar/.gitattributes"><tt>.gitattributes</tt></a>
+file assigns a <tt>filter=utf8bom</tt> attribute to several files.
+
+These files contain UTF-8 characters and the <tt>utf8bom</tt> filter ensures they start with a UTF-8 BOM (which is nothing more than the U+FEFF unicode value encoded into UTF-8 which is just
+<tt>0xEF</tt> <tt>0xBB</tt> <tt>0xBF</tt>) in order to make sure they are handled properly by all editors.  
+</p>
+
+<p>
+Strictly speaking having a UTF-8 BOM (Byte Order Mark) at the beginning of a UTF-8 file should not be necessary, but some editors incorrectly assume the wrong text encoding otherwise.
+</p>
+
+<h2>Configuring the Filter</h2>
+
+<p>The repository can be used just fine without configuring your own copy of the <tt>utf8bom</tt>
+filter.  In this case
+<a href="http://git-scm.com/">Git</a> will just ignore the <tt>filter=utf8bom</tt> attribute.
+</p>
+
+<p>This would mean that after editing one of the files marked with this attribute
+using an editor that strips off the UTF-8 BOM (some editors really do this) and
+checking the edited file back in, the UTF-8 BOM will be lost.
+</p>
+
+<p>
+The whole point of the <tt>utf8bom</tt> filter is to prevent this from happening.
+</p>
+
+<p>
+The filter lines from a <tt>~/.gitconfig</tt> file that sets up the <tt>utf8bom</tt>
+filter look like this:
+
+<pre>
+[filter "utf8bom"] 
+	clean = utf8bomcat
+	smudge = utf8bomcat
+</pre>
+
+These <a href="http://git-scm.com/">Git</a> commands will set up the <tt>utf8bom</tt>
+filter in your global (typically
+<tt>~/.gitconfig</tt>) <a href="http://git-scm.com/">Git</a> configuration file by
+creating the above lines in your <a href="http://git-scm.com/">Git</a> global
+configuration file:
+
+<pre>
+git config --global filter.utf8bom.clean utf8bomcat
+git config --global filter.utf8bom.smudge utf8bomcat
+</pre>
+</p>
+
+<p>
+The above configuration assumes that the <tt>utf8bomcat</tt> command will be available to
+<a href="http://git-scm.com/">Git</a> via the current <tt>PATH</tt>.  If that will not be
+the case, the above configuration will need to be adjusted to include a full path to the
+<tt>utf8bomcat</tt> command.
+</p>
+
+<h2>The <tt>utf8bomcat</tt> Script</h2>
+
+<p>
+Obviously in order to make the filter work, a copy of the <tt>utf8bomcat</tt> script will be
+necessary.
+</p>
+
+<p>
+The <tt>utf8bomcat</tt> script is so named because it behaves almost exactly like the
+<a href="http://developer.apple.com/documentation/Darwin/Reference/ManPages/man1/cat.1.html">cat
+command</a> except that it does not support any options or the special file name “<tt>-</tt>” (but it will read from standard input if no file names are given).
+</p>
+
+<p>
+What <tt>utf8bomcat</tt> does is check the first three bytes that would be written to standard output and if they are not the UTF-8 BOM (<tt>0xEF</tt> <tt>0xBB</tt>
+<tt>0xBF</tt>), then the UTF-8 BOM is written to standard output first.  Next the
+input is copied to standard output.
+</p>
+
+<p>
+To be successfully used as a <a href="http://git-scm.com/">Git</a> filter, it’s important that <tt>utf8bomcat</tt> not add a UTF-8 BOM if one is already present.
+</p>
+
+<p>
+Any command or script that has this behavior (it need only support reading from standard input to be a <a href="http://git-scm.com/">Git</a> filter) may be used as the <tt>utf8bom</tt> filter command.
+</p>
+
+<p>
+Here is one possible script that may be used.  It requires the
+<a href="http://www.gnu.org/software/bash/bash.html">bash shell</a>, the
+<a href="http://developer.apple.com/documentation/Darwin/Reference/ManPages/man1/hexdump.1.html">hexdump utility command</a> and the
+<a href="http://developer.apple.com/documentation/Darwin/Reference/ManPages/man1/cat.1.html">cat utility command</a>:
+
+<pre>
+#!/bin/bash
+
+# utf8bomcat -- prepend a UTF-8 BOM to the output if not already present
+# Copyright (C) 2011,2012 Kyle J. McKay.  All rights reserved.
+
+# This program is free software.  It comes WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# You can redistribute it and/or modify it under the terms of the WTFPL,
+# Version 2, as published by Sam Hocevar.
+# See http://sam.zoy.org/wtfpl/COPYING for more details.
+
+# Version 1.1.2
+
+# Only add a BOM if one is not already present
+
+export LC_ALL=C
+cat "$@" |
+{
+  read -d '' -rn3
+  hexval="$(hexdump -n3 -e '/1 "%02x"' &lt;&lt;&lt; "$REPLY")"
+  if [ "$hexval" != "efbbbf" ]; then
+    printf '\xef\xbb\xbf'
+  fi
+  printf '%s' "$REPLY"
+  exec cat
+}
+</pre>
+</p>
+
+<h2>The utf8bomcat.c Source File</h2>
+
+<p>
+On systems where the
+<a href="http://www.gnu.org/software/bash/bash.html">bash shell</a>, the
+<a href="http://developer.apple.com/documentation/Darwin/Reference/ManPages/man1/hexdump.1.html">hexdump utility command</a> or the
+<a href="http://developer.apple.com/documentation/Darwin/Reference/ManPages/man1/cat.1.html">cat utility command</a> is not available, the following source file may be compiled (typically with something like <tt style="white-space: nowrap">cc -o utf8bomcat -O utf8bomcat.c</tt>) to produce a version of <tt>utf8bomcat</tt> that can be used as a
+<a href="http://git-scm.com/">Git</a> filter instead of the previous script:
+
+<pre>
+/*
+ * utf8bomcat.c -- prepend a UTF-8 BOM to the output if not already present
+ * Copyright (C) 2012 Kyle J. McKay.  All rights reserved.
+ *
+ * This program is free software.  It comes WITHOUT ANY WARRANTY; without even
+ * the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * You can redistribute it and/or modify it under the terms of the WTFPL,
+ * Version 2, as published by Sam Hocevar.
+ * See http://sam.zoy.org/wtfpl/COPYING for more details.
+ */
+
+/*
+ * Version 1.0
+ */
+
+#include &lt;stddef.h>
+#include &lt;stdlib.h>
+#include &lt;stdio.h>
+
+#define RBUFSIZ 32768
+
+int main()
+{
+  FILE *inbinary = freopen(NULL, "rb", stdin);
+  FILE *outbinary = freopen(NULL, "wb", stdout);
+  unsigned char *buff = (unsigned char *)malloc(RBUFSIZ);
+  int checkdone = 0;
+
+  if (!inbinary) {
+    fprintf(stderr, "freopen(NULL, \"rb\", stdin) failed\n");
+    return 1;
+  }
+  if (!outbinary) {
+    fprintf(stderr, "freopen(NULL, \"wb\", stdout) failed\n");
+    return 1;
+  }
+  if (!buff) {
+    fprintf(stderr, "malloc(%d) failed\n", RBUFSIZ);
+    return 1;
+  }
+  while (!feof(inbinary) &amp;&amp; !ferror(inbinary)) {
+    size_t count = fread(buff, 1, RBUFSIZ, inbinary);
+    if (!checkdone) {
+      if (count &lt; 3 || buff[0] != 0xEF || buff[1] != 0xBB || buff[2] != 0xBF) {
+        if (fwrite("\xEF\xBB\xBF", 3, 1, outbinary) != 1) {
+          fprintf(stderr, "fwrite failed writing UTF-8 BOM to stdout\n");
+          return 1;
+        }
+      }
+      checkdone = 1;
+    }
+    if (count) {
+      if (fwrite(buff, count, 1, outbinary) != 1) {
+          fprintf(stderr, "fwrite failed writing input to stdout\n");
+          return 1;
+      }
+    }
+  }
+  if (ferror(inbinary)) {
+    fprintf(stderr, "fread failed reading input\n");
+    return 1;
+  }
+  free(buff);
+  return 0;
+}
+</pre>
+</p>
+
+<h2>GitHub</h2>
+<p class="left">
+  Visit the GitHub project page (source code etc.) at <a href="http://github.com/mackyle/xar">http://github.com/mackyle/xar</a>.
+</p>
+
+<!--
+<div class="footer">
+  get the xar source code on GitHub : <a href="http://github.com/mackyle/xar">mackyle/xar</a>
+</div>
+-->
+
+</div>
+
+</body>
+</html>
