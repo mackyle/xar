@@ -90,7 +90,9 @@ int xar_gzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 		if( tmpp )
 			opt = xar_attr_pget(f, tmpp, "style");
 		if( !opt ) return 0;
-		if( strcmp(opt, "application/x-gzip") != 0 ) return 0;
+		if( strcmp(opt, "application/x-gzip") != 0 &&
+		    strcmp(opt, "application/zlib"  ) != 0 )
+			return 0;
 		
 		inflateInit(&GZIP_CONTEXT(context)->z);
 		GZIP_CONTEXT(context)->gzipcompressed = 1;
