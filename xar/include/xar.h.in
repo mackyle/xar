@@ -39,6 +39,7 @@
 #define _XAR_H_
 
 #define XAR_VERSION "@XAR_VERSION@"
+#define XAR_VERSION_NUM @XAR_NUMERIC_VERSION@
 
 #include <sys/types.h>
 @C99_FIXED_WIDTH_TYPE_HEADER@
