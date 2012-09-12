@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Rob Braun
+ * Portions Copyright (c) 2012 Kyle J. McKay.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,6 +140,8 @@ static struct lnode *PropExclude = NULL;
 static struct lnode *PropExclude_Tail = NULL;
 static struct cnode *CertPath = NULL;
 static struct cnode *CertPath_Tail = NULL;
+
+static char *unlink_temp_file = NULL;
 
 static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx);
 static int32_t signingCallback(xar_signature_t sig, void *context, uint8_t *data, uint32_t length, uint8_t **signed_data, uint32_t *signed_len);
@@ -597,6 +600,41 @@ void *stack_pop(stack s) {
 	return ret;
 }
 
+/* is_valid_dir: check for a valid directory.
+                 Returns 0 if invalid, non-zero if valid
+                 NULL means check the current directory
+*/
+static int is_valid_dir(const char *dirpath) {
+	int result, curdir = open(".", O_RDONLY);
+	if (curdir == -1)
+		return 0;
+	if (dirpath)
+		result = chdir(dirpath);
+	else
+		result = chdir(".");
+	fchdir(curdir);
+	return result == 0;
+}
+
+/* get_umask: return the current umask without changing it
+*/
+static mode_t get_umask(void) {
+	mode_t curmask = umask(077);
+	umask(curmask);
+	return curmask;
+}
+
+/* remove_temp: remove the temporary file
+*/
+static void remove_temp(void) {
+	if (unlink_temp_file) {
+		char *remove_file = unlink_temp_file;
+		unlink_temp_file = NULL;
+		unlink(remove_file);
+		free(remove_file);
+	}
+}
+
 /* replace_sign: rip out all current signatures and certs and insert a new pair
 		Since libxar is currently not capable of doing this directly, we have to create a new xar archive,
 		copy all the files and options from the current archive, and sign the new archive
@@ -605,9 +643,10 @@ static void replace_sign(const char *filename) {
 
 	xar_t old_xar, new_xar;
 	xar_signature_t sig;
-	char *new_xar_path = (char *)malloc(16);
-	strncpy(new_xar_path, "/tmp/xar-XXXXXX", 16);
+	char *new_xar_path;
 	char *systemcall;
+	const char *temp_dir;
+	size_t new_xar_path_len;
 	struct cnode *c;
 	int err, tempfd;
 
@@ -619,13 +658,37 @@ static void replace_sign(const char *filename) {
 	}
 
 	// create the temporary archive file
+	temp_dir = getenv("TMPDIR");
+	if (!temp_dir || !is_valid_dir(temp_dir)) {
+		temp_dir = getenv("TMP");
+		if (!temp_dir || !is_valid_dir(temp_dir)) {
+			temp_dir = "/tmp";
+			if (!is_valid_dir(temp_dir))
+				temp_dir = NULL;
+		}
+	}
+	if (!temp_dir) {
+		fprintf(stderr, "Could not get temporary directory!\n");
+		exit(1);
+	}
+	new_xar_path_len = strlen(temp_dir) + 12;
+	new_xar_path = (char *)malloc(new_xar_path_len);
+	if (!new_xar_path) {
+		fprintf(stderr, "Could not allocate memory for temporary file path!\n");
+		exit(1);
+	}
+	strncpy(new_xar_path, temp_dir, new_xar_path_len);
+	strncpy(new_xar_path + (new_xar_path_len - 12), "/xar-XXXXXX", 12);
 	tempfd = mkstemp(new_xar_path);
 	if( tempfd == -1 ) {
+		free(new_xar_path);
 		fprintf(stderr, "Error creating new archive %s\n", new_xar_path);
 		exit(1);
 	}
+	fchmod(tempfd, 0666 & ~get_umask());
 	close(tempfd);
-
+	unlink_temp_file = new_xar_path;
+	atexit(remove_temp);
 
 	new_xar = xar_open(new_xar_path, WRITE);
 	if( !new_xar ) {
@@ -666,6 +729,7 @@ static void replace_sign(const char *filename) {
 	{
 		printf("old_xar -> %s (parent: %s)\n",xar_get_path(current_xar_file),XAR_FILE(current_xar_file)->parent?xar_get_path(XAR_FILE(current_xar_file)->parent):"(nil)");
 	}
+	xar_iter_free(loopIter);
 
 	do {
 		// parent is the parent in the new archive!
@@ -711,6 +775,7 @@ static void replace_sign(const char *filename) {
 		char * current_path = xar_get_path(current_xar_file);
 		printf("new_xar -> %s\n",current_path);
 	}
+	xar_iter_free(loopIter);
 
 	xar_iter_free(iter);
 	stack_free(s_new);
@@ -746,7 +811,7 @@ static void replace_sign(const char *filename) {
 	}
 	free(systemcall);
 	// delete temporary archive
-	unlink(new_xar_path);
+	remove_temp();
 }
 
 /*	belated_sign
