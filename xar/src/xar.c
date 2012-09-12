@@ -60,6 +60,21 @@
 #define E_NOSIG     60
 #define E_SIGEXISTS 61
 
+struct HashType {
+  int type; /* XAR_CKSUM_NONE, XAR_CKSUM_SHA1, etc. */
+  const char *name; /* "none", "sha1", etc. */
+};
+
+static const struct HashType HashTypes[] = {
+  { XAR_CKSUM_NONE,   XAR_OPT_VAL_NONE },
+  { XAR_CKSUM_MD5,    XAR_OPT_VAL_MD5 },
+  { XAR_CKSUM_SHA1,   XAR_OPT_VAL_SHA1 },
+  { XAR_CKSUM_SHA224, XAR_OPT_VAL_SHA224 },
+  { XAR_CKSUM_SHA256, XAR_OPT_VAL_SHA256 },
+  { XAR_CKSUM_SHA384, XAR_OPT_VAL_SHA384 },
+  { XAR_CKSUM_SHA512, XAR_OPT_VAL_SHA512 }
+};
+
 static const unsigned char Sha1DigestInfo[15] = {
 	0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E,
 	0x03, 0x02, 0x1A, 0x05, 0x00, 0x04, 0x14
@@ -69,8 +84,8 @@ static int Perms = 0;
 static int Local = 0;
 static char *Subdoc = NULL;
 static char *SubdocName = NULL;
-static char *Toccksum = NULL;
-static char *Filecksum = NULL;
+static const struct HashType *Toccksum = NULL;
+static const struct HashType *Filecksum = NULL;
 static char *Compression = NULL;
 static char *Rsize = NULL;
 static char *CompressionArg = NULL;
@@ -898,10 +913,16 @@ static int archive(const char *filename, int arglen, char *args[]) {
 	}
 
 	if( Toccksum )
-		xar_opt_set(x, XAR_OPT_TOCCKSUM, Toccksum);
+		if (xar_opt_set(x, XAR_OPT_TOCCKSUM, Toccksum->name) != 0) {
+			fprintf(stderr, "Unsupported TOC checksum type %s\n", Toccksum->name);
+			exit(1);
+		}
 
 	if( Filecksum )
-		xar_opt_set(x, XAR_OPT_FILECKSUM, Filecksum);
+		if (xar_opt_set(x, XAR_OPT_FILECKSUM, Filecksum->name) != 0) {
+			fprintf(stderr, "Unsupported file checksum type %s\n", Filecksum->name);
+			exit(1);
+		}
 
 	if( Compression )
 		xar_opt_set(x, XAR_OPT_COMPRESSION, Compression);
@@ -1338,23 +1359,31 @@ static int dump_header(const char *filename) {
 		exit(1);
 	}
 
-	printf("magic:                  0x%x ", ntohl(xh.magic));
+	printf("magic:                   0x%x ", ntohl(xh.magic));
 	if( ntohl(xh.magic) != XAR_HEADER_MAGIC )
 		printf("(BAD)\n");
 	else
 		printf("(OK)\n");
-	printf("size:                   %d\n", ntohs(xh.size));
-	printf("version:                %d\n", ntohs(xh.version));
-	printf("Compressed TOC length:  %" PRId64 "\n", xar_ntoh64(xh.toc_length_compressed));
+	printf("size:                    %d\n", ntohs(xh.size));
+	printf("version:                 %d\n", ntohs(xh.version));
+	printf("Compressed TOC length:   %" PRId64 "\n", xar_ntoh64(xh.toc_length_compressed));
 	printf("Uncompressed TOC length: %" PRId64 "\n", xar_ntoh64(xh.toc_length_uncompressed));
-	printf("Checksum algorithm:     %d ", ntohl(xh.cksum_alg));
+	printf("TOC Checksum algorithm:  %d ", ntohl(xh.cksum_alg));
 	switch( ntohl(xh.cksum_alg) ) {
-	case XAR_CKSUM_NONE: printf("(none)\n");
-	                     break;
-	case XAR_CKSUM_SHA1: printf("(SHA1)\n");
-	                     break;
-	case XAR_CKSUM_MD5: printf("(MD5)\n");
-	                    break;
+	case XAR_CKSUM_NONE:	printf("(%s)\n", XAR_OPT_VAL_NONE);
+				break;
+	case XAR_CKSUM_MD5:	printf("(%s)\n", XAR_OPT_VAL_MD5);
+				break;
+	case XAR_CKSUM_SHA1:	printf("(%s)\n", XAR_OPT_VAL_SHA1);
+				break;
+	case XAR_CKSUM_SHA224:	printf("(%s)\n", XAR_OPT_VAL_SHA224);
+				break;
+	case XAR_CKSUM_SHA256:	printf("(%s)\n", XAR_OPT_VAL_SHA256);
+				break;
+	case XAR_CKSUM_SHA384:	printf("(%s)\n", XAR_OPT_VAL_SHA384);
+				break;
+	case XAR_CKSUM_SHA512:	printf("(%s)\n", XAR_OPT_VAL_SHA512);
+				break;
 	default: printf("(unknown)\n");
 	         break;
 	};
@@ -1529,9 +1558,17 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t                      xml header verification.\n");
 	fprintf(stderr, "\t                      Valid values: none, sha1, and md5\n");
 	fprintf(stderr, "\t                      Default: sha1\n");
+	fprintf(stderr, "\t                      If the linked library supports them, sha224\n");
+	fprintf(stderr, "\t                      sha256, sha384 and sha512 may also be used.\n");
+	fprintf(stderr, "\t                      Setting a stronger toc hash than the default will\n");
+	fprintf(stderr, "\t                      also set the file hash to the same value if it's\n");
+	fprintf(stderr, "\t                      not been explictly set to something else.\n");
 	fprintf(stderr, "\t--file-cksum     Specifies the hashing algorithm to use for\n");
 	fprintf(stderr, "\t                      file verification.\n");
 	fprintf(stderr, "\t                      Same values and defaults as --toc-cksum.\n");
+	fprintf(stderr, "\t                      Setting a stronger file hash than the default will\n");
+	fprintf(stderr, "\t                      also set the toc hash to the same value if it's\n");
+	fprintf(stderr, "\t                      not been explictly set to something else.\n");
 	fprintf(stderr, "\t--dump-toc=<filename> Has xar dump the xml header into the\n");
 	fprintf(stderr, "\t                      specified file.\n");
 	fprintf(stderr, "\t--dump-toc-raw=<filename> Has xar dump the raw, compressed xml\n");
@@ -1593,6 +1630,15 @@ static void usage(const char *prog) {
 
 static void print_version() {
 	printf("xar %s\n", XAR_VERSION);
+}
+
+static const struct HashType *get_hash_alg(const char *str) {
+	unsigned i, count = sizeof(HashTypes) / sizeof(HashTypes[0]);
+	for (i = 0; i < count; ++i) {
+		if (strcmp(str, HashTypes[i].name) == 0)
+			return &HashTypes[i];
+	}
+	return NULL;
 }
 
 int main(int argc, char *argv[]) {
@@ -1658,19 +1704,21 @@ int main(int argc, char *argv[]) {
 
 	while( (c = getopt_long(argc, argv, "axcC:vtjzf:hpPln:s:d:vk", o, &loptind)) != -1 ) {
 		switch(c) {
-		case  1 : if( !optarg ) {
+		case  1 :
+		{
+		          const struct HashType *opthash;
+		          if( !optarg ) {
 		          	usage(argv[0]);
 		          	exit(1);
 		          }
-		          if( (strcmp(optarg, XAR_OPT_VAL_NONE) != 0) &&
-		              (strcmp(optarg, XAR_OPT_VAL_SHA1) != 0) &&
-		              (strcmp(optarg, XAR_OPT_VAL_MD5)  != 0) ) {
+		          if( (opthash = get_hash_alg(optarg)) == NULL ) {
 		          	usage(argv[0]);
 		          	exit(1);
 		          }
-		          Toccksum = optarg;
+		          Toccksum = opthash;
 		
 		          break;
+		}
 		case  2 : if( !optarg ) {
 		          	usage(argv[0]);
 		          	exit(1);
@@ -1825,19 +1873,21 @@ int main(int argc, char *argv[]) {
 		case 17 :
 			CompressionArg = optarg;
 			break;
-		case 18 : if( !optarg ) {
+		case 18 :
+		{
+		          const struct HashType *opthash;
+		          if( !optarg ) {
 				usage(argv[0]);
 				exit(1);
 		          }
-		          if( (strcmp(optarg, XAR_OPT_VAL_NONE) != 0) &&
-		              (strcmp(optarg, XAR_OPT_VAL_SHA1) != 0) &&
-		              (strcmp(optarg, XAR_OPT_VAL_MD5)  != 0) ) {
+		          if( (opthash = get_hash_alg(optarg)) == NULL ) {
 				usage(argv[0]);
 				exit(1);
 		          }
-		          Filecksum = optarg;
+		          Filecksum = opthash;
 
 		          break;
+		}
 		case 19 :
 			if( !optarg ) {
 				usage(argv[0]);
@@ -2030,6 +2080,11 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	if (Toccksum && !Filecksum && Toccksum->type > XAR_CKSUM_SHA1)
+		Filecksum = Toccksum;
+	if (Filecksum && !Toccksum && Filecksum->type > XAR_CKSUM_SHA1)
+		Toccksum = Filecksum;
+
 	if (! required_dash_f)	{
 		usage(argv[0]);
 		fprintf(stderr, "\n -f option is REQUIRED\n");
@@ -2042,7 +2097,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	if (DataToSignDumpPath && DumpSha1DigestInfo && Toccksum && strcmp(Toccksum, XAR_OPT_VAL_SHA1) != 0) {
+	if (DataToSignDumpPath && DumpSha1DigestInfo && Toccksum && strcmp(Toccksum->name, XAR_OPT_VAL_SHA1) != 0) {
 		fprintf(stderr, "--sha1-digestinfo-to-sign requires --toc-cksum sha1\n");
 		exit(1);
 	}

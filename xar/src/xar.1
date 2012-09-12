@@ -90,11 +90,15 @@ List the subdocuments in the xml header
 .TP
 \-\-toc\-cksum
 Specifies the hashing algorithm to use for xml header verification.
-Valid values: none, sha1, and md5.  Default value: sha1
+Valid values: none, sha1, and md5.
+If the linked libcrypto library supports them sha224, sha256, sha384 and sha512 may also be used.
+Setting this option to a stronger hash than the default will also cause \-\-file\-cksum to be set to that hash unless it's been explicitly set to something else.
+Default value: sha1
 .TP
 \-\-file\-cksum
 Specifies the hashing algorithm to use for file verification.
 Same values and defaults as \-\-toc\-cksum.
+Setting this option to a stronger hash than the default will also cause \-\-toc\-cksum to be set to that hash unless it's been explicitly set to something else.
 .TP
 \-l
 On archival, stay on the local device.

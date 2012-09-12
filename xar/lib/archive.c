@@ -65,6 +65,9 @@
 #include "subdoc.h"
 #include "darwinattr.h"
 
+#define MAXVAL(a,b) ((a)>=(b)?(a):(b))
+#define HASH_MAX_MD_SIZE MAXVAL(EVP_MAX_MD_SIZE,64)
+
 #ifndef O_EXLOCK
 #define O_EXLOCK 0
 #endif
@@ -241,8 +244,8 @@ xar_t xar_open(const char *file, int32_t flags) {
 		xar_opt_set(ret, XAR_OPT_COMPRESSION, XAR_OPT_VAL_GZIP);
 		xar_opt_set(ret, XAR_OPT_FILECKSUM, XAR_OPT_VAL_SHA1);
 	} else {
-		unsigned char toccksum[EVP_MAX_MD_SIZE];
-		unsigned char cval[EVP_MAX_MD_SIZE];
+		unsigned char toccksum[HASH_MAX_MD_SIZE];
+		unsigned char cval[HASH_MAX_MD_SIZE];
 		unsigned int tlen;
 		const EVP_MD *md;
 
@@ -273,12 +276,32 @@ xar_t xar_open(const char *file, int32_t flags) {
 			break;
 		case XAR_CKSUM_SHA1:
 			XAR(ret)->docksum = 1;
-			md = EVP_get_digestbyname("sha1");
+			md = EVP_get_digestbyname(XAR_OPT_VAL_SHA1);
 			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
 			break;
 		case XAR_CKSUM_MD5:
 			XAR(ret)->docksum = 1;
-			md = EVP_get_digestbyname("md5");
+			md = EVP_get_digestbyname(XAR_OPT_VAL_MD5);
+			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
+			break;
+		case XAR_CKSUM_SHA224:
+			XAR(ret)->docksum = 1;
+			md = EVP_get_digestbyname(XAR_OPT_VAL_SHA224);
+			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
+			break;
+		case XAR_CKSUM_SHA256:
+			XAR(ret)->docksum = 1;
+			md = EVP_get_digestbyname(XAR_OPT_VAL_SHA256);
+			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
+			break;
+		case XAR_CKSUM_SHA384:
+			XAR(ret)->docksum = 1;
+			md = EVP_get_digestbyname(XAR_OPT_VAL_SHA384);
+			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
+			break;
+		case XAR_CKSUM_SHA512:
+			XAR(ret)->docksum = 1;
+			md = EVP_get_digestbyname(XAR_OPT_VAL_SHA512);
 			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
 			break;
 		default:
@@ -309,6 +332,18 @@ xar_t xar_open(const char *file, int32_t flags) {
 				break;
 			case XAR_CKSUM_MD5:
 				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_MD5) == 0);
+				break;
+			case XAR_CKSUM_SHA224:
+				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_SHA224) == 0);
+				break;
+			case XAR_CKSUM_SHA256:
+				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_SHA256) == 0);
+				break;
+			case XAR_CKSUM_SHA384:
+				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_SHA384) == 0);
+				break;
+			case XAR_CKSUM_SHA512:
+				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_SHA512) == 0);
 				break;
 			default:
 				cksum_match = 0;
@@ -405,7 +440,7 @@ int xar_close(xar_t x) {
 		long rsize, wsize;
 		z_stream zs;
 		uint64_t ungztoc, gztoc;
-		unsigned char chkstr[EVP_MAX_MD_SIZE];
+		unsigned char chkstr[HASH_MAX_MD_SIZE];
 		int tocfd;
 		char timestr[128];
 		struct tm tmptm;
@@ -416,23 +451,32 @@ int xar_close(xar_t x) {
 		if( !tmpser ) tmpser = XAR_OPT_VAL_SHA1;
 
 		if( (strcmp(tmpser, XAR_OPT_VAL_NONE) != 0) ) {
+			uint32_t cksum_alg;
 			const EVP_MD *md;
-			xar_prop_set(XAR_FILE(x), "checksum", NULL);
-			if( strcmp(tmpser, XAR_OPT_VAL_SHA1) == 0 ) {
-				md = EVP_get_digestbyname("sha1");
-				EVP_DigestInit_ex(XAR(x)->toc_ctx, md, NULL);
-				XAR(x)->header.cksum_alg = htonl(XAR_CKSUM_SHA1);
-				xar_attr_set(XAR_FILE(x), "checksum", "style", XAR_OPT_VAL_SHA1);
-				xar_prop_set(XAR_FILE(x), "checksum/size", "20");
-			}
-			if( strcmp(tmpser, XAR_OPT_VAL_MD5) == 0 ) {
-				md = EVP_get_digestbyname("md5");
-				EVP_DigestInit_ex(XAR(x)->toc_ctx, md, NULL);
-				XAR(x)->header.cksum_alg = htonl(XAR_CKSUM_MD5);
-				xar_attr_set(XAR_FILE(x), "checksum", "style", XAR_OPT_VAL_MD5);
-				xar_prop_set(XAR_FILE(x), "checksum/size", "16");
-			}
+			char mdlenstr[32];
 
+			md = EVP_get_digestbyname(tmpser);
+			if( md == NULL ) return -1;
+			if( strcmp(tmpser, XAR_OPT_VAL_SHA1) == 0 )
+				cksum_alg = XAR_CKSUM_SHA1;
+			else if( strcmp(tmpser, XAR_OPT_VAL_MD5) == 0 )
+				cksum_alg = XAR_CKSUM_MD5;
+			else if( strcmp(tmpser, XAR_OPT_VAL_SHA224) == 0 )
+				cksum_alg = XAR_CKSUM_SHA224;
+			else if( strcmp(tmpser, XAR_OPT_VAL_SHA256) == 0 )
+				cksum_alg = XAR_CKSUM_SHA256;
+			else if( strcmp(tmpser, XAR_OPT_VAL_SHA384) == 0 )
+				cksum_alg = XAR_CKSUM_SHA384;
+			else if( strcmp(tmpser, XAR_OPT_VAL_SHA512) == 0 )
+				cksum_alg = XAR_CKSUM_SHA512;
+			else
+				return -1;
+			xar_prop_set(XAR_FILE(x), "checksum", NULL);
+			EVP_DigestInit_ex(XAR(x)->toc_ctx, md, NULL);
+			XAR(x)->header.cksum_alg = htonl(cksum_alg);
+			xar_attr_set(XAR_FILE(x), "checksum", "style", OBJ_nid2ln(EVP_MD_nid(md)));
+			sprintf(mdlenstr, "%d", EVP_MD_size(md));
+			xar_prop_set(XAR_FILE(x), "checksum/size", mdlenstr);
 			xar_prop_set(XAR_FILE(x), "checksum/offset", "0");
 			XAR(x)->docksum = 1;
 		} else {
@@ -733,11 +777,18 @@ int32_t xar_opt_set(xar_t x, const char *option, const char *value) {
 		if( strcmp(value, XAR_OPT_VAL_NONE) == 0 ) {
 			XAR(x)->heap_offset = 0;
 		}
-		if( strcmp(value, XAR_OPT_VAL_SHA1) == 0 ) {
-			XAR(x)->heap_offset = 20;
+		else {
+			const EVP_MD *md;
+			md = EVP_get_digestbyname(value);
+			if( md == NULL ) return -1;
+			XAR(x)->heap_offset = EVP_MD_size(md);
 		}
-		if( strcmp(value, XAR_OPT_VAL_MD5) == 0 ) {
-			XAR(x)->heap_offset = 16;
+	}
+	if( (strcmp(option, XAR_OPT_FILECKSUM) == 0) ) {
+		if( strcmp(value, XAR_OPT_VAL_NONE) != 0 ) {
+			const EVP_MD *md;
+			md = EVP_get_digestbyname(value);
+			if( md == NULL ) return -1;
 		}
 	}
 	a = xar_attr_new();

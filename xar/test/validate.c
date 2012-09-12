@@ -16,6 +16,9 @@
 #include <openssl/evp.h>
 #include <xar/xar.h>
 
+#define MAXVAL(a,b) ((a)>=(b)?(a):(b))
+#define HASH_MAX_MD_SIZE MAXVAL(EVP_MAX_MD_SIZE,64)
+
 off_t HeapOff = 0;
 
 static char* xar_format_md5(const unsigned char* m) {
@@ -36,7 +39,7 @@ void heap_check(int fd, const char *name, const char *prop, off_t offset, off_t 
 	char *buf;
 	EVP_MD_CTX *ctx = EVP_MD_CTX_create();
 	const EVP_MD *md;
-	unsigned char md5str[EVP_MAX_MD_SIZE];
+	unsigned char md5str[HASH_MAX_MD_SIZE];
 	unsigned int len;
 	ssize_t r;
 	char *formattedmd5;

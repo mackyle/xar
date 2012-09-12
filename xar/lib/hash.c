@@ -50,6 +50,8 @@
 #include "asprintf.h"
 #endif
 
+#define MAXVAL(a,b) ((a)>=(b)?(a):(b))
+#define HASH_MAX_MD_SIZE MAXVAL(EVP_MAX_MD_SIZE,64)
 
 struct _hash_context{
 	EVP_MD_CTX *unarchived_cts;
@@ -174,7 +176,7 @@ int32_t xar_hash_archived_in(xar_t x, xar_file_t f, xar_prop_t p, void *in, size
 }
 
 int32_t xar_hash_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
-	unsigned char hashstr[EVP_MAX_MD_SIZE];
+	unsigned char hashstr[HASH_MAX_MD_SIZE];
 	char *str;
 	unsigned int len;
 	xar_prop_t tmpp;
@@ -243,7 +245,7 @@ static char* xar_format_hash(const unsigned char* m,unsigned int len) {
 
 int32_t xar_hash_out_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 	const char *uncomp = NULL, *uncompstyle = NULL;
-	unsigned char hashstr[EVP_MAX_MD_SIZE];
+	unsigned char hashstr[HASH_MAX_MD_SIZE];
 	unsigned int len;
 	char *tmpstr;
 	const EVP_MD *md;
