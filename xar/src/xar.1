@@ -69,7 +69,7 @@ Synonym for \-\-compression=bzip2
 \-z
 Synonym for \-\-compression=gzip
 .TP
-\-\-compression-args=<arguments>
+\-\-compression\-args=<arguments>
 Specifies arguments to the compression engine selected.
 gzip, bzip2, and lzma all take a single integer argument between 0 and 9 specifying the compression level to use.
 .TP
@@ -127,19 +127,23 @@ This option can be specified multiple times.
 \-\-rsize
 Specifies a size (in bytes) for the internal libxar read buffer while performing I/O.
 .TP
-\-\-coalesce-heap
+\-\-coalesce\-heap
 When multiple files in the archive are identical, only store one copy of the data in the heap.  This creates smaller archives, but the archives created are not streamable.
 .TP
-\-\-link-same
+\-\-link\-same
 When the data section of multiple files are identical, hardlink them within the archive.
 .TP
-\-\-no-compress
-Specifies a POSIX regular expression of files to archive, but not compress.  The archived files will be copied raw into the archive.  This can be used to exclude already gzipped files from being gzipped during the archival process.
+\-\-recompress
+Normally archived files that are already compressed in a recogized format will be archived but not compressed (as though they matched a \-\-no\-compress expression).  If this option is set then recompression of these files will be allowed (unless they match an explicit \-\-no\-compress expression).
 .TP
-\-\-prop-include
+\-\-no\-compress
+Specifies a POSIX regular expression of files to archive, but not compress.  The archived files will be copied raw into the archive.  This can be used to exclude already gzipped files from being gzipped during the archival process when using \-\-recompress or unrecognized-by-xar compressed formats.
+May be repeated.
+.TP
+\-\-prop\-include
 Specifies a file property to be included in the archive.  When this option is specified, only the specified options will be included.  Anything not specifically included with this option will be omitted.  This option can be used multiple times.
 .TP
-\-\-prop-exclude
+\-\-prop\-exclude
 Specifies a file property to be excluded from the archive.  When this option is specified, all file properties will be included except the specified properties.  This option can be used multiple times.
 .TP
 \-\-distribution
@@ -149,9 +153,9 @@ Creates an archive to only contain file properties safe for file distribution.  
 Does not overwrite existing files during extraction.  Keeps any previously existing files while extracting.
 .TP
 \-k
-Synonym for \-\-keep-existing.
+Synonym for \-\-keep\-existing.
 .TP
-\-\-keep-setuid
+\-\-keep\-setuid
 When extracting without \-p or \-P options, xar will extract files as the
 uid/gid of the extracting process.  In this situation, xar will strip
 setuid/setgid bits from the extracted files for security reasons.

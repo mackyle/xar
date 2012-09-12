@@ -103,6 +103,7 @@ static int NoOverwrite = 0;
 static int SaveSuid = 0;
 static int DoSign = 0;
 static int DumpSha1DigestInfo = 0;
+static int Recompress = 0;
 
 static long SigSize = 0;
 
@@ -939,6 +940,9 @@ static int archive(const char *filename, int arglen, char *args[]) {
 	if ( Rsize != NULL )
 		xar_opt_set(x, XAR_OPT_RSIZE, Rsize);
 
+	if( Recompress )
+		xar_opt_set(x, XAR_OPT_RECOMPRESS, XAR_OPT_VAL_TRUE);
+
 	xar_register_errhandler(x, err_callback, NULL);
 
 	for( i = PropInclude; i; i=i->next ) {
@@ -1593,6 +1597,7 @@ static void usage(const char *prog) {
 	fprintf(stderr, "\t                      This option creates an archive which\n");
 	fprintf(stderr, "\t                      is not streamable\n");
 	fprintf(stderr, "\t--link-same      Hardlink identical files\n");
+	fprintf(stderr, "\t--recompress     Allow recompressing already compressed files\n");
 	fprintf(stderr, "\t--no-compress    POSIX regular expression of files\n");
 	fprintf(stderr, "\t                      to archive, but not compress.\n");
 	fprintf(stderr, "\t--prop-include   File properties to include in archive\n");
@@ -1694,6 +1699,7 @@ int main(int argc, char *argv[]) {
 		{"extract-sig", 1, 0, 30},
 		{"dump-toc-raw", 1, 0, 31},
 		{"sha1-digestinfo-to-sign", 1, 0, 32},
+		{"recompress", 0, 0, 33},
 		{ 0, 0, 0, 0}
 	};
 
@@ -2021,6 +2027,9 @@ int main(int argc, char *argv[]) {
 			}
 			DataToSignDumpPath = optarg;
 			DumpSha1DigestInfo = 1;
+			break;
+		case 33 :
+			Recompress++;
 			break;
 		case 'C': if( !optarg ) {
 		          	usage(argv[0]);

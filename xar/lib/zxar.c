@@ -175,6 +175,9 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		if( strcmp(opt, XAR_OPT_VAL_GZIP) != 0 )
 			return 0;
 
+		if( xar_prevent_recompress(x, *in, *inlen) )
+			return 0;
+
 		opt = xar_opt_get(x, XAR_OPT_COMPRESSIONARG);
 		if( opt ) {
 			int tmp;
@@ -244,4 +247,11 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	GZIP_CONTEXT(context)->count += *inlen;
 	*inlen = offset;
 	return 0;
+}
+
+int xar_gzip_is_compressed(void *in, size_t inlen)
+{
+	if( !in || inlen < 3 )
+		return 0;
+	return memcmp(in, "\x1f\x8b\x08", 3) == 0;
 }

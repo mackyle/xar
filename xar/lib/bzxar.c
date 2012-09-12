@@ -198,6 +198,9 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		if( strcmp(opt, XAR_OPT_VAL_BZIP) != 0 )
 			return 0;
 
+		if( xar_prevent_recompress(x, *in, *inlen) )
+			return 0;
+
 		opt = xar_opt_get(x, XAR_OPT_COMPRESSIONARG);
 		if( opt ) {
 			int tmp;
@@ -276,4 +279,11 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	xar_err_callback(x, XAR_SEVERITY_FATAL, XAR_ERR_ARCHIVE_CREATION);
 #endif /* HAVE_LIBBZ2 */
 	return 0;
+}
+
+int xar_bzip_is_compressed(void *in, size_t inlen)
+{
+	if( !in || inlen < 3 )
+		return 0;
+	return memcmp(in, "BZh", 3) == 0;
 }

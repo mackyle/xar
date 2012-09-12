@@ -262,6 +262,9 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		else
 			return 0;
 
+		if( xar_prevent_recompress(x, *in, *inlen) )
+			return 0;
+
 		opt = xar_opt_get(x, XAR_OPT_COMPRESSIONARG);
 		if( opt ) {
 			int tmp;
@@ -415,4 +418,11 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 
 #endif /* HAVE_LIBLZMA */
 	return 0;
+}
+
+int xar_lzma_is_compressed(void *in, size_t inlen)
+{
+	if( !in || inlen < 6 )
+		return 0;
+	return memcmp(in, "\xfd\x37zXZ\x00", 6) == 0;
 }

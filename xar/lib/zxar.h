@@ -42,5 +42,8 @@ int xar_gzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 int xar_gzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context);
 
 int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
-int xar_gzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context); 
+int xar_gzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context);
+
+int xar_gzip_is_compressed(void *in, size_t inlen);
+
 #endif /* _XAR_ZLIB_H_ */

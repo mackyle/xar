@@ -72,7 +72,7 @@
 #define LLONG_MIN LONG_LONG_MIN
 #endif
 
-struct datamod xar_datamods[] = {
+static const struct datamod xar_datamods[] = {
 	{ xar_hash_archived,
 	  xar_hash_unarchived_out,
 	  xar_hash_out_done,
@@ -115,6 +115,12 @@ struct datamod xar_datamods[] = {
 	  (toheap_out)NULL,
 	  xar_lzma_toheap_done
 	}
+};
+
+static const is_compressed xar_compresschecks[] = {
+	xar_gzip_is_compressed,
+	xar_bzip_is_compressed,
+	xar_lzma_is_compressed
 };
 
 
@@ -367,13 +373,15 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback 
 	asprintf(&tmpstr, "%"PRIu64, (uint64_t)orig_heap_offset);
 	xar_prop_pset(f, p, "offset", tmpstr);
 	free(tmpstr);
-	
-	tmpstr = (char *)xar_opt_get(x, XAR_OPT_COMPRESSION);
-	if( tmpstr && (strcmp(tmpstr, XAR_OPT_VAL_NONE) == 0) ) {
+
+	tmpp = xar_prop_pget(p, "encoding");
+	if (!tmpp) {
 		xar_prop_pset(f, p, "encoding", NULL);
 		tmpp = xar_prop_pget(p, "encoding");
-		if( tmpp )
-			xar_attr_pset(f, tmpp, "style", "application/octet-stream");
+	}
+	opt = xar_attr_pget(f, tmpp, "style");
+	if (tmpp && (!opt || !*opt)) {
+		xar_attr_pset(f, tmpp, "style", "application/octet-stream");
 	}
 
 	asprintf(&tmpstr, "%"PRIu64, writesize);
@@ -812,5 +820,33 @@ int32_t xar_heap_to_archive(xar_t x) {
 			off += r;
 		} while( off < bsize );
 	}
+	return 0;
+}
+
+/* xar_prevent_recompress
+ * x: archive to operate on
+ * Returns 0 to allow compression, non-zero to prevent compression
+ * Summary: prevents recompression unless XAR_OPT_RECOMPRESS is XAR_OPT_VAL_TRUE
+ */
+int32_t xar_prevent_recompress(xar_t x, void *in, size_t inlen) {
+	int checkcount = (sizeof(xar_compresschecks)/sizeof(xar_compresschecks[0]));
+	int i;
+	const char *opt;
+	int recompress = 0;
+
+	opt = xar_opt_get(x, XAR_OPT_RECOMPRESS);
+	if( opt && (strcmp(opt, XAR_OPT_VAL_TRUE) == 0) ) {
+		recompress = 1;
+	}
+
+	if (recompress)
+		return 0;
+
+	/* check with the modules */
+	for( i = 0; i < checkcount; ++i) {
+		if ((*xar_compresschecks[i])(in, inlen))
+			return 1;
+	}
+
 	return 0;
 }

@@ -49,6 +49,8 @@ typedef int (*toheap_in)(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 typedef int (*toheap_out)(xar_t x, xar_file_t f, xar_prop_t p, void *in, size_t inlen, void **context);
 typedef int (*toheap_done)(xar_t x, xar_file_t f, xar_prop_t p, void **context);
 
+typedef int (*is_compressed)(void *in, size_t inlen);
+
 struct datamod {
 	fromheap_in      fh_in;
 	fromheap_out     fh_out;
@@ -79,5 +81,7 @@ int32_t xar_attrcopy_from_heap_to_stream(xar_stream *stream);
 int32_t xar_attrcopy_from_heap_to_stream_end(xar_stream *stream);
 
 int32_t xar_heap_to_archive(xar_t x);
+
+int32_t xar_prevent_recompress(xar_t x, void *in, size_t inlen);
 
 #endif /* _XAR_IO_H_ */
