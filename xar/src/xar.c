@@ -129,16 +129,16 @@ struct __stack {
 typedef struct __stack_element *stack_element;
 typedef struct __stack *stack;
 
-struct lnode *Exclude = NULL;
-struct lnode *Exclude_Tail = NULL;
-struct lnode *NoCompress = NULL;
-struct lnode *NoCompress_Tail = NULL;
-struct lnode *PropInclude = NULL;
-struct lnode *PropInclude_Tail = NULL;
-struct lnode *PropExclude = NULL;
-struct lnode *PropExclude_Tail = NULL;
-struct cnode *CertPath = NULL;
-struct cnode *CertPath_Tail = NULL;
+static struct lnode *Exclude = NULL;
+static struct lnode *Exclude_Tail = NULL;
+static struct lnode *NoCompress = NULL;
+static struct lnode *NoCompress_Tail = NULL;
+static struct lnode *PropInclude = NULL;
+static struct lnode *PropInclude_Tail = NULL;
+static struct lnode *PropExclude = NULL;
+static struct lnode *PropExclude_Tail = NULL;
+static struct cnode *CertPath = NULL;
+static struct cnode *CertPath_Tail = NULL;
 
 static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx);
 static int32_t signingCallback(xar_signature_t sig, void *context, uint8_t *data, uint32_t length, uint8_t **signed_data, uint32_t *signed_len);
