@@ -147,7 +147,7 @@ static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *us
 static int32_t signingCallback(xar_signature_t sig, void *context, uint8_t *data, uint32_t length, uint8_t **signed_data, uint32_t *signed_len);
 static void insert_cert(xar_signature_t sig, const char *cert_path);
 
-static void print_file(xar_t x, xar_file_t f) {
+static void print_file(xar_t x, xar_file_t f, FILE *out) {
 	if( List && Verbose ) {
 		char *size = xar_get_size(x, f);
 		char *path = xar_get_path(f);
@@ -156,7 +156,7 @@ static void print_file(xar_t x, xar_file_t f) {
 		char *user = xar_get_owner(x, f);
 		char *group = xar_get_group(x, f);
 		char *mtime = xar_get_mtime(x, f);
-		printf("%s %8s/%-8s %10s %s %s\n", mode, user, group, size, mtime, path);
+		fprintf(out, "%s %8s/%-8s %10s %s %s\n", mode, user, group, size, mtime, path);
 		free(size);
 		free(type);
 		free(path);
@@ -166,7 +166,7 @@ static void print_file(xar_t x, xar_file_t f) {
 		free(mtime);
 	} else if( List || Verbose ) {
 		char *path = xar_get_path(f);
-		printf("%s\n", path);
+		fprintf(out, "%s\n", path);
 		free(path);
 	}
 }
@@ -727,7 +727,8 @@ static void replace_sign(const char *filename) {
 	xar_file_t current_xar_file;
 	for (current_xar_file = xar_file_first(old_xar, loopIter); current_xar_file; current_xar_file = xar_file_next(loopIter))
 	{
-		printf("old_xar -> %s (parent: %s)\n",xar_get_path(current_xar_file),XAR_FILE(current_xar_file)->parent?xar_get_path(XAR_FILE(current_xar_file)->parent):"(nil)");
+		if (Verbose)
+			printf("old_xar -> %s (parent: %s)\n",xar_get_path(current_xar_file),XAR_FILE(current_xar_file)->parent?xar_get_path(XAR_FILE(current_xar_file)->parent):"(nil)");
 	}
 	xar_iter_free(loopIter);
 
@@ -741,25 +742,30 @@ static void replace_sign(const char *filename) {
 		//		sibling on the same level
 		xar_prop_get(f, "name", &name);	// filename, without any path info
 		if (!XAR_FILE(f)->parent) {	// case 1
-			printf("root: %s\n",xar_get_path(f));
+			if (Verbose)
+				printf("root: %s\n",xar_get_path(f));
 			last_added = xar_add_from_archive(new_xar, NULL, name, old_xar, f);
 			last_copied = f;
 			stack_push(s_new, (void *)last_added);
 			stack_push(s_old, (void *)last_copied);
 		} else if (f->parent == last_copied) {	// case 2			
-			printf("child: %s -> %s\n",xar_get_path(f->parent),xar_get_path(f));
+			if (Verbose)
+				printf("child: %s -> %s\n",xar_get_path(f->parent),xar_get_path(f));
 			last_added = xar_add_from_archive(new_xar, last_added, name, old_xar, f);
 			last_copied = f;
 			stack_push(s_new, (void *)last_added);
 			stack_push(s_old, (void *)last_copied);
 		} else {	// case 3
-			printf("searching for parent: %s ?\n",xar_get_path(f));
+			if (Verbose)
+				printf("searching for parent: %s ?\n",xar_get_path(f));
 			while (XAR_FILE(f)->parent != XAR_FILE(s_old->top->data)->parent) {
-				printf("popping: %s\n",xar_get_path(XAR_FILE(s_old->top->data)));
+				if (Verbose)
+					printf("popping: %s\n",xar_get_path(XAR_FILE(s_old->top->data)));
 				stack_pop(s_new);
 				stack_pop(s_old);
 			}
-			printf("found: %s -> %s\n",xar_get_path(XAR_FILE(s_new->top->data)),xar_get_path(f));
+			if (Verbose)
+				printf("found: %s -> %s\n",xar_get_path(XAR_FILE(s_new->top->data)),xar_get_path(f));
 			stack_pop(s_new);
 			stack_pop(s_old);
 			last_added = xar_add_from_archive(new_xar, (xar_file_t)(s_new->top->data), name, old_xar, f);
@@ -772,8 +778,10 @@ static void replace_sign(const char *filename) {
 	loopIter = xar_iter_new();
 	for (current_xar_file = xar_file_first(new_xar, loopIter); current_xar_file; current_xar_file = xar_file_next(loopIter))
 	{
-		char * current_path = xar_get_path(current_xar_file);
-		printf("new_xar -> %s\n",current_path);
+		if (Verbose) {
+			char * current_path = xar_get_path(current_xar_file);
+			printf("new_xar -> %s\n",current_path);
+		}
 	}
 	xar_iter_free(loopIter);
 
@@ -901,7 +909,8 @@ static void inject_signature(const char *xar_path, const char *sig_path) {
 	xar_t x;
 	int i;
 
-	printf("inject_signature(%s, %s)\n",xar_path,sig_path);
+	if (Verbose)
+		printf("inject_signature(%s, %s)\n",xar_path,sig_path);
 
 	// open xar via the API first to determine the signature offset
 	x = xar_open(xar_path, READ);
@@ -1074,7 +1083,7 @@ static int archive(const char *filename, int arglen, char *args[]) {
 		if( !f ) {
 			fprintf(stderr, "Error adding file %s\n", ent->fts_path);
 		} else {
-			print_file(x, f);
+			print_file(x, f, stdout);
 		}
 		if( !nocompress_match )
 			xar_opt_set(x, XAR_OPT_COMPRESSION, default_compression);
@@ -1140,7 +1149,7 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		if( err ) {
 			char errstr[1024];
 			regerror(err, &tmp->reg, errstr, sizeof(errstr));
-			printf("Error with regular expression %s: %s\n", tmp->str, errstr);
+			fprintf(stderr, "Error with regular expression %s: %s\n", tmp->str, errstr);
 			exit(1);
 		}
 		if( extract_files == NULL ) {
@@ -1154,7 +1163,7 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		/* Add a clause for recursive extraction */
 		tmp = malloc(sizeof(struct lnode));
 		if (asprintf(&tmp->str, "%s/.*", args[argi]) == -1) {
-			printf("Error with asprintf()\n");
+			fprintf(stderr, "Error with asprintf()\n");
 			exit(1);
 		}
 		tmp->next = NULL;
@@ -1162,7 +1171,7 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		if( err ) {
 			char errstr[1024];
 			regerror(err, &tmp->reg, errstr, sizeof(errstr));
-			printf("Error with regular expression %s: %s\n", tmp->str, errstr);
+			fprintf(stderr, "Error with regular expression %s: %s\n", tmp->str, errstr);
 			exit(1);
 		}
 		if( extract_files == NULL ) {
@@ -1244,7 +1253,7 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		if( matched ) {
 			struct stat sb;
 			if( NoOverwrite && (lstat(path, &sb) == 0) ) {
-				printf("%s already exists, not overwriting\n", path);
+				fprintf(stderr, "%s already exists, not overwriting\n", path);
 			} else {
 				const char *prop = NULL;
 				int deferred = 0;
@@ -1259,7 +1268,7 @@ static int extract(const char *filename, int arglen, char *args[]) {
 				}
 				if( ! deferred ) {
 					files_extracted++;
-					print_file(x, f);
+					print_file(x, f, stdout);
 					xar_extract(x, f);
 				}
 			}
@@ -1268,7 +1277,7 @@ static int extract(const char *filename, int arglen, char *args[]) {
 	}
 	for(lnodei = dirs; lnodei; lnodei = lnodei->next) {
 		files_extracted++;
-		print_file(x,(xar_file_t)lnodei->str);
+		print_file(x,(xar_file_t)lnodei->str, stdout);
 		xar_extract(x, (xar_file_t)lnodei->str);
 	}
 	if( args[0] && (files_extracted == 0) ) {
@@ -1334,7 +1343,7 @@ static int list(const char *filename, int arglen, char *args[]) {
 		if( err ) {
 			char errstr[1024];
 			regerror(err, &tmp->reg, errstr, sizeof(errstr));
-			printf("Error with regular expression %s: %s\n", tmp->str, errstr);
+			fprintf(stderr, "Error with regular expression %s: %s\n", tmp->str, errstr);
 			exit(1);
 		}
 		if( list_files == NULL ) {
@@ -1378,7 +1387,7 @@ static int list(const char *filename, int arglen, char *args[]) {
 		}
 
 		if( matched )
-			print_file(x, f);
+			print_file(x, f, stdout);
 	}
 
 	xar_iter_free(i);
@@ -1549,31 +1558,31 @@ static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *us
 	case XAR_SEVERITY_INFO:
 		break;
 	case XAR_SEVERITY_WARNING:
-		printf("%s\n", str);
+		fprintf(stderr, "%s\n", str);
 		break;
 	case XAR_SEVERITY_NORMAL:
 		if( (err = XAR_ERR_ARCHIVE_CREATION) && f )
-    			print_file(x, f);
+			print_file(x, f, stderr);
 		break;
 	case XAR_SEVERITY_NONFATAL:
 	case XAR_SEVERITY_FATAL:
 		Err = 2;
-		printf("Error while ");
-		if( err == XAR_ERR_ARCHIVE_CREATION ) printf("creating");
-		if( err == XAR_ERR_ARCHIVE_EXTRACTION ) printf("extracting");
-		printf(" archive");
+		fprintf(stderr, "Error while ");
+		if( err == XAR_ERR_ARCHIVE_CREATION ) fprintf(stderr, "creating");
+		if( err == XAR_ERR_ARCHIVE_EXTRACTION ) fprintf(stderr, "extracting");
+		fprintf(stderr, " archive");
 		if( f ) {
 			const char *file = xar_get_path(f);
-			if( file ) printf(":(%s)", file);
+			if( file ) fprintf(stderr, ":(%s)", file);
 			free((char *)file);
 		}
-		if( str ) printf(": %s", str);
-		if( err ) printf(" (%s)", strerror(e));
+		if( str ) fprintf(stderr, ": %s", str);
+		if( err ) fprintf(stderr, " (%s)", strerror(e));
 		if( sev == XAR_SEVERITY_NONFATAL ) {
-			printf(" - ignored");
-			printf("\n");
+			fprintf(stderr, " - ignored");
+			fprintf(stderr, "\n");
 		} else {
-			printf("\n");
+			fprintf(stderr, "\n");
 			exit(1);
 		}
 		break;
