@@ -68,7 +68,7 @@ struct __xar_t {
 	int heap_fd;            /* fd for tmp heap archive, used in creation */
 	off_t heap_offset;      /* current offset within the heap */
 	off_t heap_len;         /* current length of the heap */
-	xar_header_t header;    /* header of the xar archive */
+	xar_header_ex_t header; /* header of the xar archive */
 	void *readbuf;          /* buffer for reading/writing compressed toc */
 	size_t readbuf_len;     /* length of readbuf */
 	size_t offset;          /* offset into readbuf for keeping track

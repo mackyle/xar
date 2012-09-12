@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005-2008 Rob Braun
+ * Portions Copyright (c) 2012 Kyle J. McKay.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -131,7 +132,7 @@ static xar_t xar_new() {
  */
 static int32_t xar_parse_header(xar_t x) {
 	ssize_t r;
-	int off = 0;
+	int off;
 	int sz2read = 0;
 
 	/* read just the magic, verify it, read the header length,
@@ -141,7 +142,7 @@ static int32_t xar_parse_header(xar_t x) {
 	 * if the recorded header length is greater than the 
 	 * expected header length.
 	 */
-	r = xar_read_fd(XAR(x)->fd, (char *)&XAR(x)->header.magic+off, sizeof(XAR(x)->header.magic)-off);
+	r = xar_read_fd(XAR(x)->fd, (char *)&XAR(x)->header.magic, sizeof(XAR(x)->header.magic));
 	if ( r == -1 )
 		return r;
 
@@ -154,19 +155,21 @@ static int32_t xar_parse_header(xar_t x) {
 		return -1;
 	}
 
-	r = xar_read_fd(XAR(x)->fd, (char *)&XAR(x)->header.size+off, sizeof(XAR(x)->header.size)-off);
+	r = xar_read_fd(XAR(x)->fd, (char *)&XAR(x)->header.size, sizeof(XAR(x)->header.size));
 	if ( r == -1 )
 		return r;
 
 	XAR(x)->header.size = ntohs(XAR(x)->header.size);
 
-	if( XAR(x)->header.size > sizeof(xar_header_t) )
-		sz2read = sizeof(xar_header_t);
+	if( XAR(x)->header.size > sizeof(xar_header_ex_t) )
+		sz2read = sizeof(xar_header_ex_t);
 	else
 		sz2read = XAR(x)->header.size;
+	if ( XAR(x)->header.size < sizeof(xar_header_t) )
+		return -1;
 
 	off = sizeof(XAR(x)->header.magic) + sizeof(XAR(x)->header.size);
-	r = xar_read_fd(XAR(x)->fd, ((char *)&XAR(x)->header)+off, sizeof(xar_header_t)-off);
+	r = xar_read_fd(XAR(x)->fd, ((char *)&XAR(x)->header)+off, sz2read-off);
 	if ( r == -1 )
 		return r;
 
@@ -174,6 +177,18 @@ static int32_t xar_parse_header(xar_t x) {
 	XAR(x)->header.toc_length_compressed = xar_ntoh64(XAR(x)->header.toc_length_compressed);
 	XAR(x)->header.toc_length_uncompressed = xar_ntoh64(XAR(x)->header.toc_length_uncompressed);
 	XAR(x)->header.cksum_alg = ntohl(XAR(x)->header.cksum_alg);
+
+	if (XAR(x)->header.cksum_alg == XAR_CKSUM_OTHER) {
+		/* Make sure toc_cksum_name is Nul terminated and included in header length */
+		size_t max_search = XAR(x)->header.size;
+		if (max_search > sizeof(xar_header_ex_t))
+			max_search = sizeof(xar_header_ex_t);
+		max_search -= sizeof(xar_header_t);
+		if (XAR(x)->header.size < sizeof(xar_header_t) + 4 || (XAR(x)->header.size & 0x3) != 0)
+			return -1; /* Does not include a name or not multiple of 4 */
+		if (!memchr(XAR(x)->header.toc_cksum_name, 0, max_search))
+			return -1; /* No Nul terminated string present for toc_cksum_name within header.size bytes */
+	}
 
 	off = XAR(x)->header.size - sz2read;
 	if( off > 0 )
@@ -272,38 +287,29 @@ xar_t xar_open(const char *file, int32_t flags) {
 		}
 
 		switch(XAR(ret)->header.cksum_alg) {
-		case XAR_CKSUM_NONE:
+		case XAR_CKSUM_MD5:
+			strncpy(XAR(ret)->header.toc_cksum_name, XAR_OPT_VAL_MD5, sizeof(XAR(ret)->header.toc_cksum_name));
 			break;
 		case XAR_CKSUM_SHA1:
-			XAR(ret)->docksum = 1;
-			md = EVP_get_digestbyname(XAR_OPT_VAL_SHA1);
-			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
+			strncpy(XAR(ret)->header.toc_cksum_name, XAR_OPT_VAL_SHA1, sizeof(XAR(ret)->header.toc_cksum_name));
+			break;
+		default:
+			/* nothing to do */;
+		};
+
+		switch(XAR(ret)->header.cksum_alg) {
+		case XAR_CKSUM_NONE:
 			break;
 		case XAR_CKSUM_MD5:
-			XAR(ret)->docksum = 1;
-			md = EVP_get_digestbyname(XAR_OPT_VAL_MD5);
-			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
-			break;
-		case XAR_CKSUM_SHA224:
-			XAR(ret)->docksum = 1;
-			md = EVP_get_digestbyname(XAR_OPT_VAL_SHA224);
-			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
-			break;
-		case XAR_CKSUM_SHA256:
-			XAR(ret)->docksum = 1;
-			md = EVP_get_digestbyname(XAR_OPT_VAL_SHA256);
-			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
-			break;
-		case XAR_CKSUM_SHA384:
-			XAR(ret)->docksum = 1;
-			md = EVP_get_digestbyname(XAR_OPT_VAL_SHA384);
-			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
-			break;
-		case XAR_CKSUM_SHA512:
-			XAR(ret)->docksum = 1;
-			md = EVP_get_digestbyname(XAR_OPT_VAL_SHA512);
-			EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
-			break;
+		case XAR_CKSUM_SHA1:
+		case XAR_CKSUM_OTHER:
+			md = EVP_get_digestbyname(XAR(ret)->header.toc_cksum_name);
+			if (md) {
+				XAR(ret)->docksum = 1;
+				EVP_DigestInit_ex(XAR(ret)->toc_ctx, md, NULL);
+				break;
+			}
+			/* else fall through */
 		default:
 			fprintf(stderr, "Unknown hashing algorithm, skipping\n");
 			break;
@@ -327,23 +333,10 @@ xar_t xar_open(const char *file, int32_t flags) {
 			case XAR_CKSUM_NONE:
 				cksum_match = (cksum_style == NULL || strcmp(cksum_style, XAR_OPT_VAL_NONE) == 0);
 				break;
-			case XAR_CKSUM_SHA1:
-				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_SHA1) == 0);
-				break;
 			case XAR_CKSUM_MD5:
-				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_MD5) == 0);
-				break;
-			case XAR_CKSUM_SHA224:
-				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_SHA224) == 0);
-				break;
-			case XAR_CKSUM_SHA256:
-				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_SHA256) == 0);
-				break;
-			case XAR_CKSUM_SHA384:
-				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_SHA384) == 0);
-				break;
-			case XAR_CKSUM_SHA512:
-				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR_OPT_VAL_SHA512) == 0);
+			case XAR_CKSUM_SHA1:
+			case XAR_CKSUM_OTHER:
+				cksum_match = (cksum_style != NULL && strcmp(cksum_style, XAR(ret)->header.toc_cksum_name) == 0);
 				break;
 			default:
 				cksum_match = 0;
@@ -445,44 +438,41 @@ int xar_close(xar_t x) {
 		char timestr[128];
 		struct tm tmptm;
 		time_t t;
+		uint32_t cksum_alg = XAR_CKSUM_NONE;
 
 		tmpser = (char *)xar_opt_get(x, XAR_OPT_TOCCKSUM);
 		/* If no checksum type is specified, default to sha1 */
 		if( !tmpser ) tmpser = XAR_OPT_VAL_SHA1;
 
 		if( (strcmp(tmpser, XAR_OPT_VAL_NONE) != 0) ) {
-			uint32_t cksum_alg;
 			const EVP_MD *md;
+			const char *md_name;
 			char mdlenstr[32];
 
 			md = EVP_get_digestbyname(tmpser);
 			if( md == NULL ) return -1;
-			if( strcmp(tmpser, XAR_OPT_VAL_SHA1) == 0 )
+			md_name = OBJ_nid2ln(EVP_MD_nid(md));
+			if( strcmp(md_name, XAR_OPT_VAL_SHA1) == 0 )
 				cksum_alg = XAR_CKSUM_SHA1;
-			else if( strcmp(tmpser, XAR_OPT_VAL_MD5) == 0 )
+			else if( strcmp(md_name, XAR_OPT_VAL_MD5) == 0 )
 				cksum_alg = XAR_CKSUM_MD5;
-			else if( strcmp(tmpser, XAR_OPT_VAL_SHA224) == 0 )
-				cksum_alg = XAR_CKSUM_SHA224;
-			else if( strcmp(tmpser, XAR_OPT_VAL_SHA256) == 0 )
-				cksum_alg = XAR_CKSUM_SHA256;
-			else if( strcmp(tmpser, XAR_OPT_VAL_SHA384) == 0 )
-				cksum_alg = XAR_CKSUM_SHA384;
-			else if( strcmp(tmpser, XAR_OPT_VAL_SHA512) == 0 )
-				cksum_alg = XAR_CKSUM_SHA512;
-			else
+			else if( strlen(md_name) + 1 > sizeof(XAR(x)->header.toc_cksum_name) )
 				return -1;
+			else {
+				cksum_alg = XAR_CKSUM_OTHER;
+				strncpy(XAR(x)->header.toc_cksum_name, md_name, sizeof(XAR(x)->header.toc_cksum_name));
+			}
 			xar_prop_set(XAR_FILE(x), "checksum", NULL);
 			EVP_DigestInit_ex(XAR(x)->toc_ctx, md, NULL);
-			XAR(x)->header.cksum_alg = htonl(cksum_alg);
-			xar_attr_set(XAR_FILE(x), "checksum", "style", OBJ_nid2ln(EVP_MD_nid(md)));
+			xar_attr_set(XAR_FILE(x), "checksum", "style", md_name);
 			sprintf(mdlenstr, "%d", EVP_MD_size(md));
 			xar_prop_set(XAR_FILE(x), "checksum/size", mdlenstr);
 			xar_prop_set(XAR_FILE(x), "checksum/offset", "0");
 			XAR(x)->docksum = 1;
 		} else {
 			XAR(x)->docksum = 0;
-			XAR(x)->header.cksum_alg = XAR_CKSUM_NONE;
 		}
+		XAR(x)->header.cksum_alg = htonl(cksum_alg);
 
 		t = time(NULL);
 		gmtime_r(&t, &tmptm);
@@ -589,12 +579,15 @@ int xar_close(xar_t x) {
 
 		/* populate the header and write it out */
 		XAR(x)->header.magic = htonl(XAR_HEADER_MAGIC);
-		XAR(x)->header.size = ntohs(sizeof(xar_header_t));
+		if (cksum_alg == XAR_CKSUM_OTHER)
+			XAR(x)->header.size = ntohs(sizeof(xar_header_ex_t));
+		else
+			XAR(x)->header.size = ntohs(sizeof(xar_header_t));
 		XAR(x)->header.version = ntohs(1);
 		XAR(x)->header.toc_length_uncompressed = xar_ntoh64(ungztoc);
 		XAR(x)->header.toc_length_compressed = xar_ntoh64(gztoc);
 
-		write(XAR(x)->fd, &XAR(x)->header, sizeof(xar_header_t));
+		write(XAR(x)->fd, &XAR(x)->header, cksum_alg == XAR_CKSUM_OTHER ? sizeof(xar_header_ex_t) : sizeof(xar_header_t));
 
 		/* Copy the temp compressed toc file into the file */
 		lseek(tocfd, (off_t)0, SEEK_SET);
@@ -780,7 +773,7 @@ int32_t xar_opt_set(xar_t x, const char *option, const char *value) {
 		else {
 			const EVP_MD *md;
 			md = EVP_get_digestbyname(value);
-			if( md == NULL ) return -1;
+			if( md == NULL || EVP_MD_size(md) > HASH_MAX_MD_SIZE ) return -1;
 			XAR(x)->heap_offset = EVP_MD_size(md);
 		}
 	}
@@ -788,7 +781,7 @@ int32_t xar_opt_set(xar_t x, const char *option, const char *value) {
 		if( strcmp(value, XAR_OPT_VAL_NONE) != 0 ) {
 			const EVP_MD *md;
 			md = EVP_get_digestbyname(value);
-			if( md == NULL ) return -1;
+			if( md == NULL || EVP_MD_size(md) > HASH_MAX_MD_SIZE ) return -1;
 		}
 	}
 	a = xar_attr_new();

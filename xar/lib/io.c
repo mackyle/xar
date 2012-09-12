@@ -190,8 +190,7 @@ static void xar_io_seek(xar_t x, xar_file_t f, off_t seekoff) {
 				char *buf;
 				unsigned int len;
 
-				len = seekoff - XAR(x)->toc_count;
-				len -= sizeof(xar_header_t);
+				len = seekoff - (off_t)xar_get_heap_offset(x);
 				if( XAR(x)->heap_offset > len ) {
 					xar_err_new(x);
 					xar_err_set_file(x, f);
@@ -424,7 +423,7 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, xar_prop_t p, write_callba
 		}
 	}
 
-	seekoff += XAR(x)->toc_count + sizeof(xar_header_t);
+	seekoff += (int64_t)xar_get_heap_offset(x);
 	xar_io_seek(x, f, seekoff);
 
 	fsize = get_length(p);
@@ -523,7 +522,7 @@ int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, xar_pr
 	if( seekoff < 0 )
 		return -1;
 	
-	seekoff += XAR(xsource)->toc_count + sizeof(xar_header_t);
+	seekoff += (int64_t)xar_get_heap_offset(xsource);
 	xar_io_seek(xsource, fsource, seekoff);
 	
 	fsize = get_length(p);
@@ -660,7 +659,7 @@ int32_t xar_attrcopy_from_heap_to_stream_init(xar_t x, xar_file_t f, xar_prop_t 
 		return XAR_STREAM_ERR;
 	}
 
-	seekoff += XAR(x)->toc_count + sizeof(xar_header_t);
+	seekoff += (off_t)xar_get_heap_offset(x);
 	xar_io_seek(x, f, seekoff);
 
 	stream->total_in = 0;

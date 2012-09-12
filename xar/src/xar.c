@@ -62,24 +62,28 @@
 #define E_SIGEXISTS 61
 
 struct HashType {
-  int type; /* XAR_CKSUM_NONE, XAR_CKSUM_SHA1, etc. */
   const char *name; /* "none", "sha1", etc. */
-};
-
-static const struct HashType HashTypes[] = {
-  { XAR_CKSUM_NONE,   XAR_OPT_VAL_NONE },
-  { XAR_CKSUM_MD5,    XAR_OPT_VAL_MD5 },
-  { XAR_CKSUM_SHA1,   XAR_OPT_VAL_SHA1 },
-  { XAR_CKSUM_SHA224, XAR_OPT_VAL_SHA224 },
-  { XAR_CKSUM_SHA256, XAR_OPT_VAL_SHA256 },
-  { XAR_CKSUM_SHA384, XAR_OPT_VAL_SHA384 },
-  { XAR_CKSUM_SHA512, XAR_OPT_VAL_SHA512 }
+  size_t hashlen;
+  const unsigned char *diprefix;
+  size_t diprefixlen;
 };
 
 static const unsigned char Sha1DigestInfo[15] = {
 	0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E,
 	0x03, 0x02, 0x1A, 0x05, 0x00, 0x04, 0x14
 };
+
+static const struct HashType HashTypes[] = {
+  { XAR_OPT_VAL_NONE,   0,  NULL, 0 },
+  { XAR_OPT_VAL_MD5,    16, NULL, 0 },
+  { XAR_OPT_VAL_SHA1,   20, Sha1DigestInfo, sizeof(Sha1DigestInfo) },
+  { XAR_OPT_VAL_SHA224, 28, NULL, 0 },
+  { XAR_OPT_VAL_SHA256, 32, NULL, 0 },
+  { XAR_OPT_VAL_SHA384, 48, NULL, 0 },
+  { XAR_OPT_VAL_SHA512, 64, NULL, 0 }
+};
+
+#define SHA1_HASH_INDEX 2
 
 static int Perms = 0;
 static int Local = 0;
@@ -1420,7 +1424,7 @@ static int dumptoc(const char *filename, const char* tocfile) {
 
 static int dump_header(const char *filename) {
 	int fd;
-	xar_header_t xh;
+	xar_header_ex_t xh;
 
 	if(filename == NULL)
 		fd = 0;
@@ -1432,7 +1436,7 @@ static int dump_header(const char *filename) {
 		}
 	}
 
-	if( read(fd, &xh, sizeof(xh)) < (int)sizeof(xh) ) {
+	if( read(fd, &xh, sizeof(xh)) < (int)sizeof(xar_header_t) ) {
 		fprintf(stderr, "error reading header\n");
 		exit(1);
 	}
@@ -1454,14 +1458,26 @@ static int dump_header(const char *filename) {
 				break;
 	case XAR_CKSUM_SHA1:	printf("(%s)\n", XAR_OPT_VAL_SHA1);
 				break;
-	case XAR_CKSUM_SHA224:	printf("(%s)\n", XAR_OPT_VAL_SHA224);
+	case XAR_CKSUM_OTHER:
+	{
+				uint16_t hsiz = ntohs(xh.size);
+				if (hsiz < sizeof(xar_header_t) + 4 || (hsiz & 0x3) != 0) {
+					printf("(OTHER + invalid header length)\n");
+					break;
+				}
+				if (hsiz > sizeof(xar_header_ex_t))
+					hsiz = sizeof(xar_header_ex_t);
+				if (!memchr(xh.toc_cksum_name, 0, hsiz - sizeof(xar_header_t))) {
+					printf("(OTHER + invalid non-nul terminated name)\n");
+					break;
+				}
+				if (!xh.toc_cksum_name[0]) {
+					printf("(OTHER + invalid empty name)\n");
+					break;
+				}
+				printf("(OTHER + %s)\n", xh.toc_cksum_name);
 				break;
-	case XAR_CKSUM_SHA256:	printf("(%s)\n", XAR_OPT_VAL_SHA256);
-				break;
-	case XAR_CKSUM_SHA384:	printf("(%s)\n", XAR_OPT_VAL_SHA384);
-				break;
-	case XAR_CKSUM_SHA512:	printf("(%s)\n", XAR_OPT_VAL_SHA512);
-				break;
+	}
 	default: printf("(unknown)\n");
 	         break;
 	};
@@ -1471,12 +1487,14 @@ static int dump_header(const char *filename) {
 
 static int dumptoc_raw(const char *filename, const char* tocfile) {
 	int fd, toc;
-	xar_header_t xh;
+	xar_header_ex_t xh;
 	uint64_t clen;
 	uint16_t hlen;
-	unsigned buffer_size = 1024;
+	unsigned buffer_size = 4096;
 	void *buffer = malloc(buffer_size);
 
+	if (!buffer)
+		return -1;
 	if(filename == NULL)
 		fd = 0;
 	else {
@@ -1487,7 +1505,7 @@ static int dumptoc_raw(const char *filename, const char* tocfile) {
 		}
 	}
 
-	if( read(fd, &xh, sizeof(xh)) < (int)sizeof(xh) ) {
+	if( read(fd, &xh, sizeof(xh)) < (int)sizeof(xar_header_t) ) {
 		fprintf(stderr, "error reading header\n");
 		exit(1);
 	}
@@ -1500,12 +1518,12 @@ static int dumptoc_raw(const char *filename, const char* tocfile) {
 	hlen = ntohs(xh.size);
 	clen = xar_ntoh64(xh.toc_length_compressed);
 
-	if( hlen < sizeof(xh) ) {
+	if( hlen < sizeof(xar_header_t) ) {
 		fprintf(stderr, "error reading header (header size field value too small)\n");
 		exit(1);
 	}
 	if( hlen > sizeof(xh) && (hlen - sizeof(xh) > buffer_size) ) {
-		fprintf(stderr, "error reading header (bad header size field)\n");
+		fprintf(stderr, "error reading header (bad header size field -- greater than %u)\n", buffer_size + (unsigned)sizeof(xh));
 		exit(1);
 	}
 	if( hlen > sizeof(xh) &&
@@ -1539,6 +1557,7 @@ static int dumptoc_raw(const char *filename, const char* tocfile) {
 
 	close(fd);
 	close(toc);
+	free(buffer);
 	return 0;
 }
 
@@ -2163,9 +2182,9 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (Toccksum && !Filecksum && Toccksum->type > XAR_CKSUM_SHA1)
+	if (Toccksum && !Filecksum && Toccksum->hashlen > HashTypes[SHA1_HASH_INDEX].hashlen)
 		Filecksum = Toccksum;
-	if (Filecksum && !Toccksum && Filecksum->type > XAR_CKSUM_SHA1)
+	if (Filecksum && !Toccksum && Filecksum->hashlen > HashTypes[SHA1_HASH_INDEX].hashlen)
 		Toccksum = Filecksum;
 
 	if (! required_dash_f)	{

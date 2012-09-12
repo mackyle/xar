@@ -55,8 +55,22 @@ struct xar_header {
 	uint64_t toc_length_uncompressed;
 	uint32_t cksum_alg;
 };
+
+struct xar_header_ex { /* Only used when cksum_alg == XAR_CKSUM_OTHER */
+	uint32_t magic;
+	uint16_t size;  /* Must be multiple of 4, but may be any multiple ok so long as Nul terminated toc_cksum_name value is included */
+	uint16_t version;
+	uint64_t toc_length_compressed;
+	uint64_t toc_length_uncompressed;
+	uint32_t cksum_alg;
+	char     toc_cksum_name[36];	/* Nul terminated and padded toc checksum style attribute value. */
+					/* Must not be "none" or empty string "" if cksum_alg == XAR_CKSUM_OTHER */
+};
+
 #pragma pack()
+
 typedef struct xar_header xar_header_t;
+typedef struct xar_header_ex xar_header_ex_t;
 
 #define XAR_HEADER_MAGIC 0x78617221
 #define XAR_EA_FORK "ea"
@@ -64,10 +78,7 @@ typedef struct xar_header xar_header_t;
 #define XAR_CKSUM_NONE   0
 #define XAR_CKSUM_SHA1   1
 #define XAR_CKSUM_MD5    2
-#define XAR_CKSUM_SHA224 3
-#define XAR_CKSUM_SHA256 4
-#define XAR_CKSUM_SHA384 5
-#define XAR_CKSUM_SHA512 6
+#define XAR_CKSUM_OTHER  3  /* Must not be used for "none", should not be used for "sha1" or "md5" */
 
 typedef void *xar_errctx_t;
 typedef const struct __xar_file_t *xar_file_t;
@@ -103,7 +114,7 @@ typedef int32_t (*xar_signer_callback)(xar_signature_t sig, void *context, uint8
 #define XAR_OPT_VAL_SYMBOLIC "symbolic"   /* set owner/group based on names */
 #define XAR_OPT_VAL_NUMERIC  "numeric"    /* set owner/group based on uid/gid */
 
-#define XAR_OPT_TOCCKSUM	"toc-cksum"      /* set the toc checksum algorithm */
+#define XAR_OPT_TOCCKSUM	"toc-cksum"	/* set the toc checksum algorithm */
 #define XAR_OPT_FILECKSUM	"file-chksum"	/* set the file checksum algorithm */
 #define XAR_OPT_VAL_NONE   "none"
 #define XAR_OPT_VAL_MD5    "md5"
@@ -112,6 +123,7 @@ typedef int32_t (*xar_signer_callback)(xar_signature_t sig, void *context, uint8
 #define XAR_OPT_VAL_SHA256 "sha256"
 #define XAR_OPT_VAL_SHA384 "sha384"
 #define XAR_OPT_VAL_SHA512 "sha512"
+/* Actually any valid hash function name that returns non-NULL from EVP_get_digestbyname can be used as a value */
 
 #define XAR_OPT_COMPRESSION    "compression" /* set the file compression type */
 #define XAR_OPT_COMPRESSIONARG "compression-arg" /* set the compression opts */

@@ -202,9 +202,9 @@ xar_signature_t xar_signature_next(xar_signature_t s)
 	return XAR_SIGNATURE(s)->next;
 }
 
-int32_t _xar_signature_read_from_heap(xar_t x ,off_t offset,size_t length,uint8_t *data)
+static int32_t _xar_signature_read_from_heap(xar_t x ,off_t offset,size_t length,uint8_t *data)
 {
-	off_t seek_off = XAR(x)->toc_count + sizeof(xar_header_t) + offset;
+	off_t seek_off = (off_t)xar_get_heap_offset(x) + offset;
 	int r = 0;
 	
 	r = lseek(XAR(x)->fd, seek_off, SEEK_SET);

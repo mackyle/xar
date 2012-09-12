@@ -105,7 +105,7 @@ char *xar_get_path(xar_file_t f) {
 }
 
 uint64_t xar_get_heap_offset(xar_t x) {
-	return (uint64_t)XAR(x)->toc_count + sizeof(xar_header_t);
+	return (uint64_t)XAR(x)->toc_count + XAR(x)->header.size;
 }
 
 /* xar_read_fd
