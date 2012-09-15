@@ -54,6 +54,8 @@
 #include "../lib/filetree.h"
 #include "config.h"
 
+#define MIN_XAR_NEW_OPTIONS 0x01060180
+
 #define SYMBOLIC 1
 #define NUMERIC  2
 
@@ -115,6 +117,9 @@ static const struct HashType HashTypes[] = {
 
 #define SHA1_HASH_INDEX 2
 
+static unsigned long xar_lib_version = 0;
+static int xar_lib_version_fetched = 0;
+
 static int Perms = 0;
 static int Local = 0;
 static char *Subdoc = NULL;
@@ -128,6 +133,7 @@ static char *Chdir = NULL;
 static char *DataToSignDumpPath = NULL;
 static char *SigOffsetDumpPath = NULL;
 static char *SignatureDumpPath = NULL;
+static char *StripComponents = NULL;
 
 static int Err = 0;
 static int List = 0;
@@ -139,6 +145,7 @@ static int SaveSuid = 0;
 static int DoSign = 0;
 static int DumpDigestInfo = 0;
 static int Recompress = 0;
+static int ToStdout = 0;
 
 static long SigSize = 0;
 static int SigSizePresent = 0;
@@ -1293,7 +1300,13 @@ static int extract(const char *filename, int arglen, char *args[]) {
 	if( SaveSuid ) {
 		xar_opt_set(x, XAR_OPT_SAVESUID, XAR_OPT_VAL_TRUE);
 	}
-	
+	if (StripComponents) {
+		xar_opt_set(x, XAR_OPT_STRIPCOMPONENTS, StripComponents);
+	}
+	if (ToStdout) {
+		xar_opt_set(x, XAR_OPT_EXTRACTSTDOUT, XAR_OPT_VAL_TRUE);
+	}
+
 	i = xar_iter_new();
 	if( !i ) {
 		fprintf(stderr, "Error creating xar iterator\n");
@@ -1335,24 +1348,28 @@ static int extract(const char *filename, int arglen, char *args[]) {
 		
 		if( matched ) {
 			struct stat sb;
-			if( NoOverwrite && (lstat(path, &sb) == 0) ) {
+			if( !ToStdout && NoOverwrite && (lstat(path, &sb) == 0) ) {
 				fprintf(stderr, "%s already exists, not overwriting\n", path);
 			} else {
 				const char *prop = NULL;
 				int deferred = 0;
 				if( xar_prop_get(f, "type", &prop) == 0 ) {
 					if( strcmp(prop, "directory") == 0 ) {
-						struct lnode *tmpl = calloc(sizeof(struct lnode),1);
-						tmpl->str = (char *)f;
-						tmpl->next = dirs;
-						dirs = tmpl;
+						if (!ToStdout) {
+							struct lnode *tmpl = calloc(sizeof(struct lnode),1);
+							tmpl->str = (char *)f;
+							tmpl->next = dirs;
+							dirs = tmpl;
+						}
 						deferred = 1;
 					}
 				}
 				if( ! deferred ) {
-					files_extracted++;
 					print_file(x, f, stdout);
-					xar_extract(x, f);
+					if (xar_extract(x, f) == 0)
+						files_extracted++;
+					else if (!ToStdout)
+						fprintf(stderr, "Unable to extract file %s\n", path);
 				}
 			}
 		}
@@ -1771,6 +1788,9 @@ static void _usage(const char *prog, FILE *helpout) {
 	fprintf(helpout, "\t                      to a document in cwd named <name>.xml\n");
 	fprintf(helpout, "\t--exclude=<regexp> POSIX basic regular expression of files to \n");
 	fprintf(helpout, "\t                      ignore while archiving.\n");
+	fprintf(helpout, "\t--strip-components=n Number of path components to strip when extracting\n");
+	fprintf(helpout, "\t--to-stdout      Write file contents to standard out when extracting\n");
+	fprintf(helpout, "\t-O               Synonym for \"--to-stdout\"\n");
 	fprintf(helpout, "\t--rsize          Specifies the size of the buffer used\n");
 	fprintf(helpout, "\t                      for read IO operations in bytes.\n");
 	fprintf(helpout, "\t--coalesce-heap  When archived files are identical, only store one copy\n");
@@ -1820,8 +1840,31 @@ static void usage(const char *prog) {
 	_usage(prog, stderr);
 }
 
+static void get_libxar_version() {
+	if (!xar_lib_version_fetched) {
+		const char *libver = NULL;
+		xar_t x = xar_open("", WRITE);
+		if (x) {
+			libver = xar_opt_get(x, XAR_OPT_XARLIBVERSION);
+			xar_close(x);
+		}
+		if (libver)
+			xar_lib_version = (unsigned long)strtol(libver, NULL, 0);
+		else
+			xar_lib_version = 0;
+		xar_lib_version_fetched = 1;
+	}
+}
+
 static void print_version() {
 	printf("xar %s\n", XAR_VERSION);
+	if (Verbose) {
+		get_libxar_version();
+		if (xar_lib_version)
+			printf("xar library version 0x%08lX\n", xar_lib_version);
+		else
+			printf("xar library version unknown\n");
+	}
 }
 
 static const struct HashType *get_hash_alg(const char *str) {
@@ -1858,6 +1901,7 @@ int main(int argc, char *argv[]) {
 		{"directory", 1, 0, 'C'},
 		{"verbose", 0, 0, 'v'},
 		{"one-file-system", 0, 0, 'l'},
+		{"to-stdout", 0, 0, 'O'},
 		{"toc-cksum", 1, 0, 1},
 		{"dump-toc", 1, 0, 'd'},
 		{"compression", 1, 0, 2},
@@ -1895,6 +1939,7 @@ int main(int argc, char *argv[]) {
 		{"dump-toc-raw", 1, 0, 31},
 		{"digestinfo-to-sign", 1, 0, 32},
 		{"recompress", 0, 0, 33},
+		{"strip-components", 1, 0, 34},
 		{ 0, 0, 0, 0}
 	};
 
@@ -1903,7 +1948,11 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	while( (c = getopt_long(argc, argv, "axcC:vtjzf:hpPln:s:d:k", o, &loptind)) != -1 ) {
+	get_libxar_version();
+	if (xar_lib_version < XAR_VERSION_NUM)
+		fprintf(stderr, "WARNING: linked xar library older than xar executable\n");
+
+	while( (c = getopt_long(argc, argv, "axcVOC:vtjzf:hpPln:s:d:k", o, &loptind)) != -1 ) {
 		switch(c) {
 		case  1 :
 		{
@@ -1951,6 +2000,7 @@ int main(int argc, char *argv[]) {
 		          }
 			  command = 'L';
 			  break;
+		case 'V':
 		case  4 : print_version();
 		          exit(0);
 		case 'd':
@@ -2291,6 +2341,26 @@ int main(int argc, char *argv[]) {
 		case 33 :
 			Recompress++;
 			break;
+		case 34 :
+		{
+			long comps;
+			char *endptr;
+			if( !optarg ) {
+				fprintf(stderr, "--strip-components requires an argument\n");
+				exit(1);
+			}
+			if (xar_lib_version < MIN_XAR_NEW_OPTIONS) {
+				fprintf(stderr, "--strip-components requires a newer xar library\n");
+				exit(1);
+			}
+			comps = strtol(optarg, &endptr, 0);
+			if (!*optarg || *endptr || comps < 0) {
+				fprintf(stderr, "--strip-components requires a non-negative number argument\n");
+				exit(1);
+			}
+			StripComponents = optarg;
+			break;
+		}
 		case 'C': if( !optarg ) {
 		          	usage(argv[0]);
 				fprintf(stderr, "-C requires an argument\n");
@@ -2331,6 +2401,13 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'l':
 			Local = 1;
+			break;
+		case 'O':
+			if (xar_lib_version < MIN_XAR_NEW_OPTIONS) {
+				fprintf(stderr, "--to-stdout requires a newer xar library\n");
+				exit(1);
+			}
+			ToStdout = 1;
 			break;
 		case 'n':
 			SubdocName = optarg;
