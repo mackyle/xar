@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005-2007 Rob Braun
+ * Portions Copyright (c) 2012 Kyle J. McKay.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +48,7 @@
 #include <zlib.h>
 #include <errno.h>
 #include "xar.h"
+#include "archive.h"
 #include "filetree.h"
 #include "io.h"
 
@@ -146,7 +148,8 @@ int xar_gzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 		if( GZIP_CONTEXT(context)->count ) {
 			tmpp = xar_prop_pset(f, p, "encoding", NULL);
 			if( tmpp )
-				xar_attr_pset(f, tmpp, "style", "application/x-gzip");
+				xar_attr_pset(f, tmpp, "style",
+					XAR(x)->rfcformat ? "application/zlib" : "application/x-gzip");
 		}
 	}
 

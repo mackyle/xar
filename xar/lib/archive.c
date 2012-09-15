@@ -422,6 +422,27 @@ xar_t xar_open(const char *file, int32_t flags) {
 	return ret;
 }
 
+/* xar_check_force_rfc6713
+ * x: the xar_t to check
+ * Summary: forces the rfcformat option on if the checksum type will be
+ *          XAR_CKSUM_OTHER.  Should be called just before first file is added.
+ */
+static void xar_check_force_rfc6713(xar_t x)
+{
+	char *tmpser;
+
+	if (XAR(x)->files != NULL)
+		return;
+	tmpser = (char *)xar_opt_get(x, XAR_OPT_TOCCKSUM);
+	if (!tmpser)
+		return;
+	if (strcmp(tmpser, XAR_OPT_VAL_NONE) == 0 ||
+		strcmp(tmpser, XAR_OPT_VAL_SHA1) == 0 ||
+		strcmp(tmpser, XAR_OPT_VAL_MD5) == 0)
+		return;
+	XAR(x)->rfcformat = 1;
+}
+
 /* xar_close
  * x: the xar_t to close
  * Summary: closes all open file descriptors, frees all
@@ -842,6 +863,9 @@ int32_t xar_opt_set(xar_t x, const char *option, const char *value) {
 	if ((strcmp(option, XAR_OPT_EXTRACTSTDOUT) == 0)) {
 		XAR(x)->tostdout = strcmp(value, XAR_OPT_VAL_TRUE) == 0;
 	}
+	if ((XAR(x)->files == NULL && strcmp(option, XAR_OPT_RFC6713FORMAT) == 0)) {
+		XAR(x)->rfcformat = strcmp(value, XAR_OPT_VAL_TRUE) == 0;
+	}
 	a = xar_attr_new();
 	XAR_ATTR(a)->key = strdup(option);
 	XAR_ATTR(a)->value = strdup(value);
@@ -906,8 +930,10 @@ static xar_file_t xar_add_node(xar_t x, xar_file_t f, const char *name, const ch
 		xar_attr_set(ret, NULL, "id", idstr);
 		XAR_FILE(ret)->parent = NULL;
 		XAR_FILE(ret)->fspath = tmp;
-		if( XAR(x)->files == NULL )
+		if( XAR(x)->files == NULL ) {
+			xar_check_force_rfc6713(x);
 			XAR(x)->files = ret;
+		}
 		else {
 			XAR_FILE(ret)->next = XAR(x)->files;
 			XAR(x)->files = ret;
@@ -997,8 +1023,10 @@ static xar_file_t xar_add_pseudodir(xar_t x, xar_file_t f, const char *name, con
 		xar_attr_set(ret, NULL, "id", idstr);
 		XAR_FILE(ret)->parent = NULL;
 		XAR_FILE(ret)->fspath = tmp;
-		if( XAR(x)->files == NULL )
+		if( XAR(x)->files == NULL ) {
+			xar_check_force_rfc6713(x);
 			XAR(x)->files = ret;
+		}
 		else {
 			XAR_FILE(ret)->next = XAR(x)->files;
 			XAR(x)->files = ret;
@@ -1185,8 +1213,10 @@ xar_file_t xar_add_frombuffer(xar_t x, xar_file_t parent, const char *name, char
 		snprintf(idstr, sizeof(idstr)-1, "%"PRIu64, ++XAR(x)->last_fileid);
 		xar_attr_set(ret, NULL, "id", idstr);
 		XAR_FILE(ret)->parent = NULL;
-		if( XAR(x)->files == NULL )
+		if( XAR(x)->files == NULL ) {
+			xar_check_force_rfc6713(x);
 			XAR(x)->files = ret;
+		}
 		else {
 			XAR_FILE(ret)->next = XAR(x)->files;
 			XAR(x)->files = ret;
@@ -1240,8 +1270,10 @@ xar_file_t xar_add_folder(xar_t x, xar_file_t f, const char *name, struct stat *
 	if( !f ) {
 		XAR_FILE(ret)->parent = NULL;
 		
-		if( XAR(x)->files == NULL )
+		if( XAR(x)->files == NULL ) {
+			xar_check_force_rfc6713(x);
 			XAR(x)->files = ret;
+		}
 		else {
 			XAR_FILE(ret)->next = XAR(x)->files;
 			XAR(x)->files = ret;
@@ -1289,8 +1321,10 @@ xar_file_t xar_add_from_archive(xar_t x, xar_file_t parent, const char *name, xa
 	if( !parent ) {
 		XAR_FILE(ret)->parent = NULL;
 		
-		if( XAR(x)->files == NULL )
+		if( XAR(x)->files == NULL ) {
+			xar_check_force_rfc6713(x);
 			XAR(x)->files = ret;
+		}
 		else {
 			XAR_FILE(ret)->next = XAR(x)->files;
 			XAR(x)->files = ret;

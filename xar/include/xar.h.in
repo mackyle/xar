@@ -158,6 +158,9 @@ typedef int32_t (*xar_signer_callback)(xar_signature_t sig, void *context, uint8
 /* Older versions will return NULL from xar_open("",WRITE), current versions will not but only xar_opt_get and xar_close should be called on the result */
 #define XAR_OPT_XARLIBVERSION   "xar-library-version" /* Library's XAR_VERSION_NUM (as 0xVALUE string [%i scanf format, strtol base 0], get only) */
 
+/* Note that this option is forced to true whenever XAR_CKSUM_OTHER is in effect */
+#define XAR_OPT_RFC6713FORMAT  "rfc6713-format" /* Generate application/zlib instead of application/x-gzip encoding styles (true/false) */
+
 /* xar signing algorithms */
 #define XAR_SIG_SHA1RSA		1
 

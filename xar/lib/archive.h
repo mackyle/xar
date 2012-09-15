@@ -89,6 +89,7 @@ struct __xar_t {
 	int skipwarn;
 	int stripcomps;
 	int tostdout;
+	int rfcformat;
 	struct stat sbcache;
 };
 
