@@ -148,6 +148,7 @@ static int DoSign = 0;
 static int DumpDigestInfo = 0;
 static int Recompress = 0;
 static int ToStdout = 0;
+static int RFC6713 = 0;
 
 static long SigSize = 0;
 static int SigSizePresent = 0;
@@ -1097,6 +1098,9 @@ static int archive(const char *filename, int arglen, char *args[]) {
 	if( Recompress )
 		xar_opt_set(x, XAR_OPT_RECOMPRESS, XAR_OPT_VAL_TRUE);
 
+	if( RFC6713 )
+		xar_opt_set(x, XAR_OPT_RFC6713FORMAT, XAR_OPT_VAL_TRUE);
+
 	xar_register_errhandler(x, err_callback, NULL);
 
 	for( i = PropInclude; i; i=i->next ) {
@@ -1785,6 +1789,7 @@ static void _usage(const char *prog, FILE *helpout) {
 	fprintf(helpout, "\t-z               Synonym for \"--compression=gzip\"\n");
 	fprintf(helpout, "\t--compression-args=arg Specifies arguments to be passed\n");
 	fprintf(helpout, "\t                       to the compression engine.\n");
+	fprintf(helpout, "\t--rfc6713        Always use application/zlib for gzip encoding style\n");
 	fprintf(helpout, "\t--list-subdocs   List the subdocuments in the xml header\n");
 	fprintf(helpout, "\t--extract-subdoc=name Extracts the specified subdocument\n");
 	fprintf(helpout, "\t                      to a document in cwd named <name>.xml\n");
@@ -1942,6 +1947,7 @@ int main(int argc, char *argv[]) {
 		{"digestinfo-to-sign", 1, 0, 32},
 		{"recompress", 0, 0, 33},
 		{"strip-components", 1, 0, 34},
+		{"rfc6713", 0, 0, 35},
 		{ 0, 0, 0, 0}
 	};
 
@@ -2383,6 +2389,9 @@ int main(int argc, char *argv[]) {
 			StripComponents = optarg;
 			break;
 		}
+		case 35 :
+			RFC6713++;
+			break;
 		case 'C': if( !optarg ) {
 		          	usage(argv[0]);
 				fprintf(stderr, "-C requires an argument\n");

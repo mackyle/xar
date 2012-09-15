@@ -83,6 +83,14 @@ Synonym for \-\-compression=gzip (Default)
 Specifies arguments to the compression engine selected.
 gzip, bzip2, and lzma all take a single integer argument between 0 and 9 specifying the compression level to use.
 .TP
+\-\-rfc6713
+Only affects \-\-compression=gzip.
+Force gzip compression to use "application/zlib" as the encoding style name instead of "application/x-gzip".
+As of RFC 6713 this is the correct name to use for the actual compressed data format being stored in the archive.
+This option will automatically be forced on by the xar library if a \-\-toc\-cksum value other than "none", "md5" or "sha1" is in effect.
+Older xar versions will be unable to extract files using this encoding (and neither will they understand \-\-toc\-cksum values other than "none", "md5" or "sha1").
+See http://tools.ietf.org/html/rfc6713 for details.
+.TP
 \-C <path>
 On archive or extract, xar will chdir to the specified path before processing archive members being archived or extracted.
 .TP
