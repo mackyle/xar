@@ -1,9 +1,9 @@
-.TH XAR "1" "November 1, 2007" "version 1.6_sig" "User Commands"
+.TH XAR "1" "September 15, 2012" "version 1.6.1" "User Commands"
 .SH NAME
 xar \- eXtensible ARchiver
 .SH SYNOPSIS
 .B xar
-\-[\fIctx\fR][\fIv\fR] ...
+\fB\-\fR[\fBctx\fR][\fBv\fR] \fB\-f\fR \fIarchive\fR [options] [\fIfile\fR ...]]
 .SH DESCRIPTION
 The XAR project aims to provide an easily extensible archive format. Important
 design decisions include an easily extensible XML table of contents (TOC) for
@@ -15,16 +15,25 @@ for individual files in both compressed and uncompressed form, and the ability
 to query the table of content's rich meta-data.
 .SH FUNCTIONS
 .TP
-.B One of the following options must be used:
+.B One of the following options must be used\fR:
 .TP
 \-c
 Creates an archive
 .TP
+\-\-create
+Synonym for \-c
+.TP
 \-t
 Lists the contents of an archive
 .TP
+\-\-list
+Synonym for \-t
+.TP
 \-x
 Extracts an archive
+.TP
+\-\-extract
+Synonym for \-x
 .TP
 \-\-sign
 Creates a placeholder signature and saves the data to sign to disk. Works with \-c or just \-f, requires \-\-sig\-size and one or more \-\-cert\-loc options to be set. Setting the \-\-data\-to\-sign and/or \-\-sig\-offset option is optional.
@@ -46,19 +55,20 @@ Extracts the signature and stores it into the specified file. Setting the \-\-si
 .TP
 \-\-inject\-sig=<filename>
 After extracting the data to be signed and doing the signing externally, injects the signature.
+No attempt is made to verify that the signature being injected is valid other than that it has the correct length as previously reserved with the \-\-sig\-size option.
 .TP
 .B NOTE: all of the above require the use of the \-f option (filename) as this release of xar doesn't correctly handle pipes or sockets.
 .TP
-\-f
+\-f <file>
 The filename to use for creation, listing, extraction or signing operations.  With extraction, this can be a POSIX regular expression.
+.TP
+\-\-file=<file>
+Synonym for \-f <file>
 .SH OPTIONS
 .TP
-\-\-compression
+\-\-compression=<type>
 Specifies the compression type to use.
 Valid values: none, gzip, bzip2, lzma.  Default value: gzip
-.TP
-\-C <path>
-On extract, xar will chdir to the specified path before extracting the archive.
 .TP
 \-a
 Synonym for \-\-compression=lzma
@@ -67,17 +77,26 @@ Synonym for \-\-compression=lzma
 Synonym for \-\-compression=bzip2
 .TP
 \-z
-Synonym for \-\-compression=gzip
+Synonym for \-\-compression=gzip (Default)
 .TP
 \-\-compression\-args=<arguments>
 Specifies arguments to the compression engine selected.
 gzip, bzip2, and lzma all take a single integer argument between 0 and 9 specifying the compression level to use.
 .TP
+\-C <path>
+On archive or extract, xar will chdir to the specified path before processing archive members being archived or extracted.
+.TP
+\-\-directory=<path>
+Synonym for \-C <path>
+.TP
 \-\-dump\-toc=<filename>
-Has xar dump the xml header into the specified file.  "\-" can be specified to mean stdout.
+Has xar dump the XML header into the specified file.  "\-" can be specified to indicate stdout.
+.TP
+\-d <filename>
+Synonym for \-\-dump\-toc=<filename>
 .TP
 \-\-dump\-toc\-raw=<filename>
-Has xar dump the raw, compressed xml header data into the specified file.
+Has xar dump the raw, compressed XML header data into the specified file.
 .TP
 \-\-dump\-header
 Has xar print out the xar binary header information to stdout.
@@ -86,10 +105,10 @@ Has xar print out the xar binary header information to stdout.
 Extracts the specified subdocument to a document in cwd named <name>.xml
 .TP
 \-\-list\-subdocs
-List the subdocuments in the xml header
+List the subdocuments in the XML header
 .TP
 \-\-toc\-cksum
-Specifies the hashing algorithm to use for xml header verification.
+Specifies the hashing algorithm to use for XML header verification.
 Valid values: none, sha1, and md5.
 If the linked libcrypto library supports them sha224, sha256, sha384 and sha512 may also be used.
 Setting this option to a stronger hash than the default will also cause \-\-file\-cksum to be set to that hash unless it's been explicitly set to something else.
@@ -103,6 +122,9 @@ Setting this option to a stronger hash than the default will also cause \-\-toc\
 \-l
 On archival, stay on the local device.
 .TP
+\-\-one\-file\-system
+Synonym for \-l
+.TP
 \-P
 On extract, set ownership based on uid/gid.  If the uid/gid can be set
 on the extracted file, setuid/setgid bits will also be preserved.
@@ -112,15 +134,21 @@ On extract, set ownership based on symbolic names, if possible.
 If the uid/gid can be set on the extracted file, setuid/setgid bits 
 will also be preserved.
 .TP
+\-n <name>
+On archival, specifies the subdocument name to use when adding the \-s <filename> subdocument instead of the default name "subdoc".
+.TP
 \-s <filename>
 On extract, specifies the file to extract subdocuments to.
-On archival, specifies an xml file to add as a subdocument.
+On archival, specifies an XML file to add as a subdocument.
 .TP
 \-v
 Verbose output
 .TP
-\-\-exclude
-Specifies a POSIX regular expression of files to exclude from adding to
+\-\-verbose
+Synonym for \-v
+.TP
+\-\-exclude=<regexp>
+Specifies a POSIX basic regular expression of files to exclude from adding to
 the archive during creation or from being extracted during extraction.  
 This option can be specified multiple times.
 .TP
@@ -138,13 +166,16 @@ Normally archived files that are already compressed in a recogized format will b
 .TP
 \-\-no\-compress
 Specifies a POSIX regular expression of files to archive, but not compress.  The archived files will be copied raw into the archive.  This can be used to exclude already gzipped files from being gzipped during the archival process when using \-\-recompress or unrecognized-by-xar compressed formats.
-May be repeated.
+This option can be used multiple times.
 .TP
-\-\-prop\-include
+\-\-prop\-include=<propname>
 Specifies a file property to be included in the archive.  When this option is specified, only the specified options will be included.  Anything not specifically included with this option will be omitted.  This option can be used multiple times.
 .TP
-\-\-prop\-exclude
-Specifies a file property to be excluded from the archive.  When this option is specified, all file properties will be included except the specified properties.  This option can be used multiple times.
+\-\-prop\-exclude=<propname>
+Specifies a file property to be excluded from the archive.
+When this option is specified, all file properties will be included except the specified properties.
+Note that excluding the "ea" property will exclude all extended attributes (including OS X's resource fork).
+This option can be used multiple times.
 .TP
 \-\-distribution
 Creates an archive to only contain file properties safe for file distribution.  Currently, only name, type, mode, and data are preserved with this option.
@@ -162,14 +193,44 @@ setuid/setgid bits from the extracted files for security reasons.
 \-\-keep-setuid will preserve the setuid/setgid bits even though the
 uid/gid of the extracted file is not the same as the archived file.
 .TP
-\-\-sig\-size=n
+\-\-sig\-size=<n>
 Specifies the size in bytes of the signature placeholder to generate when using the \-\-sign or \-\-replace-sign options.
 .TP
+\-\-sig\-len=<n>
+Synonym for \-\-sig\-size=<n>.
+.TP
+\-\-data\-to\-sign=<file>
+Has xar dump the raw data to be signed to the specified file.
+This is simply the raw binary bytes of the \-\-toc\-cksum hash of the raw, compressed XML header data.
+Requires a \-\-toc\-cksum value other than "none".  When generating a signature, this raw hash value must first
+have the proper DigestInfo prefix added to it (see RFC 3447 sections 9.2, A.2.4 and B.1).
+The \-\-digestinfo\-to\-sign option automatically adds the appropriate prefix and should normally be used instead of this option.
+.TP
+\-\-digestinfo\-to\-sign=<file>
+Has xar dump the DigestInfo data to be signed to the specified file.
+This is simply the raw binary bytes of the \-\-toc\-cksum hash of the raw, compressed XML header data preceded by the appropriate DigestInfo prefix (see RFC 3447 sections 9.2, A.2.4 and B.1).
+Requires a \-\-toc\-cksum value of "md5", "sha1" (the default), "sha224", "sha256", "sha384" or "sha512".
+.TP
+\-\-sig\-offset=<file>
+Has xar dump the signature's byte offset within the archive (as an ASCII decimal number) to the specified file.  Always optional.
+.TP
 \-\-cert\-loc=<filename>
-Specifies the location of a signing certificate in DER format to include in the archive.  This option can be used multiple times to include a certificate chain.  The first \-\-cert\-loc option should specify the leaf signing certificate, the next its issuer CA and so on so that the last \-\-cert\-loc= option specifies the top intermediate certificate authority for the chain.  \-\-leaf\-cert\-loc=<filename> and \-\-intermediate\-cert\-loc=<filename> are accepted as synonyms for \-\-cert\-loc= for historical reasons.
+Specifies the location of a signing certificate in DER format to include in the archive.  This option can be used multiple times to include a certificate chain.
+The first \-\-cert\-loc option should specify the leaf signing certificate, the next its issuer CA and so on so that the last \-\-cert\-loc= option specifies the root certificate authority for the chain.
+\-\-leaf\-cert\-loc=<filename> and \-\-intermediate\-cert\-loc=<filename> are accepted as synonyms for \-\-cert\-loc= for historical reasons.
+.TP
+\-\-help
+Show a help summary.
+.TP
+\-h
+Synonym for \-\-help
 .TP
 \-\-version
 Display the version number of xar.
+.SH TIPS
+.TP
+xar \-\-replace\-sign \-\-sig\-size=0 \-f sample.xar
+Completely removes any signatures from sample.xar
 .SH EXAMPLES
 .TP
 xar \-cf sample.xar /home/uid
@@ -180,11 +241,60 @@ List the contents of the xar archive sample.xar
 .TP
 xar \-xf sample.xar
 Extract the contents of sample.xar to the current working directory
+.SH SIGNING
+In order to sign an archive, a leaf signing certificate in DER format together with its RSA private key in PEM format is required.  In addition,
+if the leaf signing certificate is not a self-signed root certificate then all the other certificates in the certificate chain
+(including the root certificate) should also be available in DER format.
+.PP
+The example here assumes the DER format certificates from leaf to root are available in the files
+leaf.crt \-> intorg.crt \-> toporg.crt \-> root.crt and the leaf.crt private key is available in PEM format in the file key.pem.
+Also the archive to be signed is archive.xar and the openssl and wc utility commands are available.
+The example commands are for an sh-compatible shell.
+.TP
+1. Determine the signature size
+: | openssl dgst -sign key.pem -binary | wc -c > siglen.txt
+.TP
+2. Extract the value to be signed and insert the certificates
+xar --sign -f archive.xar --digestinfo-to-sign digestinfo.dat \\
+.br
+--sig-size `cat siglen.txt` \\
+.br
+--cert-loc leaf.crt --cert-loc intorg.crt \\
+.br
+--cert-loc toporg.crt --cert-loc root.crt
+.TP
+3. Create the RSA signature
+openssl rsautl -sign -inkey key.pem -in digestinfo.dat -out signature.dat
+.TP
+4. Inject the RSA signature
+xar --inject-sig signature.dat -f archive.xar
+.PP
+Step 1 simply places the size in bytes as an ASCII decimal number into the file siglen.txt.
+For any given specific RSA private key, this step only needs to be done once as the length is determined by key characteristics
+such as bit length etc. that are independent of the data being signed.
+.PP
+Step 2, despite the name of the \-\-sign option, only reserves space for the signature to be injected in step 4, inserts the
+certificates and extracts the DigestInfo to be signed.  It does not create a valid signature.
+.PP
+Step 3 actually creates the signature using the openssl tool.
+.PP
+Step 4 inserts the real signature into the archive that previously had space reserved for it.  This final step creates a signed archive.
+.PP
+Note that whenever the archive data changes steps 2-4 must be repeated.  Repeating some or none of those steps will result in an invalid signature.
+Furthermore, xar makes no attempt to verify that the injected signature is compatible with the leaf signing certificate (the first \-\-cert\-loc option).
+For example, if the \-\-toc\-cksum type is "sha1" (the default) then the leaf signing certificate's signature algorithm must be "sha1WithRSAEncryption"
+in order for the resulting xar archive to have a valid signature.
+.PP
+More details on signing can be found at http://mackyle.github.com/xar/howtosign.html.
 .SH BUGS
 .TP
 Doesn't currently work with pipes or streams.  Might be fixed in a future release.
 .TP
-Probably one or two more somewhere in there. If you find one please report it to http://code.google.com/p/xar/
+Signature support is clumsy and requires multiple steps and use of external tools.
+.TP
+The formatting in this man page is suboptimal.
+.TP
+Probably one or two more in there somewhere.  If you find one please report it to https://github.com/mackyle/xar.
 .SH AUTHORS
 Rob Braun <bbraun AT synack DOT net>
 .br
