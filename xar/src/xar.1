@@ -152,6 +152,17 @@ Specifies a POSIX basic regular expression of files to exclude from adding to
 the archive during creation or from being extracted during extraction.  
 This option can be specified multiple times.
 .TP
+\-\-strip\-components=<n>
+When extracting, strip <n> path components from the front of the path before creating the destination file.
+If the item being extracted does not have enough path components to strip <n> off then it will be skipped and not extracted.
+.TP
+\-\-to\-stdout
+Instead of creating files during extraction, write the file contents to standard output.
+Only the file data will be written to standard output.  All extended attributes, resource forks and other file properties are ignored with this option.
+.TP
+\-O
+Synonym for \-\-to\-stdout
+.TP
 \-\-rsize
 Specifies a size (in bytes) for the internal libxar read buffer while performing I/O.
 .TP
