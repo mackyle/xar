@@ -69,6 +69,10 @@
 #define MAXVAL(a,b) ((a)>=(b)?(a):(b))
 #define HASH_MAX_MD_SIZE MAXVAL(EVP_MAX_MD_SIZE,64)
 
+#define _XAR_LIB_VERSION2(x) #x
+#define _XAR_LIB_VERSION1(x) _XAR_LIB_VERSION2(x)
+#define XAR_LIB_VERSION() _XAR_LIB_VERSION1(XAR_VERSION_NUM)
+
 #ifndef O_EXLOCK
 #define O_EXLOCK 0
 #endif
@@ -215,6 +219,10 @@ xar_t xar_open(const char *file, int32_t flags) {
 	if( !file )
 		file = "-";
 	XAR(ret)->filename = strdup(file);
+	if (!*file && flags) {
+		XAR(ret)->fd = XAR(ret)->heap_fd = -2;
+		return ret;
+	}
 	OpenSSL_add_all_digests();
 	if( flags ) {
 		char *tmp1, *tmp2, *tmp3, *tmp4;
@@ -424,6 +432,9 @@ int xar_close(xar_t x) {
 	xar_attr_t a;
 	xar_file_t f;
 	int ret, retval = 0;
+
+	if (XAR(x)->heap_fd == -2)
+		goto CLOSE_BAIL;
 
 	/* If we're creating an archive */
 	if( XAR(x)->heap_fd != -1 ) {
@@ -733,7 +744,8 @@ CLOSE_BAIL:
 	xmlHashFree(XAR(x)->ino_hash, NULL);
 	xmlHashFree(XAR(x)->link_hash, NULL);
 	xmlHashFree(XAR(x)->csum_hash, NULL);
-	close(XAR(x)->fd);
+	if (XAR(x)->fd >= 0)
+		close(XAR(x)->fd);
 	if( XAR(x)->heap_fd >= 0 )
 		close(XAR(x)->heap_fd);
 	free((char *)XAR(x)->filename);
@@ -754,6 +766,10 @@ CLOSE_BAIL:
  */
 const char *xar_opt_get(xar_t x, const char *option) {
 	xar_attr_t i;
+	if (!x)
+		return NULL;
+	if (strcmp(option, XAR_OPT_XARLIBVERSION) == 0)
+		return XAR_LIB_VERSION();
 	for(i = XAR(x)->attrs; i && XAR_ATTR(i)->next; i = XAR_ATTR(i)->next) {
 		if(strcmp(XAR_ATTR(i)->key, option)==0)
 			return XAR_ATTR(i)->value;
@@ -772,6 +788,10 @@ const char *xar_opt_get(xar_t x, const char *option) {
 int32_t xar_opt_set(xar_t x, const char *option, const char *value) {
 	xar_attr_t a;
 
+	if (!x || !option)
+		return -1;
+	if (!value)
+		value = "";
 	if( (strcmp(option, XAR_OPT_TOCCKSUM) == 0) ) {
 		xar_signature_t sig;
 
@@ -810,6 +830,17 @@ int32_t xar_opt_set(xar_t x, const char *option, const char *value) {
 			md = EVP_get_digestbyname(value);
 			if( md == NULL || EVP_MD_size(md) > HASH_MAX_MD_SIZE ) return -1;
 		}
+	}
+	if ((strcmp(option, XAR_OPT_STRIPCOMPONENTS) == 0)) {
+		long comps;
+		char *endptr;
+		comps = strtol(value, &endptr, 0);
+		if (!*value || *endptr || comps < 0)
+			return -1;
+		XAR(x)->stripcomps = (int)comps;
+	}
+	if ((strcmp(option, XAR_OPT_EXTRACTSTDOUT) == 0)) {
+		XAR(x)->tostdout = strcmp(value, XAR_OPT_VAL_TRUE) == 0;
 	}
 	a = xar_attr_new();
 	XAR_ATTR(a)->key = strdup(option);
@@ -1380,6 +1411,22 @@ int32_t xar_extract_tostream_end(xar_stream *stream) {
 	return xar_attrcopy_from_heap_to_stream_end(stream);
 }
 
+const char *xar_strip_components(const char *path, int components)
+{
+	while (components-- > 0) {
+		const char *nextcomp;
+		nextcomp = strchr(path, '/');
+		if (!nextcomp)
+			return NULL;
+		while (nextcomp[1] == '/')
+			++nextcomp;
+		if (!nextcomp[1])
+			return NULL;
+		path = nextcomp + 1;
+	}
+	return path;
+}
+
 /* xar_extract
  * x: archive to extract from
  * path: path to file to extract
@@ -1396,22 +1443,39 @@ int32_t xar_extract(xar_t x, xar_file_t f) {
 	struct stat sb;
 	char *tmp1, *dname;
 	xar_file_t tmpf;
-	
-	if( (strstr(XAR_FILE(f)->fspath, "/") != NULL) && (stat(XAR_FILE(f)->fspath, &sb)) && (XAR_FILE(f)->parent_extracted == 0) ) {
-		tmp1 = strdup(XAR_FILE(f)->fspath);
-		dname = dirname(tmp1);
-		tmpf = xar_file_find(XAR(x)->files, dname);
-		if( !tmpf ) {
-			xar_err_set_string(x, "Unable to find file");
-			xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
-			return -1;
-		}
-		free(tmp1);
-		XAR_FILE(f)->parent_extracted++;
-		xar_extract(x, tmpf);
+	const char *fspath;
+
+	fspath = XAR_FILE(f)->fspath;
+	if (XAR(x)->stripcomps && (fspath=xar_strip_components(fspath, XAR(x)->stripcomps)) == NULL)
+		return -1;
+	if (XAR(x)->tostdout) {
+		char *buffer = NULL;
+		size_t bsize = 0;
+		int32_t result;
+		if ((result = xar_extract_tobuffersz(x, f, &buffer, &bsize)) != 0)
+			return result;
+		if (bsize && buffer && fwrite(buffer, bsize, 1, stdout) != 1)
+			result = -1;
+		free(buffer);
+		return result;
 	}
-	
-	return xar_extract_tofile(x, f, XAR_FILE(f)->fspath);
+	else {
+		if( (strstr(fspath, "/") != NULL) && (stat(fspath, &sb)) && (XAR_FILE(f)->parent_extracted == 0) ) {
+			tmp1 = strdup(XAR_FILE(f)->fspath);
+			dname = dirname(tmp1);
+			tmpf = xar_file_find(XAR(x)->files, dname);
+			if( !tmpf ) {
+				xar_err_set_string(x, "Unable to find file");
+				xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+				return -1;
+			}
+			free(tmp1);
+			XAR_FILE(f)->parent_extracted++;
+			xar_extract(x, tmpf);
+		}
+
+		return xar_extract_tofile(x, f, fspath);
+	}
 }
 
 /* xar_verify

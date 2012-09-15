@@ -87,6 +87,8 @@ struct __xar_t {
 	EVP_MD_CTX *toc_ctx;
 	int docksum;
 	int skipwarn;
+	int stripcomps;
+	int tostdout;
 	struct stat sbcache;
 };
 
