@@ -120,6 +120,8 @@ static const struct HashType HashTypes[] = {
 static unsigned long xar_lib_version = 0;
 static int xar_lib_version_fetched = 0;
 
+static struct HashType CustomTocHash, CustomFileHash;
+
 static int Perms = 0;
 static int Local = 0;
 static char *Subdoc = NULL;
@@ -1957,18 +1959,28 @@ int main(int argc, char *argv[]) {
 		case  1 :
 		{
 		          const struct HashType *opthash;
+		          size_t optlen;
+		          int custom = 0;
 		          if( !optarg ) {
 		          	usage(argv[0]);
 		          	fprintf(stderr, "\n--toc-cksum requires an argument\n");
 		          	exit(1);
 		          }
-		          if( (opthash = get_hash_alg(optarg)) == NULL ) {
+		          optlen = strlen(optarg);
+		          if (optlen >= 2 && optarg[optlen-1] == '!') {
+				optarg[optlen-1] = '\0';
+				custom = 1;
+		          }
+		          if( (opthash = get_hash_alg(optarg)) == NULL && !custom ) {
 		          	usage(argv[0]);
 		          	fprintf(stderr, "\n--toc-cksum unrecognized hash type %s\n", optarg);
-		          	exit(1);
+				exit(1);
+		          }
+		          if (!opthash) {
+				CustomTocHash.name = optarg;
+				opthash = &CustomTocHash;
 		          }
 		          Toccksum = opthash;
-		
 		          break;
 		}
 		case  2 : if( !optarg ) {
@@ -2143,18 +2155,28 @@ int main(int argc, char *argv[]) {
 		case 18 :
 		{
 		          const struct HashType *opthash;
+		          size_t optlen;
+		          int custom = 0;
 		          if( !optarg ) {
 				usage(argv[0]);
 		          	fprintf(stderr, "\n--file-cksum requires an argument\n");
 				exit(1);
 		          }
-		          if( (opthash = get_hash_alg(optarg)) == NULL ) {
+		          optlen = strlen(optarg);
+		          if (optlen >= 2 && optarg[optlen-1] == '!') {
+				optarg[optlen-1] = '\0';
+				custom = 1;
+		          }
+		          if( (opthash = get_hash_alg(optarg)) == NULL && !custom ) {
 				usage(argv[0]);
 		          	fprintf(stderr, "\n--file-cksum unrecognized hash type %s\n", optarg);
 				exit(1);
 		          }
+		          if (!opthash) {
+				CustomFileHash.name = optarg;
+				opthash = &CustomFileHash;
+		          }
 		          Filecksum = opthash;
-
 		          break;
 		}
 		case 19 :

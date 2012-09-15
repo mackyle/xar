@@ -245,13 +245,16 @@ Completely removes any signatures from sample.xar
 .SH EXAMPLES
 .TP
 xar \-cf sample.xar /home/uid
-Create a xar archive of all files in /home/uid
+Create an xar archive of all files in /home/uid
 .TP
 xar \-tf sample.xar
 List the contents of the xar archive sample.xar
 .TP
 xar \-xf sample.xar
 Extract the contents of sample.xar to the current working directory
+.TP
+xar \-cf sample.xar \-\-toc\-cksum=whirlpool! \-\-file\-cksum=whirlpool! /home/uid
+Create an xar archive of all files in /home/uid using the whirlpool message digest (requires EVP_get_digestbyname support for whirlpool)
 .SH SIGNING
 In order to sign an archive, a leaf signing certificate in DER format together with its RSA private key in PEM format is required.  In addition,
 if the leaf signing certificate is not a self-signed root certificate then all the other certificates in the certificate chain
@@ -282,7 +285,7 @@ xar --inject-sig signature.dat -f archive.xar
 .PP
 Step 1 simply places the size in bytes as an ASCII decimal number into the file siglen.txt.
 For any given specific RSA private key, this step only needs to be done once as the length is determined by key characteristics
-such as bit length etc. that are independent of the data being signed.
+such as bit length, signing algorithm etc. that are independent of the data being signed.
 .PP
 Step 2, despite the name of the \-\-sign option, only reserves space for the signature to be injected in step 4, inserts the
 certificates and extracts the DigestInfo to be signed.  It does not create a valid signature.
@@ -304,6 +307,8 @@ Doesn't currently work with pipes or streams.  Might be fixed in a future releas
 Signature support is clumsy and requires multiple steps and use of external tools.
 .TP
 The formatting in this man page is suboptimal.
+.TP
+The option to use any available EVP_get_digestbyname hash for \-\-toc\-cksum and/or \-\-file\-cksum by simply appending an ! to its name remains mostly undocumented.
 .TP
 Probably one or two more in there somewhere.  If you find one please report it to https://github.com/mackyle/xar.
 .SH AUTHORS
