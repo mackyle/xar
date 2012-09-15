@@ -16,9 +16,6 @@
 #include <openssl/evp.h>
 #include <xar/xar.h>
 
-#define MAXVAL(a,b) ((a)>=(b)?(a):(b))
-#define HASH_MAX_MD_SIZE MAXVAL(EVP_MAX_MD_SIZE,64)
-
 off_t HeapOff = 0;
 
 static char* xar_format_md5(const unsigned char* m) {
@@ -39,7 +36,7 @@ void heap_check(int fd, const char *name, const char *prop, off_t offset, off_t 
 	char *buf;
 	EVP_MD_CTX *ctx = EVP_MD_CTX_create();
 	const EVP_MD *md;
-	unsigned char md5str[HASH_MAX_MD_SIZE];
+	unsigned char *md5str;
 	unsigned int len;
 	ssize_t r;
 	char *formattedmd5;
@@ -57,8 +54,9 @@ void heap_check(int fd, const char *name, const char *prop, off_t offset, off_t 
 	}
 	EVP_DigestInit_ex(ctx, md, NULL);
 
-	buf = malloc(length);
-	if( !buf ) {
+	buf = (char *)malloc(length);
+	md5str = (unsigned char *)malloc(EVP_MD_size(md));
+	if( !buf || !md5str ) {
 		fprintf(stderr, "Error allocating buffer\n");
 		exit(1);
 	}
@@ -83,6 +81,7 @@ void heap_check(int fd, const char *name, const char *prop, off_t offset, off_t 
 		fprintf(stderr, "%s %s checksum does not match\n", name, prop);
 	}
 	free(formattedmd5);
+	free(md5str);
 	free(buf);
 }
 
