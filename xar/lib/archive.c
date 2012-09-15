@@ -615,6 +615,9 @@ int xar_close(xar_t x) {
 			} while( off < wbytes );
 		}
 
+		/* start counting any digest/signature bytes written */
+		rbytes = 0;
+
 		if( XAR(x)->docksum ) {
 			unsigned int l = r;
 			
@@ -622,6 +625,7 @@ int xar_close(xar_t x) {
 			EVP_DigestFinal_ex(XAR(x)->toc_ctx, chkstr, &l);
 			r = l;
 			write(XAR(x)->fd, chkstr, r);
+			rbytes += r;
 		}
 
 		/* If there are any signatures, get the signed data a sign it */
@@ -649,8 +653,9 @@ int xar_close(xar_t x) {
 				}
 				
 				/* Write the signed data to the heap */
-				write(XAR(x)->fd, signed_data,XAR_SIGNATURE(sig)->len);
-				
+				write(XAR(x)->fd, signed_data, XAR_SIGNATURE(sig)->len);
+				rbytes += XAR_SIGNATURE(sig)->len;
+
 				free(signed_data);
 			}
 			
@@ -663,7 +668,8 @@ int xar_close(xar_t x) {
 			fprintf(stderr, "Error lseeking to offset 0: %s\n", strerror(errno));
 			exit(1);
 		}
-		rbytes = 0;
+		/* XAR(x)->heap_len includes any digest/signatures but the heap file does not and at this
+                 * point rbytes reflects the total byte count of any digest/signatures that are present */
 		while(1) {
 			if( (XAR(x)->heap_len - rbytes) < rsize )
 				rsize = XAR(x)->heap_len - rbytes;
@@ -767,14 +773,35 @@ int32_t xar_opt_set(xar_t x, const char *option, const char *value) {
 	xar_attr_t a;
 
 	if( (strcmp(option, XAR_OPT_TOCCKSUM) == 0) ) {
+		xar_signature_t sig;
+
+		/* Cannot change XAR_OPT_TOCCKSUM after adding any files */
+		if (XAR(x)->files != NULL) {
+			xar_err_new(x);
+			xar_err_set_string(x, "XAR_OPT_TOCCKSUM must be set before files are added");
+			xar_err_callback(x, XAR_SEVERITY_WARNING, XAR_ERR_ARCHIVE_CREATION);
+			return -1;
+		}
+
 		if( strcmp(value, XAR_OPT_VAL_NONE) == 0 ) {
 			XAR(x)->heap_offset = 0;
+			XAR(x)->heap_len = 0;
 		}
 		else {
 			const EVP_MD *md;
 			md = EVP_get_digestbyname(value);
 			if( md == NULL || EVP_MD_size(md) > HASH_MAX_MD_SIZE ) return -1;
 			XAR(x)->heap_offset = EVP_MD_size(md);
+			XAR(x)->heap_len = EVP_MD_size(md);
+		}
+
+		/* If there are any signatures already added they must have their offsets reset now */
+		sig = XAR(x)->signatures;
+		while (sig) {
+			XAR_SIGNATURE(sig)->offset = XAR(x)->heap_offset;
+			XAR(x)->heap_offset += XAR_SIGNATURE(sig)->len;
+			XAR(x)->heap_len += XAR_SIGNATURE(sig)->len;
+			sig = XAR_SIGNATURE(sig)->next;
 		}
 	}
 	if( (strcmp(option, XAR_OPT_FILECKSUM) == 0) ) {
