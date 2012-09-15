@@ -40,6 +40,9 @@
 
 #include "filetree.h"
 
+#define _HASHMAXVAL(a,b) ((a)>=(b)?(a):(b))
+#define HASH_MAX_MD_SIZE _HASHMAXVAL(EVP_MAX_MD_SIZE,128)
+
 int32_t xar_hash_archived(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
 int32_t xar_hash_archived_in(xar_t x, xar_file_t f, xar_prop_t p, void *in, size_t inlen, void **context);
 

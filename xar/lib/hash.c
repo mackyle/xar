@@ -50,9 +50,6 @@
 #include "asprintf.h"
 #endif
 
-#define MAXVAL(a,b) ((a)>=(b)?(a):(b))
-#define HASH_MAX_MD_SIZE MAXVAL(EVP_MAX_MD_SIZE,64)
-
 struct _hash_context{
 	EVP_MD_CTX *unarchived_cts;
 	EVP_MD_CTX *archived_cts;

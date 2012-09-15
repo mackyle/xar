@@ -59,15 +59,13 @@
 #include "xar.h"
 #include "filetree.h"
 #include "archive.h"
+#include "hash.h"
 #include "signature.h"
 #include "arcmod.h"
 #include "io.h"
 #include "util.h"
 #include "subdoc.h"
 #include "darwinattr.h"
-
-#define MAXVAL(a,b) ((a)>=(b)?(a):(b))
-#define HASH_MAX_MD_SIZE MAXVAL(EVP_MAX_MD_SIZE,64)
 
 #define _XAR_LIB_VERSION2(x) #x
 #define _XAR_LIB_VERSION1(x) _XAR_LIB_VERSION2(x)
