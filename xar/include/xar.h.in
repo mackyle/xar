@@ -150,6 +150,14 @@ typedef int32_t (*xar_signer_callback)(xar_signature_t sig, void *context, uint8
 
 #define XAR_OPT_RECOMPRESS     "recompress"   /* Allow recompression (true/false) */
 
+#define XAR_OPT_EXTRACTSTDOUT  "extract-stdout" /* Extract data to stdout instead of file (true/false) */
+
+#define XAR_OPT_STRIPCOMPONENTS "strip-components" /* Number of components to strip on extraction (default 0) */
+
+/* Use xar_open("",WRITE) to get an xar_t to use xar_opt_get on to fetch this then xar_close it if an xar_t is not otherwise available */
+/* Older versions will return NULL from xar_open("",WRITE), current versions will not but only xar_opt_get and xar_close should be called on the result */
+#define XAR_OPT_XARLIBVERSION   "xar-library-version" /* Library's XAR_VERSION_NUM (as 0xVALUE string [%i scanf format, strtol base 0], get only) */
+
 /* xar signing algorithms */
 #define XAR_SIG_SHA1RSA		1
 
