@@ -507,7 +507,7 @@ int xar_close(xar_t x) {
 		t = time(NULL);
 		gmtime_r(&t, &tmptm);
 		memset(timestr, 0, sizeof(timestr));
-		strftime(timestr, sizeof(timestr), "%FT%T", &tmptm);
+		strftime(timestr, sizeof(timestr), "%FT%TZ", &tmptm);
 		xar_prop_set(XAR_FILE(x), "creation-time", timestr);
 
 		/* serialize the toc to a tmp file */

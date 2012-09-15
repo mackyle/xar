@@ -691,7 +691,7 @@ static int32_t stragglers_archive(xar_t x, xar_file_t f, const char* file, void 
 			xar_prop_setvalue(tmpp, NULL);
 			memset(tmpc, 0, sizeof(tmpc));
 			gmtime_r(&fts.ts.tv_sec, &tm);
-			strftime(tmpc, sizeof(tmpc), "%FT%T", &tm);
+			strftime(tmpc, sizeof(tmpc), "%FT%TZ", &tm);
 			xar_prop_pset(f, tmpp, "time", tmpc);
 			memset(tmpc, 0, sizeof(tmpc));
 			sprintf(tmpc, "%ld", fts.ts.tv_nsec);

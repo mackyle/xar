@@ -504,24 +504,21 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	if( xar_check_prop(x, "atime") ) {
 		gmtime_r(&XAR(x)->sbcache.st_atime, &t);
 		memset(time, 0, sizeof(time));
-		strftime(time, sizeof(time), "%FT%T", &t);
-		strcat(time, "Z");
+		strftime(time, sizeof(time), "%FT%TZ", &t);
 		xar_prop_set(f, "atime", time);
 	}
 
 	if( xar_check_prop(x, "mtime") ) {
 		gmtime_r(&XAR(x)->sbcache.st_mtime, &t);
 		memset(time, 0, sizeof(time));
-		strftime(time, sizeof(time), "%FT%T", &t);
-		strcat(time, "Z");
+		strftime(time, sizeof(time), "%FT%TZ", &t);
 		xar_prop_set(f, "mtime", time);
 	}
 
 	if( xar_check_prop(x, "ctime") ) {
 		gmtime_r(&XAR(x)->sbcache.st_ctime, &t);
 		memset(time, 0, sizeof(time));
-		strftime(time, sizeof(time), "%FT%T", &t);
-		strcat(time, "Z");
+		strftime(time, sizeof(time), "%FT%TZ", &t);
 		xar_prop_set(f, "ctime", time);
 	}
 
