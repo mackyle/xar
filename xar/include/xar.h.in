@@ -45,6 +45,10 @@
 @C99_FIXED_WIDTH_TYPE_HEADER@
 #include <sys/stat.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #pragma pack(4)
 
 struct xar_header {
@@ -256,5 +260,9 @@ void xar_serialize(xar_t x, const char *file);
 char *xar_get_path(xar_file_t f);
 uint64_t xar_get_heap_offset(xar_t x);
 uint64_t xar_ntoh64(uint64_t num);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _XAR_H_ */
