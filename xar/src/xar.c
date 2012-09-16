@@ -1874,6 +1874,7 @@ static void _usage(const char *prog, FILE *helpout) {
 	fprintf(helpout, "\t                      historical reasons.\n");
 	fprintf(helpout, "\t--help           Show this help on stdout\n");
 	fprintf(helpout, "\t-h               Synonym for \"--help\"\n");
+	fprintf(helpout, "\t-V               Synonym for \"--version\"\n");
 	fprintf(helpout, "\t--version        Print xar's version number to stdout\n");
 }
 
