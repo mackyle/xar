@@ -831,7 +831,7 @@ CLOSE_BAIL:
  */
 const char *xar_opt_get(xar_t x, const char *option) {
 	xar_attr_t i;
-	if (!x)
+	if (!x || !option)
 		return NULL;
 	if (strcmp(option, XAR_OPT_XARLIBVERSION) == 0)
 		return XAR_LIB_VERSION();
