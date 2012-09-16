@@ -1,7 +1,7 @@
 To build:
 
 ./autogen.sh --noconfigure
-PATH="`getconf PATH`:/usr/local/bin" CFLAGS='-Wall -O2' ./configure
+./configure
 
 If make is GNU make (try make --version to find out) use:
 
