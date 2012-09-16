@@ -705,6 +705,7 @@ static void remove_temp(void) {
 */
 static void replace_sign(const char *filename) {
 
+	static const char *const opts[5] = {XAR_OPT_COMPRESSION, XAR_OPT_COALESCE, XAR_OPT_LINKSAME, XAR_OPT_RSIZE, XAR_OPT_OWNERSHIP};
 	xar_t old_xar, new_xar;
 	char *new_xar_path;
 	char *systemcall;
@@ -714,7 +715,6 @@ static void replace_sign(const char *filename) {
 	int err, tempfd;
 	const char *hash_name = NULL;
 	/* copy options -- this may not be effective since these do not appear to be stored in the TOC */
-	char *opts[6] = {XAR_OPT_COMPRESSION, XAR_OPT_COALESCE, XAR_OPT_LINKSAME, XAR_OPT_RSIZE, XAR_OPT_OWNERSHIP};
 	int i;
 	const char *opt;
 	xar_iter_t iter;
@@ -802,7 +802,7 @@ static void replace_sign(const char *filename) {
 		}
 	}
 
-	for (i=0; i<6; i++) {
+	for (i=0; i<(int)(sizeof(opts)/sizeof(opts[0])); i++) {
 		opt = xar_opt_get(old_xar, opts[i]);
 		if (opt)
 			xar_opt_set(new_xar, opts[i], opt);
