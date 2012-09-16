@@ -1711,6 +1711,11 @@ static int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *us
 	return 0;
 }
 
+static void _usagehint(const char *prog, FILE *helpout) {
+	fprintf(helpout, "Usage: %s -[ctx][v] -f <archive> ...\n", prog);
+	fprintf(helpout, "(Use %s --help for extended help)\n", prog);
+}
+
 static void _usage(const char *prog, FILE *helpout) {
 	fprintf(helpout, "Usage: %s -[ctx][v] -f <archive> ...\n", prog);
 	fprintf(helpout, "\t-c               Creates an archive\n");
@@ -1843,8 +1848,14 @@ static void _usage(const char *prog, FILE *helpout) {
 	fprintf(helpout, "\t--version        Print xar's version number to stdout\n");
 }
 
+/*
 static void usage(const char *prog) {
 	_usage(prog, stderr);
+}
+*/
+
+static void usagehint(const char *prog) {
+	_usagehint(prog, stderr);
 }
 
 static void get_libxar_version() {
@@ -1891,6 +1902,7 @@ int main(int argc, char *argv[]) {
 	char *cert_CAfile = NULL;
 	char command = 0, c;
 	char **args;
+	const char *argv0;
 	const char *tocfile = NULL;
 	int arglen, i, err;
 	xar_t x;
@@ -1951,14 +1963,19 @@ int main(int argc, char *argv[]) {
 		{ 0, 0, 0, 0}
 	};
 
+	if (!(argv0=strrchr(argv[0], '/')))
+		argv0 = argv[0];
+	else
+		++argv0;
+
 	if( argc < 2 ) {
-		usage(argv[0]);
+		usagehint(argv0);
 		exit(1);
 	}
 
 	get_libxar_version();
 	if (xar_lib_version < XAR_VERSION_NUM)
-		fprintf(stderr, "WARNING: linked xar library older than xar executable\n");
+		fprintf(stderr, "%s: warning: linked xar library version older than %s executable\n", argv0, argv0);
 
 	while( (c = getopt_long(argc, argv, "axcVOC:vtjzf:hpPln:s:d:k", o, &loptind)) != -1 ) {
 		switch(c) {
@@ -1968,7 +1985,7 @@ int main(int argc, char *argv[]) {
 		          size_t optlen;
 		          int custom = 0;
 		          if( !optarg ) {
-		          	usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--toc-cksum requires an argument\n");
 		          	exit(1);
 		          }
@@ -1978,7 +1995,7 @@ int main(int argc, char *argv[]) {
 				custom = 1;
 		          }
 		          if( (opthash = get_hash_alg(optarg)) == NULL && !custom ) {
-		          	usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--toc-cksum unrecognized hash type %s\n", optarg);
 				exit(1);
 		          }
@@ -1990,7 +2007,7 @@ int main(int argc, char *argv[]) {
 		          break;
 		}
 		case  2 : if( !optarg ) {
-		          	usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\n--compression requires an argument\n");
 		          	exit(1);
 		          }
@@ -2006,13 +2023,14 @@ int main(int argc, char *argv[]) {
 		              && (strcmp(optarg, XAR_OPT_VAL_XZ) != 0)
 #endif
 		          ) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nThis instance of xar doesn't understand compression type %s\n", optarg);
 				exit(1);
 		          }
 		          Compression = optarg;
 		          break;
 		case  3 : if( command && (command != 'L') ) {
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: --list-subdocs and -%c specified\n", command);
 				exit(1);
 		          }
@@ -2023,12 +2041,12 @@ int main(int argc, char *argv[]) {
 		          exit(0);
 		case 'd':
 			if( !optarg ) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\n--dump-toc requires an argument\n");
 				exit(1);
 			}
 			if( command && (command != 'd') ) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: -%c and -%c specified\n", c, command);
 				exit(1);
 			}
@@ -2037,7 +2055,7 @@ int main(int argc, char *argv[]) {
 			break;
 		case  5 :
 			if( command && (command != 'H') ) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: --dump-header and -%c specified\n", command);
 				exit(1);
 			}
@@ -2047,7 +2065,7 @@ int main(int argc, char *argv[]) {
 			SubdocName = optarg;
 			err = asprintf(&Subdoc, "%s.xml", SubdocName);
 			if( err == -1 ) {
-				fprintf(stderr, "Error with asprintf()\n");
+				fprintf(stderr, "%s: Error with asprintf()\n", argv0);
 				exit(1);
 			}
 			if( !command )
@@ -2061,7 +2079,7 @@ int main(int argc, char *argv[]) {
 			if( err ) {
 				char errstr[1024];
 				regerror(err, &tmp->reg, errstr, sizeof(errstr));
-				fprintf(stderr, "Error with regular expression %s: %s\n", tmp->str, errstr);
+				fprintf(stderr, "%s: Error with regular expression %s: %s\n", argv0, tmp->str, errstr);
 				exit(1);
 			}
 			if( Exclude == NULL ) {
@@ -2074,13 +2092,14 @@ int main(int argc, char *argv[]) {
 			break;
 		case  8 :
 			if ( !optarg ) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\n--rsize requires an argument\n");
 				exit(1);
 			}
 			longtmp = strtol(optarg, NULL, 10);
 			if( (((longtmp == LONG_MIN) || (longtmp == LONG_MAX)) && (errno == ERANGE)) || (longtmp < 16) ) {
-				fprintf(stderr, "Invalid rsize value: %s\n", optarg);
+				usagehint(argv0);
+				fprintf(stderr, "\nInvalid rsize value: %s\n", optarg);
 				exit(5);
 			}
 			Rsize = optarg;
@@ -2164,7 +2183,7 @@ int main(int argc, char *argv[]) {
 		          size_t optlen;
 		          int custom = 0;
 		          if( !optarg ) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--file-cksum requires an argument\n");
 				exit(1);
 		          }
@@ -2174,7 +2193,7 @@ int main(int argc, char *argv[]) {
 				custom = 1;
 		          }
 		          if( (opthash = get_hash_alg(optarg)) == NULL && !custom ) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--file-cksum unrecognized hash type %s\n", optarg);
 				exit(1);
 		          }
@@ -2187,7 +2206,7 @@ int main(int argc, char *argv[]) {
 		}
 		case 19 :
 			if( !optarg ) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--sig-size requires an argument\n");
 				exit(1);
 			}
@@ -2196,23 +2215,25 @@ int main(int argc, char *argv[]) {
 			break;
 		case 20 :
 			if( !optarg ) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--data-to-sign requires an argument\n");
 				exit(1);
 			}
 			if (DumpDigestInfo) {
-				fprintf(stderr, "--data-to-sign may not be used with --digestinfo-to-sign\n");
+				usagehint(argv0);
+				fprintf(stderr, "\n--data-to-sign may not be used with --digestinfo-to-sign\n");
 				exit(1);
 			}
 			if (DataToSignDumpPath) {
-				fprintf(stderr, "--data-to-sign may only be used once\n");
+				usagehint(argv0);
+				fprintf(stderr, "\n--data-to-sign may only be used once\n");
 				exit(1);
 			}
 			DataToSignDumpPath = optarg;
 			break;
 		case 21 :
 			if( !optarg ) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--sig-offset requires an argument\n");
 				exit(1);
 			}
@@ -2221,7 +2242,7 @@ int main(int argc, char *argv[]) {
 		case 22 :	// cert-loc & intermediate-cert-loc
 		case 23 :	// leaf-cert-loc
 			if( !optarg ) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--cert-loc requires an argument\n");
 				exit(1);
 			}
@@ -2243,7 +2264,7 @@ int main(int argc, char *argv[]) {
 			break;
 		case 24 :	// extract-data-to-sign
 			if (command && (command != 'e')) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: --extract-data-to-sign and -%c specified\n", command);
 				exit(1);
 			}
@@ -2254,7 +2275,7 @@ int main(int argc, char *argv[]) {
 			break;
 		case 26 :	// replace-sign
 			if (command && (command != 'r')) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: --replace-sign and -%c specified\n", command);
 				exit(1);
 			}
@@ -2263,12 +2284,12 @@ int main(int argc, char *argv[]) {
 			break;
 		case 27 :	// inject signature
 			if (!optarg) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--inject-sig requires an argument\n");
 				exit(1);
 			}
 			if (command && (command != 'i')) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: --inject-sig and -%c specified\n", command);
 				exit(1);
 			}
@@ -2277,39 +2298,39 @@ int main(int argc, char *argv[]) {
 			break;
 		case 28 :	// extract-certs
 			if (!optarg) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--extract-certs requires an argument\n");
 				exit(1);
 			}
 			if (command && (command != 'j' || cert_CAfile)) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: --extract-certs and -%c specified\n", command);
 				exit(1);
 			}
 			cert_path = optarg;
 			err = stat(cert_path, &stat_struct);
 			if (err || !(stat_struct.st_mode & S_IFDIR)) {
-				usage(argv[0]);
-				fprintf(stderr, "%s is not a directory\n", cert_path);
+				usagehint(argv0);
+				fprintf(stderr, "\n%s is not a directory\n", cert_path);
 				exit(1);
 			}
 			command = 'j';
 			break;
 		case 29 :	// extract-CAfile
 			if (!optarg) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--extract-CAfile requires an argument\n");
 				exit(1);
 			}
 			if (command && (command != 'j' || cert_path)) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: --extract-CAfile and -%c specified\n", command);
 				exit(1);
 			}
 			cert_CAfile = optarg;
 			err = stat(cert_CAfile, &stat_struct);
 			if (!err && (stat_struct.st_mode & S_IFDIR)) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\n%s is a directory\n", cert_CAfile);
 				exit(1);
 			}
@@ -2317,19 +2338,19 @@ int main(int argc, char *argv[]) {
 			break;
 		case 30 :	// extract-sig
 			if( !optarg ) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--extract-sig requires an argument\n");
 				exit(1);
 			}
 			if (command && (command != 'g')) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: --extract-sig and -%c specified\n", command);
 				exit(1);
 			}
 			SignatureDumpPath = optarg;
 			err = stat(SignatureDumpPath, &stat_struct);
 			if (!err && (stat_struct.st_mode & S_IFDIR)) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\n%s is a directory\n", SignatureDumpPath);
 				exit(1);
 			}
@@ -2337,12 +2358,12 @@ int main(int argc, char *argv[]) {
 			break;
 		case 31:
 			if( !optarg ) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--dump-toc-raw requires an argument\n");
 				exit(1);
 			}
 			if (command && (command != 'w')) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: --dump-toc-raw and -%c specified\n", command);
 				exit(1);
 			}
@@ -2351,16 +2372,18 @@ int main(int argc, char *argv[]) {
 			break;
 		case 32 :
 			if( !optarg ) {
-				usage(argv[0]);
+				usagehint(argv0);
 		          	fprintf(stderr, "\n--digestinfo-to-sign requires an argument\n");
 				exit(1);
 			}
 			if (DataToSignDumpPath && !DumpDigestInfo) {
-				fprintf(stderr, "--digestinfo-to-sign may not be used with --data-to-sign\n");
+				usagehint(argv0);
+				fprintf(stderr, "\n--digestinfo-to-sign may not be used with --data-to-sign\n");
 				exit(1);
 			}
 			if (DataToSignDumpPath) {
-				fprintf(stderr, "--digestinfo-to-sign may only be used once\n");
+				usagehint(argv0);
+				fprintf(stderr, "\n--digestinfo-to-sign may only be used once\n");
 				exit(1);
 			}
 			DataToSignDumpPath = optarg;
@@ -2374,16 +2397,19 @@ int main(int argc, char *argv[]) {
 			long comps;
 			char *endptr;
 			if( !optarg ) {
-				fprintf(stderr, "--strip-components requires an argument\n");
+				usagehint(argv0);
+				fprintf(stderr, "\n--strip-components requires an argument\n");
 				exit(1);
 			}
 			if (xar_lib_version < MIN_XAR_NEW_OPTIONS) {
-				fprintf(stderr, "--strip-components requires a newer xar library\n");
+				usagehint(argv0);
+				fprintf(stderr, "\n--strip-components requires a newer xar library\n");
 				exit(1);
 			}
 			comps = strtol(optarg, &endptr, 0);
 			if (!*optarg || *endptr || comps < 0) {
-				fprintf(stderr, "--strip-components requires a non-negative number argument\n");
+				usagehint(argv0);
+				fprintf(stderr, "\n--strip-components requires a non-negative number argument\n");
 				exit(1);
 			}
 			StripComponents = optarg;
@@ -2393,8 +2419,8 @@ int main(int argc, char *argv[]) {
 			RFC6713++;
 			break;
 		case 'C': if( !optarg ) {
-		          	usage(argv[0]);
-				fprintf(stderr, "-C requires an argument\n");
+				usagehint(argv0);
+				fprintf(stderr, "\n-C requires an argument\n");
 		          	exit(1);
 		          }
 		          Chdir = optarg;
@@ -2403,7 +2429,7 @@ int main(int argc, char *argv[]) {
 		case 'x':
 		case 't':
 			if( command && (command != 's') ) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nConflicting commands: -%c and -%c specified\n", c, command);
 				exit(1);
 			}
@@ -2435,7 +2461,7 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'O':
 			if (xar_lib_version < MIN_XAR_NEW_OPTIONS) {
-				fprintf(stderr, "--to-stdout requires a newer xar library\n");
+				fprintf(stderr, "%s: --to-stdout requires a newer xar library\n", argv0);
 				exit(1);
 			}
 			ToStdout = 1;
@@ -2452,10 +2478,11 @@ int main(int argc, char *argv[]) {
 			Verbose++;
 			break;
 		case 'h':
-			_usage(argv[0], stdout);
+			print_version();
+			_usage(argv0, stdout);
 			exit(0);
 		default:
-			usage(argv[0]);
+			usagehint(argv0);
 			exit(1);
 		}
 	}
@@ -2470,40 +2497,44 @@ int main(int argc, char *argv[]) {
 		if (!Filecksum)
 			Filecksum = &HashTypes[SHA1_HASH_INDEX];
 		if (DoSign && strcmp(Toccksum->name, XAR_OPT_VAL_NONE) == 0) {
-			fprintf(stderr, "--sign requires a --toc-cksum type value other than \"%s\"\n", XAR_OPT_VAL_NONE);
+			usagehint(argv0);
+			fprintf(stderr, "\n--sign requires a --toc-cksum type value other than \"%s\"\n", XAR_OPT_VAL_NONE);
 			exit(1);
 		}
 	}
 
 	if (!DoSign && (SigSizePresent || CertPath)) {
-		fprintf(stderr, "Neither --sig-size nor --cert-loc may be used without either --sign or --replace-sign\n");
+		usagehint(argv0);
+		fprintf(stderr, "\nNeither --sig-size nor --cert-loc may be used without either --sign or --replace-sign\n");
 		exit(1);
 	}
 
 	if ((Toccksum && strcmp(Toccksum->name, XAR_OPT_VAL_MD5) == 0) || (Filecksum && strcmp(Filecksum->name, XAR_OPT_VAL_MD5) == 0)) {
-		fprintf(stderr, "WARNING: The md5 hash is obsolete and should not be used anymore -- continuing anyway\n");
+		fprintf(stderr, "%s: warning: The md5 hash is obsolete and should not be used anymore -- continuing anyway\n", argv0);
 	}
 
 	if (! required_dash_f)	{
-		usage(argv[0]);
+		usagehint(argv0);
 		fprintf(stderr, "\n-f option is REQUIRED\n");
 		exit(1);
 	}
 
 	// extract-data-to-sign
 	if ( (command == 'e') && ((!filename) || (!DataToSignDumpPath)) ) {
-		usage(argv[0]);
+		usagehint(argv0);
 		fprintf(stderr, "\n--extract-data-to-sign also requires either --data-to-sign or --digestinfo-to-sign\n");
 		exit(1);
 	}
 
 	if (command == 'c' && DataToSignDumpPath && !DumpDigestInfo && strcmp(Toccksum->name, XAR_OPT_VAL_NONE) == 0) {
-		fprintf(stderr, "--data-to-sign requires a --toc-cksum type value other than \"%s\"\n", XAR_OPT_VAL_NONE);
+		usagehint(argv0);
+		fprintf(stderr, "\n--data-to-sign requires a --toc-cksum type value other than \"%s\"\n", XAR_OPT_VAL_NONE);
 		exit(1);
 	}
 
 	if (command == 'c' && DataToSignDumpPath && DumpDigestInfo && (!Toccksum->diprefix || !Toccksum->diprefixlen)) {
-		fprintf(stderr, "--digestinfo-to-sign requires --toc-cksum of \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" or \"%s\"\n",
+		usagehint(argv0);
+		fprintf(stderr, "\n--digestinfo-to-sign requires --toc-cksum of \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" or \"%s\"\n",
 			XAR_OPT_VAL_MD5, XAR_OPT_VAL_SHA1, XAR_OPT_VAL_SHA224, XAR_OPT_VAL_SHA256, XAR_OPT_VAL_SHA384, XAR_OPT_VAL_SHA512);
 		exit(1);
 	}
@@ -2511,14 +2542,15 @@ int main(int argc, char *argv[]) {
 
 	if ( DoSign && command == 'r' && SigSizePresent && !SigSize ) {
 		if (CertPath || SigOffsetDumpPath) {
-			fprintf(stderr, "Neither --cert-loc nor --sig-offset may be used when removing signatures with --sig-size=0\n");
+			usagehint(argv0);
+			fprintf(stderr, "\nNeither --cert-loc nor --sig-offset may be used when removing signatures with --sig-size=0\n");
 			exit(1);
 		}
 	}
 	else if ( DoSign ) {
 		if (  ( SigSize <= 0 || !CertPath ) 
 			  || ((command != 'c') && (!filename)) ) {
-			usage(argv[0]);
+			usagehint(argv0);
 			fprintf(stderr, "\n--sig-size > 0 and at least one --cert-loc option are required to sign\n");
 			exit(1);
 		}
@@ -2528,30 +2560,30 @@ int main(int argc, char *argv[]) {
 
 	if (command == 'r') {
 		/*if ( !SigSize || !CertPath || !filename) {
-			usage(argv[0]);
+			usage(argv0);
 			exit(1);
 		}
 		xar_t x = xar_open(filename, READ);
 		if ( x == NULL ) {
-			fprintf(stderr, "Could not open archive %s!\n", filename);
+			fprintf(stderr, "%s: Could not open archive %s!\n", argv0, filename);
 			exit(1);
 		}
 		xar_signature_t sig = xar_signature_first(x);
 		if ( !sig ) {
-			fprintf(stderr, "No signature found to replace\n");
+			fprintf(stderr, "%s: No signature found to replace\n", argv0);
 			exit(E_NOSIG);
 		}
 		xar_close(x);*/
 	}
 
 	if ((command == 'i') && ((!filename) || (!sig_path))) {
-		usage(argv[0]);
+		usagehint(argv0);
 		fprintf(stderr, "\n--inject-sig requires an argument and also -f\n");
 		exit(1);
 	}
 
 	if ((command == 'j' || command == 'g') && (!filename)) {
-		usage(argv[0]);
+		usagehint(argv0);
 		fprintf(stderr, "\nmissing required -f\n");
 		exit(1);
 	}
@@ -2563,7 +2595,7 @@ int main(int argc, char *argv[]) {
 			return list_subdocs(filename);
 		case 'c':
 			if( optind == argc ) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nNo files to operate on\n");
 				exit(1);
 			}
@@ -2576,14 +2608,14 @@ int main(int argc, char *argv[]) {
 			return archive(filename, arglen, args);
 		case 'd':
 			if( !tocfile ) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nmissing --dump-toc argument\n");
 				exit(1);
 			}
 			return dumptoc(filename, tocfile);
 		case 'w':
 			if( !tocfile ) {
-				usage(argv[0]);
+				usagehint(argv0);
 				fprintf(stderr, "\nmissing --dump-toc-raw argument\n");
 				exit(1);
 			}
@@ -2607,7 +2639,7 @@ int main(int argc, char *argv[]) {
 		case 's':
 			x = xar_open(filename, READ);
 			if( !x ) {
-				fprintf(stderr, "Error opening xar archive: %s\n", filename);
+				fprintf(stderr, "%s: Error opening xar archive: %s\n", argv0, filename);
 				exit(1);
 			}
 			xar_register_errhandler(x, err_callback, NULL);
@@ -2634,8 +2666,8 @@ int main(int argc, char *argv[]) {
 			extract_certs(filename, cert_path, cert_CAfile);
 			exit(Err);
 		default:
-			usage(argv[0]);
-			fprintf(stderr, "Unrecognized command\n");
+			usagehint(argv0);
+			fprintf(stderr, "\nUnrecognized command\n");
 			exit(1);
 	}
 
