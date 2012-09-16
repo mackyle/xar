@@ -1,7 +1,7 @@
 To build:
 
 ./autogen.sh --noconfigure
-PATH="`getconf PATH`:/usr/local/bin" CFLAGS='-Wall -Os' ./configure --without-lzma
+PATH="`getconf PATH`:/usr/local/bin" CFLAGS='-Wall -O2' ./configure
 
 If make is GNU make (try make --version to find out) use:
 
