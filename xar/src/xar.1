@@ -314,6 +314,8 @@ Doesn't currently work with pipes or streams.  Might be fixed in a future releas
 .TP
 Signature support is clumsy and requires multiple steps and use of external tools.
 .TP
+Should default to SHA-256 checksums if supported by the linked library but currently does not for backwards compatibility.
+.TP
 The formatting in this man page is suboptimal.
 .TP
 The option to use any available EVP_get_digestbyname hash for \-\-toc\-cksum and/or \-\-file\-cksum by simply appending an ! to its name remains mostly undocumented.
