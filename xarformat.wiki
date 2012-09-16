@@ -10,12 +10,12 @@ The XAR file format has three main regions, The Header, The Table of Contents, a
 The header starts with 32 bits of file magic ('xar!') in network byte order. The next 16 bits are the size of the header (including the 32 bits of file magic) in network byte order. A 16 bit xar file version number follows in network byte order, the current version is zero. Last is the 64 bit length of the table of contents regions, also in network byte order. The header may be represented as the following xar_header C structure.
 
 <pre>
-#define XAR_HEADER_MAGIC 0x78617221
+#define XAR_HEADER_MAGIC 0x78617221 /* 'xar!' */
 #define XAR_HEADER_VERSION 0
 #define XAR_HEADER_SIZE sizeof(struct xar_header)
 
 /*
- * xar_header version 0
+ * xar_header version 1
  */
 struct xar_header {
     uint32_t magic;	
@@ -24,8 +24,30 @@ struct xar_header {
     uint64_t toc_length_compressed;
     uint64_t toc_length_uncompressed;
     uint32_t cksum_alg;
+    /* A nul-terminated, zero-padded to multiple of 4, message digest name
+     * appears here if cksum_alg is 3 which must not be empty ("") or "none".
+     */
 };
 </pre>
+
+The size field MUST be at least 28.  The version field SHOULD be 1 (the xar library writes a 1, but ignores the value when reading an archive).  cksum_alg 0 is none, 1 is sha1, 2 is md5.
+
+Older versions of the xar library do not correctly handle a header size value of other than 28 (even when cksum_alg is 0, 1 or 2).
+
+If cksum_alg is 3 then the size field MUST be a multiple of 4 and at least 32.  Furthermore,
+immediately following the cksum_alg field a nul terminated nul padded string which is the
+long name of the hash MUST be present and MUST NOT be the empty ("") string or "none".
+This name must match exactly (byte-for-byte) the checksum style attribute value from the
+toc's checksum property.  The name SHOULD NOT be "sha1" or "md5" either instead,
+for backwards-compatibility, cksum_alg values 1 and 2 respectively should be used in that case.
+Note that this name string is considered part of the header and its length (along with its trailing nul
+terminator and any trailing nul byte padding) is included in the header size value.  The current xar
+library always writes 64-byte headers (xar_header.size = 64) when using a cksum_alg of 3 and is therefore
+limited to checksum message digest names of 35 bytes (not counting the terminating nul byte) or less.
+
+See the xar.h header for structure and constant definitions.
+
+Note that the zlib-compressed table-of-contents immediately follows the xar_header (whatever size the header is) and continues for exactly toc_length_compressed bytes.  It is this zlib-compressed toc that the message digest hash is computed over.
 
 === The Table of Contents ===
 
@@ -73,4 +95,6 @@ The table of contents is an XML document. The table of contents should be encode
 
 === The Heap ===
 
-As its name suggests, the heap is an unstructured heap of data referenced by the table of contents. It is recommended that implementations use the heap as efficiently as possible and defragment the heap during archive creation as well order it sensibly. In order for an archive to be streamable, it is necissary for all of a file's heap entries to be grouped together, with extended attributes coming before the data portion of the file. When streaming, the heap entries will be extracted in the order they appear, and the EA data must be extracted before the data so the proper security context can be set on the file before the data is extracted. 
+As its name suggests, the heap is an unstructured heap of data referenced by the table of contents. It is recommended that implementations use the heap as efficiently as possible and defragment the heap during archive creation as well order it sensibly. In order for an archive to be streamable, it is necessary for all of a file's heap entries to be grouped together, with extended attributes coming before the data portion of the file. When streaming, the heap entries will be extracted in the order they appear, and the EA data must be extracted before the data so the proper security context can be set on the file before the data is extracted.
+
+The heap begins immediately following the compressed toc.  Offset values listed in the toc are offsets from the beginning of the heap.  The length values in the toc refer to the actual number of bytes stored in the heap (compressed or not) whereas the size value refers to the extracted size of the item (after decompressing if necessary).
