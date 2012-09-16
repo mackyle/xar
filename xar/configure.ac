@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([Xar], [1.6dev_sigv4], [xar-devel@googlegroups.com], [xar])
+AC_INIT([Xar], [1.6.1], [xar-devel@googlegroups.com], [xar])
 AC_CONFIG_SRCDIR([LICENSE])
 
 dnl Revision number for libxar.
@@ -8,8 +8,8 @@ AC_SUBST([LIB_REV])
 
 dnl xar version variables.
 XAR_MAJOR_VERSION="1"
-XAR_MINOR_VERSION="6dev_sigv4"
-XAR_NUMERIC_VERSION="0x01060004"
+XAR_MINOR_VERSION="6.1"
+XAR_NUMERIC_VERSION="0x01060180"
 XAR_VERSION="${XAR_MAJOR_VERSION}.${XAR_MINOR_VERSION}"
 AC_SUBST([XAR_MAJOR_VERSION])
 AC_SUBST([XAR_MINOR_VERSION])
