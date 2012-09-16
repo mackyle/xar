@@ -85,6 +85,7 @@ struct fi {
  * This function is used from the nonea_archive() function.
  */
 static int32_t finfo_read(xar_t x, xar_file_t f, void *buf, size_t len, void *context) {
+	(void)x; (void)f;
 	if( len < 32 )
 		return -1;
 
@@ -104,6 +105,7 @@ static int32_t finfo_write(xar_t x, xar_file_t f, void *buf, size_t len, void *c
 	struct attrlist attrs;
 	struct fi finfo;
 
+	(void)x; (void)f;
 	if( len < 32 )
 		return -1;
 	if( DARWINATTR_CONTEXT(context)->finfo == NULL )
@@ -131,8 +133,9 @@ static int32_t finfo_write(xar_t x, xar_file_t f, void *buf, size_t len, void *c
 static int32_t xar_rsrc_read(xar_t x, xar_file_t f, void *inbuf, size_t bsize, void *context) {
 	int32_t r;
 
+	(void)x; (void)f;
 	while(1) {
-		r = read(DARWINATTR_CONTEXT(context)->fd, inbuf, bsize);
+		r = (int)read(DARWINATTR_CONTEXT(context)->fd, inbuf, bsize);
 		if( (r < 0) && (errno == EINTR) )
 			continue;
 		return r;
@@ -148,23 +151,25 @@ static int32_t xar_rsrc_read(xar_t x, xar_file_t f, void *inbuf, size_t bsize, v
 static int32_t xar_rsrc_write(xar_t x, xar_file_t f, void *buf, size_t len, void *context) {
 	int32_t r;
 	size_t off = 0;
+	(void)x; (void)f;
 	do {
-		r = write(DARWINATTR_CONTEXT(context)->fd, ((char *)buf)+off, len-off);
+		r = (int32_t)write(DARWINATTR_CONTEXT(context)->fd, ((char *)buf)+off, len-off);
 		if( (r < 0) && (errno != EINTR) )
 			return r;
 		off += r;
 	} while( off < len );
-	return off;
+	return (int32_t)off;
 }
 
 #ifdef __APPLE__
 #if defined(HAVE_GETXATTR)
 
 static int32_t xar_ea_read(xar_t x, xar_file_t f, void *buf, size_t len, void *context) {
+	(void)x; (void)f;
 	if( DARWINATTR_CONTEXT(context)->buf == NULL )
 		return 0;
 
-	if( ((DARWINATTR_CONTEXT(context)->len)-(DARWINATTR_CONTEXT(context)->off)) <= len ) {
+	if( ((DARWINATTR_CONTEXT(context)->len)-(DARWINATTR_CONTEXT(context)->off)) <= (int)len ) {
 		int siz = (DARWINATTR_CONTEXT(context)->len)-(DARWINATTR_CONTEXT(context)->off);
 		memcpy(buf, DARWINATTR_CONTEXT(context)->buf+DARWINATTR_CONTEXT(context)->off, siz);
 		free(DARWINATTR_CONTEXT(context)->buf);
@@ -175,7 +180,7 @@ static int32_t xar_ea_read(xar_t x, xar_file_t f, void *buf, size_t len, void *c
 	}
 
 	memcpy(buf, DARWINATTR_CONTEXT(context)->buf+DARWINATTR_CONTEXT(context)->off, len);
-	DARWINATTR_CONTEXT(context)->off += len;
+	DARWINATTR_CONTEXT(context)->off += (int)len;
 
 	if( DARWINATTR_CONTEXT(context)->off == DARWINATTR_CONTEXT(context)->len ) {
 		free(DARWINATTR_CONTEXT(context)->buf);
@@ -184,26 +189,27 @@ static int32_t xar_ea_read(xar_t x, xar_file_t f, void *buf, size_t len, void *c
 		DARWINATTR_CONTEXT(context)->len = 0;
 	}
 
-	return len;
+	return (int32_t)len;
 }
 
 static int32_t xar_ea_write(xar_t x, xar_file_t f, void *buf, size_t len, void *context) {
+	(void)x; (void)f;
 	if( DARWINATTR_CONTEXT(context)->buf == NULL )
 		return 0;
 
 	if( DARWINATTR_CONTEXT(context)->off == DARWINATTR_CONTEXT(context)->len )
 		return 0;
 
-	if( ((DARWINATTR_CONTEXT(context)->len)-(DARWINATTR_CONTEXT(context)->off)) <= len ) {
+	if( ((DARWINATTR_CONTEXT(context)->len)-(DARWINATTR_CONTEXT(context)->off)) <= (int)len ) {
 		int siz = (DARWINATTR_CONTEXT(context)->len)-(DARWINATTR_CONTEXT(context)->off);
 		memcpy((DARWINATTR_CONTEXT(context)->buf)+(DARWINATTR_CONTEXT(context)->off), buf, siz);
 		return siz;
 	}
 
 	memcpy((DARWINATTR_CONTEXT(context)->buf)+(DARWINATTR_CONTEXT(context)->off), buf, len);
-	DARWINATTR_CONTEXT(context)->off += len;
+	DARWINATTR_CONTEXT(context)->off += (int)len;
 
-	return len;
+	return (int32_t)len;
 }
 
 static int32_t ea_archive(xar_t x, xar_file_t f, const char* file, void *context) {
@@ -214,7 +220,7 @@ static int32_t ea_archive(xar_t x, xar_file_t f, const char* file, void *context
 	if( file == NULL )
 		return 0;
 
-	ret = listxattr(file, NULL, 0, XATTR_NOFOLLOW);
+	ret = (int)listxattr(file, NULL, 0, XATTR_NOFOLLOW);
 	if( ret < 0 )
 		return -1;
 	if( ret == 0 )
@@ -225,7 +231,7 @@ TRYAGAIN:
 	buf = malloc(bufsz);
 	if( !buf )
 		goto TRYAGAIN;
-	ret = listxattr(file, buf, bufsz, XATTR_NOFOLLOW);
+	ret = (int)listxattr(file, buf, bufsz, XATTR_NOFOLLOW);
 	if( ret < 0 ) {
 		switch(errno) {
 		case ERANGE: bufsz = bufsz*2; free(buf); goto TRYAGAIN;
@@ -242,7 +248,7 @@ TRYAGAIN:
 	for( i = buf; (i-buf) < attrsz; i += strlen(i)+1 ) {
 		xar_ea_t e;
 
-		ret = getxattr(file, i, NULL, 0, 0, XATTR_NOFOLLOW);
+		ret = (int)getxattr(file, i, NULL, 0, 0, XATTR_NOFOLLOW);
 		if( ret < 0 )
 			continue;
 		DARWINATTR_CONTEXT(context)->len = ret;
@@ -250,7 +256,7 @@ TRYAGAIN:
 		if( !DARWINATTR_CONTEXT(context)->buf )
 			goto BAIL;
 
-		ret = getxattr(file, i, DARWINATTR_CONTEXT(context)->buf, DARWINATTR_CONTEXT(context)->len, 0, XATTR_NOFOLLOW);
+		ret = (int)getxattr(file, i, DARWINATTR_CONTEXT(context)->buf, DARWINATTR_CONTEXT(context)->len, 0, XATTR_NOFOLLOW);
 		if( ret < 0 ) {
 			free(DARWINATTR_CONTEXT(context)->buf);
 			DARWINATTR_CONTEXT(context)->buf = NULL;
@@ -288,7 +294,7 @@ static int32_t ea_extract(xar_t x, xar_file_t f, const char* file, void *context
 		if( !opt )
 			continue;
 
-		len = strtol(opt, NULL, 10);
+		len = (int)strtol(opt, NULL, 10);
 		DARWINATTR_CONTEXT(context)->buf = malloc(len);
 		if( !DARWINATTR_CONTEXT(context)->buf )
 			return -1;
@@ -415,29 +421,35 @@ static int32_t nonea_extract(xar_t x, xar_file_t f, const char* file, void *cont
 xar_file_t xar_underbar_check(xar_t x, xar_file_t f, const char* file, void *context) {
 	char *bname, *tmp;
 
+	(void)f; (void)context;
 	tmp = strdup(file);
 	bname = basename(tmp);
 
 	if(bname && (bname[0] == '.') && (bname[1] == '_')) {
 		char *nonunderbar, *nupath, *tmp2, *dname;
 		struct stat sb;
-		
+		int err;
+
 		nonunderbar = bname+2;
 		tmp2 = strdup(file);
 		dname = dirname(tmp2);
-		asprintf(&nupath, "%s/%s", dname, nonunderbar);
+		err = asprintf(&nupath, "%s/%s", dname, nonunderbar);
 		free(tmp2);
 
 		/* if there is no file that the ._ corresponds to, archive
 		 * it like a normal file.
 		 */
-		if( stat(nupath, &sb) ) {
+		if( err == -1 || stat(nupath, &sb) ) {
 			free(tmp);
 			free(nupath);
 			return NULL;
 		}
 
-		asprintf(&tmp2, "%s/..namedfork/rsrc", nupath);
+		if (asprintf(&tmp2, "%s/..namedfork/rsrc", nupath) == -1) {
+			free(tmp);
+			free(nupath);
+			return NULL;
+		}
 
 		/* If there is a file that the ._ file corresponds to, and
 		 * there is no resource fork, assume the ._ file contains
@@ -503,7 +515,7 @@ static int32_t underbar_archive(xar_t x, xar_file_t f, const char* file, void *c
 
 	memset(&ash, 0, sizeof(ash));
 	memset(&ase, 0, sizeof(ase));
-	r = read(DARWINATTR_CONTEXT(context)->fd, &ash, XAR_ASH_SIZE);
+	r = (int)read(DARWINATTR_CONTEXT(context)->fd, &ash, XAR_ASH_SIZE);
 	if( r < XAR_ASH_SIZE ) {
 		close(DARWINATTR_CONTEXT(context)->fd);
 		return -1;
@@ -523,8 +535,8 @@ static int32_t underbar_archive(xar_t x, xar_file_t f, const char* file, void *c
 
 	for(i = 0; i < num_entries; i++) {
 		off_t entoff;
-		r = read(DARWINATTR_CONTEXT(context)->fd, &ase, sizeof(ase));
-		if( r < sizeof(ase) ) {
+		r = (int)read(DARWINATTR_CONTEXT(context)->fd, &ase, sizeof(ase));
+		if( r < (int)sizeof(ase) ) {
 			close(DARWINATTR_CONTEXT(context)->fd);
 			return -1;
 		}
@@ -537,8 +549,8 @@ static int32_t underbar_archive(xar_t x, xar_file_t f, const char* file, void *c
 				close(DARWINATTR_CONTEXT(context)->fd);
 				return -1;
 			}
-			r = read(DARWINATTR_CONTEXT(context)->fd, z, sizeof(z));
-			if( r < sizeof(z) ) {
+			r = (int)read(DARWINATTR_CONTEXT(context)->fd, z, sizeof(z));
+			if( r < (int)sizeof(z) ) {
 				close(DARWINATTR_CONTEXT(context)->fd);
 				return -1;
 			}
@@ -624,7 +636,7 @@ static int32_t underbar_extract(xar_t x, xar_file_t f, const char* file, void *c
 		if( p )
 			rsrclenstr = xar_prop_getvalue(p);
 		if( rsrclenstr ) 
-			rsrclen = strtol(rsrclenstr, NULL, 10);
+			rsrclen = (int)strtol(rsrclenstr, NULL, 10);
 	}
 
 	memset(&ash, 0, sizeof(ash));
@@ -633,20 +645,23 @@ static int32_t underbar_extract(xar_t x, xar_file_t f, const char* file, void *c
 	ash.version = htonl(APPLEDOUBLE_VERSION);
 	ash.entries = htons(num_entries);
 
-	write(DARWINATTR_CONTEXT(context)->fd, &ash, XAR_ASH_SIZE);
+	if (write(DARWINATTR_CONTEXT(context)->fd, &ash, XAR_ASH_SIZE) != XAR_ASH_SIZE)
+		return -1;
 
 	ase.offset = htonl(XAR_ASH_SIZE + ntohs(ash.entries)*12);
 	if( have_fi ) {
 		ase.entry_id = htonl(AS_ID_FINDER);
 		ase.length = htonl(32);
-		write(DARWINATTR_CONTEXT(context)->fd, &ase, 12);
+		if (write(DARWINATTR_CONTEXT(context)->fd, &ase, 12) != 12)
+			return -1;
 	}
 
 	if( have_rsrc ) {
 		ase.entry_id = htonl(AS_ID_RESOURCE);
 		ase.offset = htonl(ntohl(ase.offset) + ntohl(ase.length));
 		ase.length = htonl(rsrclen);
-		write(DARWINATTR_CONTEXT(context)->fd, &ase, 12);
+		if (write(DARWINATTR_CONTEXT(context)->fd, &ase, 12) != 12)
+			return -1;
 	}
 	
 	if( have_fi )
@@ -673,6 +688,7 @@ static int32_t stragglers_archive(xar_t x, xar_file_t f, const char* file, void 
 	struct attrlist attrs;
 	int ret;
 
+	(void)context;
 	if( !xar_check_prop(x, "FinderCreateTime") )
 		return 0;
 
@@ -691,7 +707,7 @@ static int32_t stragglers_archive(xar_t x, xar_file_t f, const char* file, void 
 			xar_prop_setvalue(tmpp, NULL);
 			memset(tmpc, 0, sizeof(tmpc));
 			gmtime_r(&fts.ts.tv_sec, &tm);
-			strftime(tmpc, sizeof(tmpc), "%FT%TZ", &tm);
+			strftime(tmpc, sizeof(tmpc), "%Y-%m-%dT%H:%M:%SZ", &tm);
 			xar_prop_pset(f, tmpp, "time", tmpc);
 			memset(tmpc, 0, sizeof(tmpc));
 			sprintf(tmpc, "%ld", fts.ts.tv_nsec);
@@ -699,7 +715,8 @@ static int32_t stragglers_archive(xar_t x, xar_file_t f, const char* file, void 
 		}
 	}
 #endif
-	return 0;	
+	(void)x; (void)f; (void)file; (void)context;
+	return 0;
 }
 
 static int32_t stragglers_extract(xar_t x, xar_file_t f, const char* file, void *context) {
@@ -709,9 +726,10 @@ static int32_t stragglers_extract(xar_t x, xar_file_t f, const char* file, void 
 	struct timespec ts;
 	struct attrlist attrs;
 
+	(void)x; (void)context;
 	xar_prop_get(f, "FinderCreateTime/time", &tmpc);
 	if( tmpc ) {
-		strptime(tmpc, "%FT%T", &tm);
+		strptime(tmpc, "%Y-%m-%dT%H:%M:%S", &tm);
 		ts.tv_sec = timegm(&tm);
 		xar_prop_get(f, "FinderCreateTime/nanoseconds", &tmpc);
 		ts.tv_nsec = strtol(tmpc, NULL, 10);
@@ -722,6 +740,7 @@ static int32_t stragglers_extract(xar_t x, xar_file_t f, const char* file, void 
 	}
 
 #endif
+	(void)x; (void)f; (void)file; (void)context;
 	return 0;
 }
 #endif /* __APPLE__ */
@@ -731,7 +750,8 @@ int32_t xar_darwinattr_archive(xar_t x, xar_file_t f, const char* file, const ch
 	struct _darwinattr_context context;
 	
 	memset(&context,0,sizeof(struct _darwinattr_context));
-	
+
+	(void)buffer;
 #if defined(__APPLE__)
 	if( len )
 		return 0;
@@ -748,7 +768,9 @@ int32_t xar_darwinattr_archive(xar_t x, xar_file_t f, const char* file, const ch
 	if( nonea_archive(x, f, file, (void *)&context) == 0 )
 		return 0;
 	return underbar_archive(x, f, file, (void *)&context);
-#endif /* __APPLE__ */
+#else /* !__APPLE__ */
+	(void)x; (void)f; (void)file; (void)len;
+#endif /* !__APPLE__ */
 	return 0;
 }
 
@@ -758,6 +780,7 @@ int32_t xar_darwinattr_extract(xar_t x, xar_file_t f, const char* file, char *bu
 	
 	memset(&context,0,sizeof(struct _darwinattr_context));
 	
+	(void)buffer;
 #if defined(__APPLE__)
 	if( len )
 		return 0;
@@ -769,6 +792,8 @@ int32_t xar_darwinattr_extract(xar_t x, xar_file_t f, const char* file, char *bu
 #endif
 	if( nonea_extract(x, f, file, (void *)&context) == 0 )
 		return 0;
-#endif /* __APPLE__ */
+#else /* !__APPLE__ */
+	(void)x; (void)f; (void)file; (void)len;
+#endif /* !__APPLE__ */
 	return underbar_extract(x, f, file, (void *)&context);
 }

@@ -64,10 +64,11 @@ struct _data_context{
 int32_t xar_data_read(xar_t x, xar_file_t f, void *inbuf, size_t bsize, void *context) {
 	int32_t r;
 
+	(void)x; (void)f;
 	/* read from buffer, rather then fd,if available */
 	if(DATA_CONTEXT(context)->length){
 		char *readbuf = (char *)DATA_CONTEXT(context)->buffer;
-		size_t sizetoread = DATA_CONTEXT(context)->length - DATA_CONTEXT(context)->offset;
+		size_t sizetoread = (size_t)(DATA_CONTEXT(context)->length - DATA_CONTEXT(context)->offset);
 		
 		if( !sizetoread){
 			return 0;
@@ -80,7 +81,7 @@ int32_t xar_data_read(xar_t x, xar_file_t f, void *inbuf, size_t bsize, void *co
 		/* dont read passed the end of the buffer */
 		if((DATA_CONTEXT(context)->offset + sizetoread) > DATA_CONTEXT(context)->length){
 			return -1;
-			//sizetoread = (DATA_CONTEXT(context)->offset + sizetoread) - DATA_CONTEXT(context)->length;
+			/*sizetoread = (DATA_CONTEXT(context)->offset + sizetoread) - DATA_CONTEXT(context)->length;*/
 		}
 		
 		readbuf += DATA_CONTEXT(context)->offset;
@@ -89,11 +90,11 @@ int32_t xar_data_read(xar_t x, xar_file_t f, void *inbuf, size_t bsize, void *co
 		DATA_CONTEXT(context)->total += sizetoread;
 		DATA_CONTEXT(context)->offset += sizetoread;
 		
-		return sizetoread;
+		return (int32_t)sizetoread;
 	}
 	
 	while(1) {
-		r = read(DATA_CONTEXT(context)->fd, inbuf, bsize);
+		r = (int)read(DATA_CONTEXT(context)->fd, inbuf, bsize);
 		if( (r < 0) && (errno == EINTR) )
 			continue;
 		DATA_CONTEXT(context)->total += r;
@@ -105,7 +106,8 @@ int32_t xar_data_read(xar_t x, xar_file_t f, void *inbuf, size_t bsize, void *co
 int32_t xar_data_write(xar_t x, xar_file_t f, void *buf, size_t len, void *context) {
 	int32_t r;
 	size_t off = 0;
-	
+
+	(void)x; (void)f;
 	/* read from buffer, rather then fd,if available */
 	if(DATA_CONTEXT(context)->length){
 		char *writebuf = (char *)DATA_CONTEXT(context)->buffer;
@@ -120,16 +122,16 @@ int32_t xar_data_write(xar_t x, xar_file_t f, void *buf, size_t len, void *conte
 		
 		DATA_CONTEXT(context)->offset += len;
 		
-		return len;
+		return (int32_t)len;
 	}
 	
 	do {
-		r = write(DATA_CONTEXT(context)->fd, ((char *)buf)+off, len-off);
+		r = (int)write(DATA_CONTEXT(context)->fd, ((char *)buf)+off, len-off);
 		if( (r < 0) && (errno != EINTR) )
 			return r;
 		off += r;
 	} while( off < len );
-	return off;
+	return (int32_t)off;
 }
 
 /* xar_data_archive

@@ -117,6 +117,7 @@ int32_t xar_fbsdattr_archive(xar_t x, xar_file_t f, const char* file, const char
 	int namespace = EXTATTR_NAMESPACE_USER;
 	struct _fbsdattr_context context;
 	
+	(void)buffer;
 	memset(&context,0,sizeof(struct _fbsdattr_context));
 
 	/* no fbsdattr attributes for data to a buffer */
@@ -261,6 +262,7 @@ BAIL:
 	free(buf);
 	return ret;
 #else
+	(void)x; (void)f; (void)file; (void)buffer; (void)len;
 	return 0;
 #endif
 }
@@ -278,6 +280,7 @@ int32_t xar_fbsdattr_extract(xar_t x, xar_file_t f, const char* file, char *buff
 	int eaopt = 0;
 	struct _fbsdattr_context context;
 	
+	(void)buffer;
 	memset(&context,0,sizeof(struct _fbsdattr_context));
 	
 	/* no fbsdattr attributes for data to a buffer */
@@ -336,5 +339,6 @@ int32_t xar_fbsdattr_extract(xar_t x, xar_file_t f, const char* file, char *buff
 
 
 #endif
+	(void)x; (void)f; (void)file; (void)buffer; (void)len;
 	return 0;
 }

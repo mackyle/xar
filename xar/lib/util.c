@@ -58,7 +58,7 @@ uint64_t xar_ntoh64(uint64_t num) {
 		uint32_t i32[2];
 	} *in, out;
 
-	if( ntohl(t) == t ) {
+	if( (int)ntohl(t) == t ) {
 		out.i64 = num;
 		return out.i64;
 	}
@@ -94,10 +94,11 @@ char *xar_get_path(xar_file_t f) {
 	xar_prop_get(f, "name", &name);
 	ret = strdup(name);
 	for(i = XAR_FILE(f)->parent; i; i = XAR_FILE(i)->parent) {
+		int err;
 		const char *name;
 	       	xar_prop_get(i, "name", &name);
 		tmp = ret;
-		asprintf(&ret, "%s/%s", name, tmp);
+		err = asprintf(&ret, "%s/%s", name, tmp);
 		free(tmp);
 	}
 
@@ -117,7 +118,7 @@ ssize_t xar_read_fd( int fd, void * buffer, size_t nbytes ) {
 	ssize_t rb;
 	ssize_t off = 0;
 
-	while ( off < nbytes ) {
+	while ( (size_t)off < nbytes ) {
 		rb = read(fd, ((char *)buffer)+off, nbytes-off);
 		if( (rb < 1 ) && (errno != EINTR) && (errno != EAGAIN) )
 			return -1;
@@ -136,7 +137,7 @@ ssize_t xar_write_fd( int fd, void * buffer, size_t nbytes ) {
 	ssize_t rb;
 	ssize_t off = 0;
 
-	while ( off < nbytes ) {
+	while ( (size_t)off < nbytes ) {
 		rb = write(fd, ((char *)buffer)+off, nbytes-off);
 		if( (rb < 1 ) && (errno != EINTR) && (errno != EAGAIN) )
 			return -1;
@@ -177,6 +178,7 @@ void xar_devmake(dev_t dev, uint32_t *out_major, uint32_t *out_minor)
 
 char *xar_get_type(xar_t x, xar_file_t f) {
 	const char *type = NULL;
+	(void)x;
 	xar_prop_get(f, "type", &type);
 	if( type == NULL )
 		type = "unknown";
@@ -224,6 +226,7 @@ char *xar_get_mode(xar_t x, xar_file_t f) {
 	const char *type = NULL;
 	char *ret;
 	mode_t m;
+	(void)x;
 	xar_prop_get(f, "mode", &mode);
 	if( mode == NULL )
 		return  strdup("??????????");
@@ -266,6 +269,7 @@ char *xar_get_mode(xar_t x, xar_file_t f) {
 char *xar_get_owner(xar_t x, xar_file_t f) {
 	const char *user = NULL;
 
+	(void)x;
 	xar_prop_get(f, "user", &user);
 	if( !user )
 		return strdup("unknown");
@@ -275,6 +279,7 @@ char *xar_get_owner(xar_t x, xar_file_t f) {
 char *xar_get_group(xar_t x, xar_file_t f) {
 	const char *group = NULL;
 
+	(void)x;
 	xar_prop_get(f, "group", &group);
 	if( !group )
 		return strdup("unknown");
@@ -286,12 +291,13 @@ char *xar_get_mtime(xar_t x, xar_file_t f) {
 	char *tmp;
 	struct tm tm;
 
+	(void)x;
 	xar_prop_get(f, "mtime", &mtime);
 	if( !mtime )
 		mtime = "1970-01-01T00:00:00Z";
 
-	strptime(mtime, "%FT%T", &tm);
+	strptime(mtime, "%Y-%m-%dT%H:%M:%S", &tm);
 	tmp = calloc(128,1);
-	strftime(tmp, 127, "%F %T", &tm);
+	strftime(tmp, 127, "%Y-%m-%d %H:%M:%S", &tm);
 	return tmp;
 }

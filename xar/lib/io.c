@@ -133,7 +133,7 @@ static size_t get_rsize(xar_t x) {
 		bsize = 4096;
 	} else {
 		bsize = strtol(opt, NULL, 0);
-		if( ((bsize == LONG_MAX) || (bsize == LONG_MIN)) && (errno == ERANGE) ) {
+		if( ((bsize == (size_t)LONG_MAX) || (bsize == (size_t)LONG_MIN)) && (errno == ERANGE) ) {
 			bsize = 4096;
 		}
 	}
@@ -146,6 +146,7 @@ static off_t get_offset(xar_t x, xar_file_t f, xar_prop_t p) {
 	xar_prop_t tmpp;
 	const char *opt = NULL;
 
+	(void)x; (void)f;
 	tmpp = xar_prop_pget(p, "offset");
 	if( tmpp )
 		opt = xar_prop_getvalue(tmpp);
@@ -183,25 +184,25 @@ static void xar_io_seek(xar_t x, xar_file_t f, off_t seekoff) {
 	int r;
 
 	if( XAR(x)->fd >= 0 ) {
-		r = lseek(XAR(x)->fd, seekoff, SEEK_SET);
+		r = (int)lseek(XAR(x)->fd, seekoff, SEEK_SET);
 		if( r == -1 ) {
 			if( errno == ESPIPE ) {
 				ssize_t rr;
 				char *buf;
 				unsigned int len;
 
-				len = seekoff - (off_t)xar_get_heap_offset(x);
+				len = (unsigned)(seekoff - (off_t)xar_get_heap_offset(x));
 				if( XAR(x)->heap_offset > len ) {
 					xar_err_new(x);
 					xar_err_set_file(x, f);
 					xar_err_set_string(x, "Unable to seek");
 					xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
 				} else {
-					len -= XAR(x)->heap_offset;
+					len -= (unsigned)XAR(x)->heap_offset;
 					buf = malloc(len);
 					assert(buf);
 					rr = xar_read_fd(XAR(x)->fd, buf, len);
-					if( rr < len ) {
+					if( rr < (ssize_t)len ) {
 						xar_err_new(x);
 						xar_err_set_file(x, f);
 						xar_err_set_string(x, "Unable to seek");
@@ -221,8 +222,8 @@ static void xar_io_seek(xar_t x, xar_file_t f, off_t seekoff) {
 }
 
 int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb, void *context) {
-	int modulecount = (sizeof(xar_datamods)/sizeof(struct datamod));
-	void	*modulecontext[modulecount];
+	void	*modulecontext[sizeof(xar_datamods)/sizeof(struct datamod)];
+	int modulecount = (int)(sizeof(modulecontext)/sizeof(modulecontext[0]));
 	int r, off, i;
 	size_t bsize, rsize;
 	int64_t readsize=0, writesize=0, inc = 0;
@@ -269,12 +270,12 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback 
 		off = 0;
 		if( rsize != 0 ) {
 			do {
-				r = write(XAR(x)->heap_fd, ((char *)inbuf)+off, rsize-off);
+				r = (int)write(XAR(x)->heap_fd, ((char *)inbuf)+off, rsize-off);
 				if( (r < 0) && (errno != EINTR) )
 					return -1;
 				off += r;
 				writesize += r;
-			} while( off < rsize );
+			} while( (size_t)off < rsize );
 		}
 		XAR(x)->heap_offset += off;
 		free(inbuf);
@@ -365,11 +366,13 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback 
 		xar_err_callback(x, XAR_SEVERITY_WARNING, XAR_ERR_ARCHIVE_CREATION);
 	}
 
-	asprintf(&tmpstr, "%"PRIu64, readsize);
+	if (asprintf(&tmpstr, "%"PRIu64, readsize) == -1)
+		return -1;
 	xar_prop_pset(f, p, "size", tmpstr);
 	free(tmpstr);
 
-	asprintf(&tmpstr, "%"PRIu64, (uint64_t)orig_heap_offset);
+	if (asprintf(&tmpstr, "%"PRIu64, (uint64_t)orig_heap_offset) == -1)
+		return -1;
 	xar_prop_pset(f, p, "offset", tmpstr);
 	free(tmpstr);
 
@@ -383,7 +386,8 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback 
 		xar_attr_pset(f, tmpp, "style", "application/octet-stream");
 	}
 
-	asprintf(&tmpstr, "%"PRIu64, writesize);
+	if (asprintf(&tmpstr, "%"PRIu64, writesize) == -1)
+		return -1;
 	xar_prop_pset(f, p, "length", tmpstr);
 	free(tmpstr);
 
@@ -396,8 +400,8 @@ int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback 
  * It is assumed the heap_fd is already positioned appropriately.
  */
 int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, xar_prop_t p, write_callback wcb, void *context) {
-	int modulecount = (sizeof(xar_datamods)/sizeof(struct datamod));
-	void	*modulecontext[modulecount];
+	void	*modulecontext[sizeof(xar_datamods)/sizeof(struct datamod)];
+	int modulecount = (int)(sizeof(modulecontext)/sizeof(modulecontext[0]));
 	int r, i;
 	size_t bsize, def_bsize;
 	int64_t fsize, inc = 0, seekoff;
@@ -442,9 +446,9 @@ int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, xar_prop_t p, write_callba
 		/* Size has been reached */
 		if( fsize == inc )
 			break;
-		if( (fsize - inc) < bsize )
-			bsize = fsize - inc;
-		r = read(XAR(x)->fd, inbuf, bsize);
+		if( (fsize - inc) < (int64_t)bsize )
+			bsize = (size_t)(fsize - inc);
+		r = (int)read(XAR(x)->fd, inbuf, bsize);
 		if( r == 0 )
 			break;
 		if( (r < 0) && (errno == EINTR) )
@@ -541,9 +545,9 @@ int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, xar_pr
 		/* Size has been reached */
 		if( fsize == inc )
 			break;
-		if( (fsize - inc) < bsize )
-			bsize = fsize - inc;
-		r = read(XAR(xsource)->fd, inbuf, bsize);
+		if( (fsize - inc) < (int64_t)bsize )
+			bsize = (size_t)(fsize - inc);
+		r = (int)read(XAR(xsource)->fd, inbuf, bsize);
 		if( r == 0 )
 			break;
 		if( (r < 0) && (errno == EINTR) )
@@ -560,7 +564,7 @@ int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, xar_pr
 		off = 0;
 		
 		do {
-			r = write(XAR(xdest)->heap_fd, ((char *)inbuf)+off, r-off );
+			r = (int)write(XAR(xdest)->heap_fd, ((char *)inbuf)+off, r-off );
 			off += r;
 			writesize += r;
 		} while( off < r );
@@ -568,7 +572,10 @@ int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, xar_pr
 		XAR(xdest)->heap_len += off;
 	}
 	
-	asprintf(&tmpstr, "%"PRIu64, (uint64_t)orig_heap_offset);
+	if (asprintf(&tmpstr, "%"PRIu64, (uint64_t)orig_heap_offset) == -1) {
+		free(inbuf);
+		return -1;
+	}
 	opt = xar_prop_getkey(p);
 	tmpp = xar_prop_pfirst(fdest);
 	if( tmpp )
@@ -597,7 +604,7 @@ static int32_t flush_stream(xar_stream *stream) {
 
 		memcpy(stream->next_out, state->pending_buf, len);
 		stream->next_out += len;
-		stream->avail_out -= len;
+		stream->avail_out -= (unsigned)len;
 		stream->total_out += len;
 
 		if( state->pending_buf_size == len )  {
@@ -624,14 +631,14 @@ static int32_t write_to_stream(void *inbuf, size_t inlen, xar_stream *stream) {
 
 	memcpy(stream->next_out, inbuf, len);
 	stream->next_out += len;
-	stream->avail_out -= len;
+	stream->avail_out -= (unsigned)len;
 	stream->total_out += len;
 
 	if( inlen > len ) {
 		state->pending_buf_size = inlen - len;
 		state->pending_buf = malloc(state->pending_buf_size);
 
-		memcpy(state->pending_buf, inbuf + len, state->pending_buf_size);
+		memcpy(state->pending_buf, (char *)inbuf + len, state->pending_buf_size);
 	}
 
 	return XAR_STREAM_OK;
@@ -652,7 +659,7 @@ int32_t xar_attrcopy_from_heap_to_stream_init(xar_t x, xar_file_t f, xar_prop_t 
 	stream->state = (void*)state;
 	state->bsize = get_rsize(x);
 
-	state->modulecount = (sizeof(xar_datamods)/sizeof(struct datamod));
+	state->modulecount = (int)(sizeof(xar_datamods)/sizeof(struct datamod));
 	state->modulecontext = calloc(1, sizeof(void*)*state->modulecount);
 	if( !state->modulecontext ) {
 		free(state);
@@ -702,13 +709,13 @@ int32_t xar_attrcopy_from_heap_to_stream(xar_stream *stream) {
 	}
         
 	/* Size has been reached */
-	if( state->fsize == stream->total_in ) {
+	if( (uint64_t)state->fsize == stream->total_in ) {
 		free(inbuf);
 		return XAR_STREAM_END;
 	}
 	if( (state->fsize - stream->total_in) < bsize )
-		bsize = state->fsize - stream->total_in;
-	r = read(XAR(state->x)->fd, inbuf, bsize);
+		bsize = (size_t)(state->fsize - stream->total_in);
+	r = (int)read(XAR(state->x)->fd, inbuf, bsize);
 	if( r == 0 ) {
 		free(inbuf);
 		return XAR_STREAM_END;
@@ -816,7 +823,7 @@ int32_t xar_heap_to_archive(xar_t x) {
 			r = write(XAR(x)->fd, b+off, bsize-off);
 			if( (r < 0) && (errno != EINTR) )
 				return -1;
-			off += r;
+			off += (int)r;
 		} while( off < bsize );
 	}
 	return 0;
@@ -828,7 +835,7 @@ int32_t xar_heap_to_archive(xar_t x) {
  * Summary: prevents recompression unless XAR_OPT_RECOMPRESS is XAR_OPT_VAL_TRUE
  */
 int32_t xar_prevent_recompress(xar_t x, void *in, size_t inlen) {
-	int checkcount = (sizeof(xar_compresschecks)/sizeof(xar_compresschecks[0]));
+	int checkcount = (int)(sizeof(xar_compresschecks)/sizeof(xar_compresschecks[0]));
 	int i;
 	const char *opt;
 	int recompress = 0;

@@ -78,14 +78,15 @@ int xar_ext2attr_archive(xar_t x, xar_file_t f, const char* file, const char *bu
 {
 	int ret = 0;
 	
-	/* if archiving from a buffer, then there is no place to get extattr */
-	if ( len )
-		return 0;
-		
 #if defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)
 	int fd, flags=0, version;
 	char *vstr;
 	const char *opt;
+
+	(void)x; (void)buffer;
+	/* if archiving from a buffer, then there is no place to get extattr */
+	if ( len )
+		return 0;
 
         xar_prop_get(f, "type", &opt);
         if(!opt) return 0;
@@ -111,8 +112,8 @@ int xar_ext2attr_archive(xar_t x, xar_file_t f, const char* file, const char *bu
 	if( flags == 0 ) goto BAIL;
 
 	xar_prop_set(f, XAR_EXT2_FORK, NULL);
-	asprintf(&vstr, "%d", version);
-	xar_attr_set(f, XAR_EXT2_FORK, "version", vstr);
+	if (asprintf(&vstr, "%d", version) != -1)
+		xar_attr_set(f, XAR_EXT2_FORK, "version", vstr);
 	free(vstr);
 
 	if(! (flags & ~EXT2_SECRM_FL) )
@@ -162,6 +163,8 @@ int xar_ext2attr_archive(xar_t x, xar_file_t f, const char* file, const char *bu
 
 BAIL:
 	close(fd);
+#else
+	(void)x; (void)f; (void)file; (void)buffer; (void)len;
 #endif
 	return ret;
 }
@@ -178,13 +181,14 @@ static int32_t e2prop_get(xar_file_t f, const char *name, char **value) {
 
 int xar_ext2attr_extract(xar_t x, xar_file_t f, const char* file, char *buffer, size_t len)
 {
-	/* if extracting to a buffer, then there is no place to write extattr */
-	if ( len )
-		return 0;
-	
 #if defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)
 	int fd = -1, version, flags = 0;
 	char *tmp;
+
+	(void)x; (void)buffer;
+	/* if extracting to a buffer, then there is no place to write extattr */
+	if ( len )
+		return 0;
 
 	if( xar_prop_get(f, XAR_EXT2_FORK, NULL) == 0 ) {
 		const char *temp;
@@ -252,6 +256,8 @@ int xar_ext2attr_extract(xar_t x, xar_file_t f, const char* file, char *buffer, 
 
 	ioctl(fd, EXT2_IOC_SETFLAGS, &flags);
 	close(fd);
+#else
+	(void)x; (void)f; (void)file; (void)buffer; (void)len;
 #endif
 	return 0;
 }

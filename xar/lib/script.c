@@ -82,7 +82,7 @@ int32_t xar_script_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *in
 			return -1;
 		memset(exe, 0, *inlen);
 		
-		for(i = 2; (i < *inlen) && (buf[i] != '\0') && (buf[i] != '\n') && (buf[i] != ' '); ++i) {
+		for(i = 2; ((size_t)i < *inlen) && (buf[i] != '\0') && (buf[i] != '\n') && (buf[i] != ' '); ++i) {
 			exe[i-2] = buf[i];
 		}
 
@@ -98,6 +98,7 @@ int32_t xar_script_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *in
 
 int32_t xar_script_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 
+	(void)x; (void)f; (void)p;
 	if(!SCRIPT_CONTEXT(context)){
 		return 0;
 	}

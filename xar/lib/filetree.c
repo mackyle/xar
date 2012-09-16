@@ -350,12 +350,15 @@ const char *xar_prop_first(xar_file_t f, xar_iter_t i) {
 const char *xar_prop_next(xar_iter_t i) {
 	xar_prop_t p = XAR_ITER(i)->iter;
 	if( !(XAR_ITER(i)->nochild) && XAR_PROP(p)->children ) {
+		int err;
 		char *tmp = XAR_ITER(i)->path;
 		if( tmp ) {
-			asprintf(&XAR_ITER(i)->path, "%s/%s", tmp, XAR_PROP(p)->key);
+			err = asprintf(&XAR_ITER(i)->path, "%s/%s", tmp, XAR_PROP(p)->key);
 			free(tmp);
 		} else
 			XAR_ITER(i)->path = strdup(XAR_PROP(p)->key);
+		if (!XAR_ITER(i)->path)
+			return NULL;
 		XAR_ITER(i)->iter = p = XAR_PROP(p)->children;
 		goto SUCCESS;
 	}
@@ -388,8 +391,12 @@ const char *xar_prop_next(xar_iter_t i) {
 	return NULL;
 SUCCESS:
 	free(XAR_ITER(i)->node);
-	if( XAR_ITER(i)->path )
-		asprintf((char **)&XAR_ITER(i)->node, "%s/%s", XAR_ITER(i)->path, XAR_PROP(p)->key);
+	if( XAR_ITER(i)->path ) {
+		int err;
+		char *result = NULL;
+		err = asprintf(&result, "%s/%s", XAR_ITER(i)->path, XAR_PROP(p)->key);
+		XAR_ITER(i)->node = result;
+	}
 	else {
 		if(XAR_PROP(p)->key == NULL)
 			XAR_ITER(i)->node = strdup("");
@@ -611,7 +618,8 @@ xar_prop_t xar_prop_pget(xar_prop_t p, const char *key) {
 	const char *k;
 	xar_prop_t ret;
 	k = XAR_PROP(p)->key;
-	asprintf(&tmp, "%s/%s", k, key);
+	if (asprintf(&tmp, "%s/%s", k, key) == -1)
+		return NULL;
 	ret = xar_prop_find(p, tmp);
 	free(tmp);
 	return ret;
@@ -631,6 +639,8 @@ void xar_prop_replicate_r(xar_file_t f, xar_prop_t p, xar_prop_t parent )
 	/* look through properties */
 	for( property = p; property; property = property->next ){
 		xar_prop_t	newprop = xar_prop_new( f, parent );
+		xar_attr_t a;
+		xar_attr_t last;
 		
 		/* copy the key value for the property */
 		XAR_PROP(newprop)->key = strdup(property->key);
@@ -638,8 +648,8 @@ void xar_prop_replicate_r(xar_file_t f, xar_prop_t p, xar_prop_t parent )
 			XAR_PROP(newprop)->value = strdup(property->value);
 		
 		/* loop through the attributes and copy them */
-		xar_attr_t a = NULL;
-		xar_attr_t last = NULL;
+		a = NULL;
+		last = NULL;
 		
 		/* copy attributes for file */
 		for(a = property->attrs; a; a = a->next) {			
@@ -837,10 +847,13 @@ xar_file_t xar_file_next(xar_iter_t i) {
 		char *tmp = XAR_ITER(i)->path;
 		xar_prop_get(f, "name", &name);
 		if( tmp ) {
-			asprintf(&XAR_ITER(i)->path, "%s/%s", tmp, name);
+			int err;
+			err = asprintf(&XAR_ITER(i)->path, "%s/%s", tmp, name);
 			free(tmp);
 		} else
 			XAR_ITER(i)->path = strdup(name);
+		if (!XAR_ITER(i)->path)
+			return NULL;
 		XAR_ITER(i)->iter = f = XAR_FILE(f)->children;
 		goto FSUCCESS;
 	}
@@ -935,7 +948,7 @@ void xar_prop_serialize(xar_prop_t p, xmlTextWriterPtr writer) {
 		if( XAR_PROP(i)->value ) {
 			if( strcmp(XAR_PROP(i)->key, "name") == 0 ) {
 				unsigned char *tmp;
-				int outlen = strlen(XAR_PROP(i)->value);
+				int outlen = (int)strlen(XAR_PROP(i)->value);
 				int inlen, len;
 
 				inlen = len = outlen;
@@ -944,7 +957,7 @@ void xar_prop_serialize(xar_prop_t p, xmlTextWriterPtr writer) {
 				assert(tmp);
 				if( UTF8Toisolat1(tmp, &len, BAD_CAST(XAR_PROP(i)->value), &inlen) < 0 ) {
 					xmlTextWriterWriteAttribute(writer, BAD_CAST("enctype"), BAD_CAST("base64"));
-					xmlTextWriterWriteBase64(writer, XAR_PROP(i)->value, 0, strlen(XAR_PROP(i)->value));
+					xmlTextWriterWriteBase64(writer, XAR_PROP(i)->value, 0, (int)strlen(XAR_PROP(i)->value));
 				} else
 					xmlTextWriterWriteString(writer, BAD_CAST(XAR_PROP(i)->value));
 				free(tmp);
@@ -1037,15 +1050,18 @@ int32_t xar_prop_unserialize(xar_file_t f, xar_prop_t parent, xmlTextReaderPtr r
 			value = (const char *)xmlTextReaderConstValue(reader);
 			free((char*)XAR_PROP(p)->value);
 			if( isencoded )
-				XAR_PROP(p)->value = (const char *)xar_from_base64(BAD_CAST(value), strlen(value), NULL);
+				XAR_PROP(p)->value = (const char *)xar_from_base64(BAD_CAST(value), (unsigned)strlen(value), NULL);
 			else
 				XAR_PROP(p)->value = strdup(value);
 			if( isname ) {
 				if( XAR_FILE(f)->parent ) {
-					asprintf((char **)&XAR_FILE(f)->fspath, "%s/%s", XAR_FILE(XAR_FILE(f)->parent)->fspath, XAR_PROP(p)->value);
+					int err;
+					err = asprintf((char **)&XAR_FILE(f)->fspath, "%s/%s", XAR_FILE(XAR_FILE(f)->parent)->fspath, XAR_PROP(p)->value);
 				} else {
 					XAR_FILE(f)->fspath = strdup(XAR_PROP(p)->value);
 				}
+				if (!XAR_FILE(f)->fspath)
+					return -1;
 			}
 			break;
 		case XML_READER_TYPE_END_ELEMENT:

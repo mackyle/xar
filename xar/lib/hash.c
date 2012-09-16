@@ -127,7 +127,7 @@ int32_t xar_hash_unarchived_out(xar_t x, xar_file_t f, xar_prop_t p, void *in, s
 		return 0;
 	
 	CONTEXT(context)->count += inlen;
-	EVP_DigestUpdate(CONTEXT(context)->unarchived_cts, in, inlen);
+	EVP_DigestUpdate(CONTEXT(context)->unarchived_cts, in, (unsigned)inlen);
 	return 0;
 }
 
@@ -168,7 +168,7 @@ int32_t xar_hash_archived_in(xar_t x, xar_file_t f, xar_prop_t p, void *in, size
 		return 0;
 
 	CONTEXT(context)->count += inlen;
-	EVP_DigestUpdate(CONTEXT(context)->archived_cts, in, inlen);
+	EVP_DigestUpdate(CONTEXT(context)->archived_cts, in, (unsigned)inlen);
 	return 0;
 }
 
@@ -178,6 +178,7 @@ int32_t xar_hash_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 	unsigned int len;
 	xar_prop_t tmpp;
 
+	(void)x;
 	if(!CONTEXT(context))
 		return 0;
 
@@ -244,7 +245,6 @@ int32_t xar_hash_out_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 	const char *uncomp = NULL, *uncompstyle = NULL;
 	unsigned char hashstr[HASH_MAX_MD_SIZE];
 	unsigned int len;
-	char *tmpstr;
 	const EVP_MD *md;
 	int32_t err = 0;
 	xar_prop_t tmpp;
@@ -269,8 +269,7 @@ int32_t xar_hash_out_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 			if(strcmp(uncomp, str) != 0) {
 				xar_err_new(x);
 				xar_err_set_file(x, f);
-				asprintf(&tmpstr, "archived-checksum %s's do not match",uncompstyle);
-				xar_err_set_string(x, tmpstr);
+				xar_err_set_string(x, "archived-checksum message digest hash values do not match");
 				xar_err_callback(x, XAR_SEVERITY_FATAL, XAR_ERR_ARCHIVE_EXTRACTION);
 				err = -1; 
 			}

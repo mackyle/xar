@@ -119,7 +119,7 @@ static unsigned int raw_base64_decode(
                         break;
                     case 3:
                         buf[2] |= x;
-                        for (x = 0;  x < 3 - pad;  x++) {
+                        for (x = 0;  x < 3U - pad;  x++) {
                             *output++ = buf[x];
                             (*olen)++;
                         }
@@ -132,7 +132,7 @@ static unsigned int raw_base64_decode(
     if (!pad) {
         if ((i - ignr) % 4) return 1;
     } else {
-        for (x = 0;  x < 3 - pad;  x++) {
+        for (x = 0;  x < 3U - pad;  x++) {
             *output++ = buf[x];
             (*olen)++;
         }

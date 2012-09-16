@@ -171,7 +171,7 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 				context->nextme = context->arches[0].offset;
 				context->state = lf_machheader;
 			}
-			consumed = sizeof(struct fat_arch);
+			consumed = (int32_t)sizeof(struct fat_arch);
 		} else {
 			memcpy(context->buffer, in, inlen);
 			context->buffersz = inlen;
@@ -181,7 +181,7 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 		break;
 	case lf_machheader:
 		if( (context->curroffset+inlen) <= context->nextme )
-			consumed = inlen;
+			consumed = (int32_t)inlen;
 		else {
 			uint64_t off;
 			unsigned char *tmpin = in;
@@ -208,7 +208,7 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 					break;
 				default:
 					context->state = lf_none;
-					return inlen;
+					return (int32_t)inlen;
 				};
 				
 				if( context->me[context->curme].byteswapped ) {
@@ -243,20 +243,20 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 				if( xar_prop_get(f, "contents/type", (const char **)&typestr2) ) {
 					xar_prop_set(f, "contents/type", typestr);
 				}			
-				asprintf(&typestr2, "contents/%s/type", cpustr);
-				xar_prop_set(f, typestr2, typestr);
-				free(typestr2);
-
+				if (asprintf(&typestr2, "contents/%s/type", cpustr) != -1) {
+					xar_prop_set(f, typestr2, typestr);
+					free(typestr2);
+				}
 				context->me[context->curme].lc = malloc(sizeof(struct lc) * context->me[context->curme].mh.ncmds);
 				context->me[context->curme].strings = malloc(sizeof(char *) * context->me[context->curme].mh.ncmds);
 				context->me[context->curme].curlc = 0;
-				consumed = off + sizeof(struct mach_header);
+				consumed = (int32_t)(off + sizeof(struct mach_header));
 				if( context->me[context->curme].bits == 64 )
 					consumed += 4;
 				context->me[context->curme].nextlc = context->curroffset + consumed;
 				context->state = lf_loadcommand;
 			} else {
-				memcpy(context->buffer, tmpin, inlen-off);
+				memcpy(context->buffer, tmpin, (size_t)(inlen-off));
 				context->buffersz = inlen-off;
 				consumed = (int32_t)inlen;
 				context->state = lf_inc_machheader;
@@ -265,7 +265,7 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 		break;
 	case lf_loadcommand:
 		if( (context->curroffset+inlen) <= context->me[context->curme].nextlc )
-			consumed = inlen;
+			consumed = (int32_t)inlen;
 		else {
 			uint64_t off;
 			unsigned char *tmpin = in;
@@ -279,7 +279,7 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 				} else {
 					memcpy(&context->me[context->curme].lc[context->me[context->curme].curlc], tmpin, sizeof(struct lc));
 				}
-				consumed = off + sizeof(struct lc);
+				consumed = (int32_t)(off + sizeof(struct lc));
 				context->me[context->curme].nextlc += context->me[context->curme].lc[context->me[context->curme].curlc].cmdsize;
 				if( (context->me[context->curme].lc[context->me[context->curme].curlc].cmd == 0xc) || (context->me[context->curme].lc[context->me[context->curme].curlc].cmd == 0xd) ) {
 					context->state = lf_lcstr;
@@ -300,9 +300,9 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 					}
 				}
 			} else {
-				memcpy(context->buffer, ((char *)in)+off, inlen-off);
+				memcpy(context->buffer, ((char *)in)+off, (size_t)(inlen-off));
 				context->buffersz = inlen-off;
-				consumed = inlen;
+				consumed = (int32_t)inlen;
 				context->state = lf_inc_loadcommand;
 			}
 		}
@@ -319,13 +319,15 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 			else
 				offset = *offsetp;
 			lib = calloc(1,(cmdsize - offset)+1);
-			memcpy(lib, ((char *)in)+(offset - 8), cmdsize - offset);
-			tmpstr = macho_cpustr(context->me[context->curme].mh.cputype);
-			asprintf(&propstr, "contents/%s/library", tmpstr);
-			xar_prop_create(f, propstr, lib);
-			free(lib);
-			free(propstr);
-
+			if (lib) {
+				memcpy(lib, ((char *)in)+(offset - 8), cmdsize - offset);
+				tmpstr = macho_cpustr(context->me[context->curme].mh.cputype);
+				if (asprintf(&propstr, "contents/%s/library", tmpstr) != -1) {
+					xar_prop_create(f, propstr, lib);
+					free(propstr);
+				}
+				free(lib);
+			}
 			consumed = cmdsize-8;
 			context->state = lf_loadcommand;
 			context->me[context->curme].curlc++;
@@ -345,13 +347,13 @@ static int32_t macho_parse(xar_file_t f, void *in, size_t inlen, struct _macho_c
 		} else {
 			memcpy(context->buffer, in, inlen);
 			context->buffersz = inlen;
-			consumed = inlen;
+			consumed = (int32_t)inlen;
 			context->state = lf_inc_lcstr;
 		}
 		break;
 	case lf_none:
 	default:
-		consumed = inlen;
+		consumed = (int32_t)inlen;
 		break;
 	};
 	return consumed;
@@ -370,7 +372,7 @@ int32_t xar_macho_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inl
 		*context = calloc(1,sizeof(struct _macho_context));
 	}
 
-	while( total < *inlen ) {
+	while( (size_t)total < *inlen ) {
 		consumed = macho_parse(f, ((char *)*in)+total, *inlen-total, MACHO_CONTEXT(context));
 		total += consumed;
 		MACHO_CONTEXT(context)->curroffset += consumed;
@@ -381,10 +383,11 @@ int32_t xar_macho_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inl
 
 int32_t xar_macho_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 
+	(void)x; (void)f; (void)p;
 	if( MACHO_CONTEXT(context) ){
 		int i;
 		if( MACHO_CONTEXT(context)->fath.nfat_arch ) {
-			for(i = 0; i < MACHO_CONTEXT(context)->fath.nfat_arch; i++) {
+			for(i = 0; (unsigned)i < MACHO_CONTEXT(context)->fath.nfat_arch; i++) {
 				if( MACHO_CONTEXT(context)->me[i].lc )
 					free(MACHO_CONTEXT(context)->me[i].lc);
 				if( MACHO_CONTEXT(context)->me[i].strings )

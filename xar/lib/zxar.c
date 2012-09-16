@@ -62,6 +62,7 @@ struct _gzip_context{
 
 int xar_gzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 
+	(void)x; (void)f; (void)p;
 	if( !context || !GZIP_CONTEXT(context) )
 		return 0;
 
@@ -108,7 +109,7 @@ int xar_gzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	outlen = *inlen;
 
 	GZIP_CONTEXT(context)->z.next_in = *in;
-	GZIP_CONTEXT(context)->z.avail_in = *inlen;
+	GZIP_CONTEXT(context)->z.avail_in = (unsigned)*inlen;
 	GZIP_CONTEXT(context)->z.next_out = out;
 	GZIP_CONTEXT(context)->z.avail_out = 0;
 
@@ -118,7 +119,7 @@ int xar_gzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 		if( out == NULL ) abort();
 
 		GZIP_CONTEXT(context)->z.next_out = ((unsigned char *)out) + offset;
-		GZIP_CONTEXT(context)->z.avail_out = outlen - offset;
+		GZIP_CONTEXT(context)->z.avail_out = (unsigned)(outlen - offset);
 
 		r = inflate(&(GZIP_CONTEXT(context)->z), Z_NO_FLUSH);
 		if( (r != Z_OK) && (r != Z_STREAM_END) ) {
@@ -166,6 +167,7 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	int r;
 	const char *opt;
 
+	(void)p;
 	/* on first run, we init the context and check the compression type */
 	if( !GZIP_CONTEXT(context) ) {
 		int level = Z_BEST_COMPRESSION;
@@ -185,7 +187,7 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		if( opt ) {
 			int tmp;
 			errno = 0;
-			tmp = strtol(opt, NULL, 10);
+			tmp = (int)strtol(opt, NULL, 10);
 			if( errno == 0 ) {
 				if( (level >= 0) && (level <= 9) )
 					level = tmp;
@@ -206,7 +208,7 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	outlen = *inlen/2;
 	if(outlen == 0) outlen = 1024;
 	GZIP_CONTEXT(context)->z.next_in = *in;
-	GZIP_CONTEXT(context)->z.avail_in = *inlen;
+	GZIP_CONTEXT(context)->z.avail_in = (unsigned)*inlen;
 	GZIP_CONTEXT(context)->z.next_out = out;
 	GZIP_CONTEXT(context)->z.avail_out = 0;
 
@@ -217,7 +219,7 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 			if( out == NULL ) abort();
 
 			GZIP_CONTEXT(context)->z.next_out = ((unsigned char *)out) + offset;
-			GZIP_CONTEXT(context)->z.avail_out = outlen - offset;
+			GZIP_CONTEXT(context)->z.avail_out = (unsigned)(outlen - offset);
 
 			r = deflate(&GZIP_CONTEXT(context)->z, Z_NO_FLUSH);
 			offset = outlen - GZIP_CONTEXT(context)->z.avail_out;
@@ -229,7 +231,7 @@ int32_t xar_gzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 			if( out == NULL ) abort();
 
 			GZIP_CONTEXT(context)->z.next_out = ((unsigned char *)out) + offset;
-			GZIP_CONTEXT(context)->z.avail_out = outlen - offset;
+			GZIP_CONTEXT(context)->z.avail_out = (unsigned)(outlen - offset);
 
 			r = deflate(&GZIP_CONTEXT(context)->z, Z_FINISH);
 			offset = outlen - GZIP_CONTEXT(context)->z.avail_out;

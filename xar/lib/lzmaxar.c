@@ -93,6 +93,7 @@ struct _lzma_context{
 int xar_lzma_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 #ifdef HAVE_LIBLZMA
 
+	(void)x; (void)f; (void)p;
 	if( !context || !LZMA_CONTEXT(context) )
 		return 0;
 
@@ -105,6 +106,7 @@ int xar_lzma_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) 
 	*context = NULL;
 	
 #endif
+	(void)x; (void)f; (void)p; (void)context;
 	return 0;
 }
 
@@ -162,7 +164,7 @@ int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	outlen = *inlen;
 
 	LZMA_CONTEXT(context)->lzma.next_in = *in;
-	LZMA_CONTEXT(context)->lzma.avail_in = *inlen;
+	LZMA_CONTEXT(context)->lzma.avail_in = (unsigned)*inlen;
 	LZMA_CONTEXT(context)->lzma.next_out = out;
 	LZMA_CONTEXT(context)->lzma.avail_out = 0;
 
@@ -192,6 +194,7 @@ int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	*in = out;
 	*inlen = offset;
 #else
+	(void)in; (void)inlen; (void)context;
 	opt = NULL;
 	tmpp = xar_prop_pget(p, "encoding");
 	if( tmpp )
@@ -212,7 +215,8 @@ int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 int xar_lzma_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 #ifdef HAVE_LIBLZMA
 	xar_prop_t tmpp;
-	
+
+	(void)x;
 	if( LZMA_CONTEXT(context)->lzmacompressed){
 		lzma_end(&LZMA_CONTEXT(context)->lzma);		
 #if LZMA_VERSION < 40420010U
@@ -235,6 +239,7 @@ int xar_lzma_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 	*context = NULL;
 	
 #endif /* HAVE_LIBLZMA */
+	(void)x; (void)f; (void)p; (void)context;
 	return 0;
 }
 
@@ -246,6 +251,7 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	size_t outlen, offset = 0;
 	lzma_ret r;
 
+	(void)p;
 	/* on first run, we init the context and check the compression type */
 	if( !LZMA_CONTEXT(context) ) {
 		int level = preset_level;
@@ -404,6 +410,7 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	*in = out;
 	*inlen = offset;
 #else
+	(void)p; (void)in; (void)inlen; (void)context;
 	opt = xar_opt_get(x, XAR_OPT_COMPRESSION);
 	if( !opt )
 		return 0;

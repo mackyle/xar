@@ -66,6 +66,7 @@ struct _bzip_context{
 int xar_bzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 #ifdef HAVE_LIBBZ2
 
+	(void)x; (void)f; (void)p;
 	if( !context || !BZIP2_CONTEXT(context) )
 		return 0;
 
@@ -77,7 +78,9 @@ int xar_bzip_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) 
 	free(BZIP2_CONTEXT(context));
 	*context = NULL;
 	
-#endif /* HAVE_LIBBZ2 */
+#else /* !HAVE_LIBBZ2 */
+	(void)x; (void)f; (void)p; (void)context;
+#endif /* !HAVE_LIBBZ2 */
 	return 0;
 }
 
@@ -114,7 +117,7 @@ int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	outlen = *inlen;
 
 	BZIP2_CONTEXT(context)->bz.next_in = *in;
-	BZIP2_CONTEXT(context)->bz.avail_in = *inlen;
+	BZIP2_CONTEXT(context)->bz.avail_in = (unsigned)*inlen;
 	BZIP2_CONTEXT(context)->bz.next_out = out;
 	BZIP2_CONTEXT(context)->bz.avail_out = 0;
 
@@ -124,7 +127,7 @@ int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 		if( out == NULL ) abort();
 
 		BZIP2_CONTEXT(context)->bz.next_out = ((char *)out) + offset;
-		BZIP2_CONTEXT(context)->bz.avail_out = outlen - offset;
+		BZIP2_CONTEXT(context)->bz.avail_out = (unsigned)(outlen - offset);
 
 		r = BZ2_bzDecompress(&BZIP2_CONTEXT(context)->bz);
 		if( (r != BZ_OK) && (r != BZ_STREAM_END) ) {
@@ -143,6 +146,7 @@ int xar_bzip_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 	*in = out;
 	*inlen = offset;
 #else
+	(void)in; (void)inlen; (void)context;
 	opt = NULL;
 	tmpp = xar_prop_pget(p, "encoding");
 	if( tmpp )
@@ -163,6 +167,7 @@ int xar_bzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 #ifdef HAVE_LIBBZ2
 	xar_prop_t tmpp;
 
+	(void)x;
 	if( BZIP2_CONTEXT(context)->bzipcompressed){
 		BZ2_bzCompressEnd(&BZIP2_CONTEXT(context)->bz);
 
@@ -174,8 +179,9 @@ int xar_bzip_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 	/* free the context */
 	free(BZIP2_CONTEXT(context));
 	*context = NULL;
-	
-#endif /* HAVE_LIBBZ2 */
+#else /* !HAVE_LIBBZ2 */
+	(void)x; (void)f; (void)p; (void)context;
+#endif /* !HAVE_LIBBZ2 */
 	return 0;
 }
 
@@ -186,6 +192,7 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	size_t outlen, offset = 0;
 	int r;
 
+	(void)p;
 	/* on first run, we init the context and check the compression type */
 	if( !BZIP2_CONTEXT(context) ) {
 		int level = 9;
@@ -205,7 +212,7 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		if( opt ) {
 			int tmp;
 			errno = 0;
-			tmp = strtol(opt, NULL, 10);
+			tmp = (int)strtol(opt, NULL, 10);
 			if( errno == 0 ) {
 				if( (level >= 0) && (level <= 9) )
 					level = tmp;
@@ -224,7 +231,7 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	outlen = *inlen/2;
 	if(outlen == 0) outlen = 1024;
 	BZIP2_CONTEXT(context)->bz.next_in = *in;
-	BZIP2_CONTEXT(context)->bz.avail_in = *inlen;
+	BZIP2_CONTEXT(context)->bz.avail_in = (unsigned)*inlen;
 	BZIP2_CONTEXT(context)->bz.next_out = out;
 	BZIP2_CONTEXT(context)->bz.avail_out = 0;
 
@@ -235,7 +242,7 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 			if( out == NULL ) abort();
 
 			BZIP2_CONTEXT(context)->bz.next_out = ((char *)out) + offset;
-			BZIP2_CONTEXT(context)->bz.avail_out = outlen - offset;
+			BZIP2_CONTEXT(context)->bz.avail_out = (unsigned)(outlen - offset);
 
 			r = BZ2_bzCompress(&BZIP2_CONTEXT(context)->bz, BZ_RUN);
 			offset = outlen - BZIP2_CONTEXT(context)->bz.avail_out;
@@ -247,7 +254,7 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 			if( out == NULL ) abort();
 
 			BZIP2_CONTEXT(context)->bz.next_out = ((char *)out) + offset;
-			BZIP2_CONTEXT(context)->bz.avail_out = outlen - offset;
+			BZIP2_CONTEXT(context)->bz.avail_out = (unsigned)(outlen - offset);
 
 			r = BZ2_bzCompress(&BZIP2_CONTEXT(context)->bz, BZ_FINISH);
 			offset = outlen - BZIP2_CONTEXT(context)->bz.avail_out;
@@ -267,6 +274,7 @@ int32_t xar_bzip_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	*in = out;
 	*inlen = offset;
 #else
+	(void)p; (void)in; (void)inlen; (void)context;
 	opt = xar_opt_get(x, XAR_OPT_COMPRESSION);
 	if( !opt )
 		return 0;

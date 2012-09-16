@@ -189,6 +189,8 @@ DONE:
 	}
 	acl_free(a);
 #endif /* !__APPLE__ */
+#else
+	(void)x; (void)f; (void)file;
 #endif
 	return 0;
 }
@@ -270,6 +272,8 @@ static int32_t eacls(xar_t x, xar_file_t f, const char *file) {
 		}
 	}
 #endif /* !__APPLE__ */
+#else
+	(void)x; (void)f; (void)file;
 #endif
 	return 0;
 }
@@ -321,7 +325,9 @@ static int32_t flags_archive(xar_t x, xar_file_t f, const struct stat *sb) {
 		x_addflag(f, "SystemAppend");
 #endif
 
-#endif /* HAVE_STRUCT_STAT_ST_FLAGS */
+#else /* !HAVE_STRUCT_STAT_ST_FLAGS */
+	(void)x; (void)f; (void)sb;
+#endif /* !HAVE_STRUCT_STAT_ST_FLAGS */
 	return 0;
 }
 
@@ -339,6 +345,7 @@ int32_t xar_flags_extract(xar_t x, xar_file_t f, const char *file, char *buffer,
 	char *tmp;
 	u_int flags = 0;
 
+	(void)buffer; (void)len;
 	if( xar_prop_get(f, XAR_FLAG_FORK, NULL) )
 		return 0;
 
@@ -384,6 +391,8 @@ int32_t xar_flags_extract(xar_t x, xar_file_t f, const char *file, char *buffer,
 		xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
 		return -1;
 	}
+#else
+	(void)x; (void)f; (void)file; (void)buffer; (void)len;
 #endif
 	
 	return 0;
@@ -397,6 +406,7 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	struct tm t;
 	const char *type;
 
+	(void)buffer;
 	/* no stat attributes for data from a buffer, it is just a file */
 	if(len){
 		if( xar_check_prop(x, "type") )
@@ -449,7 +459,8 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 		struct stat lsb;
 
 		memset(link, 0, sizeof(link));
-		readlink(file, link, sizeof(link)-1);
+		if (readlink(file, link, sizeof(link)-1) == -1)
+			return -1;
 		xar_prop_set(f, "link", link);
 		if( stat(file, &lsb) != 0 ) {
 			xar_attr_set(f, "link", "type", "broken");
@@ -460,25 +471,29 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	}
 
 	if( xar_check_prop(x, "inode") ) {
-		asprintf(&tmpstr, "%"INO_STRING, XAR(x)->sbcache.st_ino);
+		if (asprintf(&tmpstr, "%"INO_STRING, XAR(x)->sbcache.st_ino) == -1)
+			return -1;
 		xar_prop_set(f, "inode", tmpstr);
 		free(tmpstr);
 	}
 
 	if( xar_check_prop(x, "deviceno") ) {
-		asprintf(&tmpstr, "%"DEV_STRING, XAR(x)->sbcache.st_dev);
+		if (asprintf(&tmpstr, "%"DEV_STRING, DEV_CAST XAR(x)->sbcache.st_dev) == -1)
+			return -1;
 		xar_prop_set(f, "deviceno", tmpstr);
 		free(tmpstr);
 	}
 
 	if( xar_check_prop(x, "mode") ) {
-		asprintf(&tmpstr, "%04o", XAR(x)->sbcache.st_mode & (~S_IFMT));
+		if (asprintf(&tmpstr, "%04o", XAR(x)->sbcache.st_mode & (~S_IFMT)) == -1)
+			return -1;
 		xar_prop_set(f, "mode", tmpstr);
 		free(tmpstr);
 	}
 
 	if( xar_check_prop(x, "uid") ) {
-		asprintf(&tmpstr, "%"PRIu64, (uint64_t)XAR(x)->sbcache.st_uid);
+		if (asprintf(&tmpstr, "%"PRIu64, (uint64_t)XAR(x)->sbcache.st_uid) == -1)
+			return -1;
 		xar_prop_set(f, "uid", tmpstr);
 		free(tmpstr);
 	}
@@ -490,7 +505,8 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	}
 
 	if( xar_check_prop(x, "gid") ) {
-		asprintf(&tmpstr, "%"PRIu64, (uint64_t)XAR(x)->sbcache.st_gid);
+		if (asprintf(&tmpstr, "%"PRIu64, (uint64_t)XAR(x)->sbcache.st_gid) == -1)
+			return -1;
 		xar_prop_set(f, "gid", tmpstr);
 		free(tmpstr);
 	}
@@ -504,21 +520,21 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	if( xar_check_prop(x, "atime") ) {
 		gmtime_r(&XAR(x)->sbcache.st_atime, &t);
 		memset(time, 0, sizeof(time));
-		strftime(time, sizeof(time), "%FT%TZ", &t);
+		strftime(time, sizeof(time), "%Y-%m-%dT%H:%M:%SZ", &t);
 		xar_prop_set(f, "atime", time);
 	}
 
 	if( xar_check_prop(x, "mtime") ) {
 		gmtime_r(&XAR(x)->sbcache.st_mtime, &t);
 		memset(time, 0, sizeof(time));
-		strftime(time, sizeof(time), "%FT%TZ", &t);
+		strftime(time, sizeof(time), "%Y-%m-%dT%H:%M:%SZ", &t);
 		xar_prop_set(f, "mtime", time);
 	}
 
 	if( xar_check_prop(x, "ctime") ) {
 		gmtime_r(&XAR(x)->sbcache.st_ctime, &t);
 		memset(time, 0, sizeof(time));
-		strftime(time, sizeof(time), "%FT%TZ", &t);
+		strftime(time, sizeof(time), "%Y-%m-%dT%H:%M:%SZ", &t);
 		xar_prop_set(f, "ctime", time);
 	}
 
@@ -540,6 +556,7 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 	struct timeval tv[2];
 	char savesuid = 0;
 
+	(void)buffer;
 	/* when writing to a buffer, there are no permissions to set */
 	if ( len )
 		return 0;
@@ -668,7 +685,7 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 	xar_prop_get(f, "atime", &timestr);
 	if( timestr ) {
 		memset(&t, 0, sizeof(t));
-		strptime(timestr, "%FT%T", &t);
+		strptime(timestr, "%Y-%m-%dT%H:%M:%S", &t);
 		tv[ATIME].tv_sec = timegm(&t);
 	} else {
 		tv[ATIME].tv_sec = time(NULL);
@@ -677,7 +694,7 @@ int32_t xar_set_perm(xar_t x, xar_file_t f, const char *file, char *buffer, size
 	xar_prop_get(f, "mtime", &timestr);
 	if( timestr ) {
 		memset(&t, 0, sizeof(t));
-		strptime(timestr, "%FT%T", &t);
+		strptime(timestr, "%Y-%m-%dT%H:%M:%S", &t);
 		tv[MTIME].tv_sec = timegm(&t);
 	} else {
 		tv[MTIME].tv_sec = time(NULL);
@@ -692,6 +709,7 @@ int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 	int ret, fd;
 	mode_t modet = 0;
 
+	(void)buffer; (void)len;
 	xar_prop_get(f, "type", &opt);
 	if(opt && (strcmp(opt, "character special") == 0))
 		modet = S_IFCHR;
@@ -709,7 +727,7 @@ int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 			return -1;
 		if( (tmpll < 0) || (tmpll > 255) )
 			return -1;
-		major = tmpll;
+		major = (uint32_t)tmpll;
 
 		xar_prop_get(f, "device/minor", &opt);
 		tmpll = strtoll(opt, NULL, 10);
@@ -717,7 +735,7 @@ int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 			return -1;
 		if( (tmpll < 0) || (tmpll > 255) )
 			return -1;
-		minor = tmpll;
+		minor = (uint32_t)tmpll;
 		
 		devt = xar_makedev(major, minor);
 		unlink(file);

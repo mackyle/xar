@@ -95,6 +95,7 @@ struct _linuxattr_context{
 
 int32_t xar_linuxattr_read(xar_t x, xar_file_t f, void * buf, size_t len, void *context) {
 	
+	(void)x; (void)f;
 	if( !LINUXATTR_CONTEXT(context)->buf ) {
 		int r;
 		LINUXATTR_CONTEXT(context)->bufsz = 1024;
@@ -115,7 +116,7 @@ AGAIN2:
 		LINUXATTR_CONTEXT(context)->bufsz = r;
 	}
 
-	if( (LINUXATTR_CONTEXT(context)->bufsz-LINUXATTR_CONTEXT(context)->off) <= len ) {
+	if( (LINUXATTR_CONTEXT(context)->bufsz-LINUXATTR_CONTEXT(context)->off) <= (int)len ) {
 		int32_t ret;
 		ret = LINUXATTR_CONTEXT(context)->bufsz - LINUXATTR_CONTEXT(context)->off;
 		memcpy(buf, ((char *)LINUXATTR_CONTEXT(context)->buf)+LINUXATTR_CONTEXT(context)->off, ret);
@@ -129,6 +130,7 @@ AGAIN2:
 }
 
 int32_t xar_linuxattr_write(xar_t x, xar_file_t f, void *buf, size_t len, void *context) {
+	(void)x; (void)f;
 	return lsetxattr(LINUXATTR_CONTEXT(context)->file, LINUXATTR_CONTEXT(context)->attrname, buf, len, 0);
 }
 #endif
@@ -141,7 +143,8 @@ int32_t xar_linuxattr_archive(xar_t x, xar_file_t f, const char* file, const cha
 	struct statfs sfs;
 	char *fsname = NULL;
 	struct _linuxattr_context context;
-	
+
+	(void)buffer;
 	memset(&context,0,sizeof(struct _linuxattr_context));
 
 	/* data from buffers don't have linuxattr */
@@ -197,6 +200,8 @@ TRYAGAIN:
 BAIL:
 	free(buf);
 	return retval;
+#else
+	(void)x; (void)f; (void)file; (void)buffer; (void)len;
 #endif
 	return 0;
 }
@@ -209,7 +214,8 @@ int32_t xar_linuxattr_extract(xar_t x, xar_file_t f, const char* file, char *buf
 	int eaopt = 0;
 	struct _linuxattr_context context;
 	xar_prop_t p;
-	
+
+	(void)buffer;
 	memset(&context,0,sizeof(struct _linuxattr_context));
 	
 	/* data buffers, can't store linux attrs */
@@ -264,7 +270,8 @@ int32_t xar_linuxattr_extract(xar_t x, xar_file_t f, const char* file, char *buf
 		xar_attrcopy_from_heap(x, f, p, xar_linuxattr_write, &context);
 
 	}
-
+#else
+	(void)x; (void)f; (void)file; (void)buffer; (void)len;
 #endif
 	return 0;
 }

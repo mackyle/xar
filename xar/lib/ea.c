@@ -53,22 +53,32 @@ struct __xar_ea_t {
 xar_ea_t xar_ea_new(xar_file_t f, const char *name)
 {
 	xar_ea_t ret;
+	char *newidvalue;
+	int err;
+
+	err = asprintf(&newidvalue, "%" PRIu64, XAR_FILE(f)->nexteaid);
+	if (err == -1)
+		return NULL;
 
 	ret = calloc(sizeof(struct __xar_ea_t), 1);
-	 if( !ret )
+	if( !ret ) {
+		free(newidvalue);
 		return NULL;
+	}
 
 	XAR_EA(ret)->prop = xar_prop_new(f, NULL);
 	if( !XAR_EA(ret)->prop ) {
+		free(newidvalue);
 		free(ret);
 		return NULL;
 	}
 
+	XAR_FILE(f)->nexteaid++;
 	xar_prop_setkey(XAR_EA(ret)->prop, "ea");
 	xar_prop_setvalue(XAR_EA(ret)->prop, NULL);
 	XAR_PROP(XAR_EA(ret)->prop)->attrs = xar_attr_new();
 	XAR_ATTR(XAR_PROP(XAR_EA(ret)->prop)->attrs)->key = strdup("id");
-	asprintf((char **)&XAR_ATTR(XAR_PROP(XAR_EA(ret)->prop)->attrs)->value, "%" PRIu64, XAR_FILE(f)->nexteaid++);
+	XAR_ATTR(XAR_PROP(XAR_EA(ret)->prop)->attrs)->value = newidvalue;
 
 	xar_prop_pset(f, XAR_EA(ret)->prop, "name", name);
 	
