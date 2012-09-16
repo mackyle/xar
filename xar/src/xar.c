@@ -1907,6 +1907,9 @@ static void get_libxar_version() {
 static void print_version() {
 	printf("xar %s\n", XAR_VERSION);
 	if (Verbose) {
+#ifdef XAR_COMMIT_ID
+		puts(XAR_COMMIT_ID);
+#endif
 		get_libxar_version();
 		if (xar_lib_version)
 			printf("xar library version 0x%08lX\n", xar_lib_version);
