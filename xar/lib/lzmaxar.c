@@ -76,11 +76,13 @@ struct _lzma_context{
 #else
 	lzma_options_lzma options2;
 #endif
+#if LZMA_VERSION < 49990060U
 	lzma_allocator allocator;
 #if LZMA_VERSION < 40420010U
 	lzma_memory_limitter *limit;
 #else
 	lzma_memlimit *limit;
+#endif
 #endif
 };
 
@@ -135,15 +137,23 @@ int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 		else
 			return 0;
 		
+	#if LZMA_VERSION < 49990070U
 		lzma_init_decoder();
+	#endif
 	#ifdef LZMA_STREAM_INIT_VAR
 		LZMA_CONTEXT(context)->lzma = LZMA_STREAM_INIT_VAR;
 	#endif
 	#if LZMA_VERSION < 49990050U
 		r = lzma_auto_decoder(&LZMA_CONTEXT(context)->lzma, NULL, NULL);
-	#else
+	#elif LZMA_VERSION < 49990060U
 		r = lzma_auto_decoder(&LZMA_CONTEXT(context)->lzma,
 		        lzma_easy_memory_usage(preset_level), 0);
+	#elif LZMA_VERSION < 49990070U
+		r = lzma_auto_decoder(&LZMA_CONTEXT(context)->lzma,
+		        lzma_easy_encoder_memusage(preset_level, 0), 0);
+	#else
+		r = lzma_auto_decoder(&LZMA_CONTEXT(context)->lzma,
+		        lzma_easy_encoder_memusage(preset_level), 0);
 	#endif
 		if( (r != LZMA_OK) ) {
 			xar_err_new(x);
@@ -163,9 +173,9 @@ int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t 
 
 	outlen = *inlen;
 
-	LZMA_CONTEXT(context)->lzma.next_in = *in;
-	LZMA_CONTEXT(context)->lzma.avail_in = (unsigned)*inlen;
-	LZMA_CONTEXT(context)->lzma.next_out = out;
+	LZMA_CONTEXT(context)->lzma.next_in = (const uint8_t *)*in;
+	LZMA_CONTEXT(context)->lzma.avail_in = (size_t)*inlen;
+	LZMA_CONTEXT(context)->lzma.next_out = (uint8_t *)out;
 	LZMA_CONTEXT(context)->lzma.avail_out = 0;
 
 	while( LZMA_CONTEXT(context)->lzma.avail_in != 0 ) {
@@ -221,7 +231,7 @@ int xar_lzma_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context) {
 		lzma_end(&LZMA_CONTEXT(context)->lzma);		
 #if LZMA_VERSION < 40420010U
 		lzma_memory_limitter_end(LZMA_CONTEXT(context)->limit, 1);
-#else
+#elif LZMA_VERSION < 49990060U
 		lzma_memlimit_end(LZMA_CONTEXT(context)->limit, 1);
 #endif
 
@@ -282,7 +292,9 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 			}
 		}
 		
+#if LZMA_VERSION < 49990070U
 		lzma_init_encoder();
+#endif
 #if LZMA_VERSION < 49990050U
 		LZMA_CONTEXT(context)->options.check = LZMA_CHECK_CRC64;
 		LZMA_CONTEXT(context)->options.has_crc32 = 1; /* true */
@@ -303,6 +315,7 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 #ifdef LZMA_STREAM_INIT_VAR
 		LZMA_CONTEXT(context)->lzma = LZMA_STREAM_INIT_VAR;
 #endif
+#if LZMA_VERSION < 49990060U
 #if LZMA_VERSION < 40420010U
 		LZMA_CONTEXT(context)->limit = lzma_memory_limitter_create(memory_limit);
 		LZMA_CONTEXT(context)->allocator.alloc = (void*) lzma_memory_alloc;
@@ -314,6 +327,9 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 #endif
 		LZMA_CONTEXT(context)->allocator.opaque = LZMA_CONTEXT(context)->limit;
 		LZMA_CONTEXT(context)->lzma.allocator = &LZMA_CONTEXT(context)->allocator;
+#else
+		lzma_memlimit_set(&LZMA_CONTEXT(context)->lzma, memory_limit);
+#endif
 #if LZMA_VERSION < 49990050U
 		if (alone){
 		LZMA_CONTEXT(context)->options2.uncompressed_size = *inlen;
@@ -335,6 +351,15 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		else
 		r = lzma_stream_encoder(&LZMA_CONTEXT(context)->lzma,
 		                        LZMA_CONTEXT(context)->filters, LZMA_CONTEXT(context)->check);
+#elif LZMA_VERSION < 49990070U
+		if (alone){
+		lzma_lzma_preset(&(LZMA_CONTEXT(context)->options2), level);
+		r = lzma_alone_encoder(&LZMA_CONTEXT(context)->lzma,
+		                       &(LZMA_CONTEXT(context)->options2));
+		}
+		else
+		r = lzma_easy_encoder(&LZMA_CONTEXT(context)->lzma,
+		                      level, 0, LZMA_CHECK_CRC64);
 #else
 		if (alone){
 		lzma_lzma_preset(&(LZMA_CONTEXT(context)->options2), level);
@@ -343,7 +368,7 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 		}
 		else
 		r = lzma_easy_encoder(&LZMA_CONTEXT(context)->lzma,
-		                      (lzma_easy_level) level);
+		                      level, LZMA_CHECK_CRC64);
 #endif
 		if( (r != LZMA_OK) ) {
 			xar_err_new(x);
@@ -366,9 +391,9 @@ int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_
 	
 	outlen = *inlen/2;
 	if(outlen == 0) outlen = 1024;
-	LZMA_CONTEXT(context)->lzma.next_in = *in;
-	LZMA_CONTEXT(context)->lzma.avail_in = *inlen;
-	LZMA_CONTEXT(context)->lzma.next_out = out;
+	LZMA_CONTEXT(context)->lzma.next_in = (const uint8_t *)*in;
+	LZMA_CONTEXT(context)->lzma.avail_in = (size_t)*inlen;
+	LZMA_CONTEXT(context)->lzma.next_out = (uint8_t *)out;
 	LZMA_CONTEXT(context)->lzma.avail_out = 0;
 
 	if( *inlen != 0 ) {
