@@ -28,6 +28,7 @@
 /xar/xar.spec
 /xar/lib/.libs/
 /xar/lib/*.dylib
+/xar/lib/*.so*
 /xar/lib/*.a
 /xar/lib/*.la
 /xar/src/ixar
