@@ -178,13 +178,9 @@ xar --version
 
 The output should be:
 <pre>
-xar 1.6dev_sigv4
+xar 1.6.1
 </pre>
-
-If the version does not end with “<tt>_sigv</tt><i>N</i>” where “<i>N</i>” is a digit,
-then your version of the <tt>xar</tt> tool does not have signature support.  If “<i>N</i>”
-is less than 4 then your version of the <tt>xar</tt> tool is too old to use these instructions
-and also has various bugs.
+If the version number is less than 1.6.1 then your version of the <tt>xar</tt> tool is too old to use these instructions (and also has various bugs).
 </p>
 
 <h3>Collect Your Certificate(s) And Key</h3>
@@ -283,7 +279,7 @@ for signatures (see
 
 <li>Extract the value to be signed and insert the certificates<br />
 <pre>
-xar --sign -f archive.xar --sha1-digestinfo-to-sign digestinfo.dat \
+xar --sign -f archive.xar --digestinfo-to-sign digestinfo.dat \
   --sig-size `cat siglen.txt` \
   --cert-loc leaf.der --cert-loc intorg.der \
   --cert-loc toporg.der --cert-loc root.der
@@ -294,6 +290,7 @@ It’s important that the <tt>--cert-loc</tt> options list the certificates in t
 <p class="note">If the archive already has a signature use <tt class="nobreak">--replace-sign</tt> instead of
 <tt class="nobreak">--sign</tt> to rip out the old signature and replace it.
 </p>
+<p class="note">Archive creation can be combined with this step by adding a <tt class="nobreak">-c</tt> option and a list of files to add to the archive.</p>
 <p class="important">Despite the name, the <tt class="nobreak">--sign</tt> option does not create a signature, it only reserves space for one so that it can be injected later.
 </p>
 </li>
@@ -370,7 +367,7 @@ mkdir certs
 xar -f signed.xar --extract-certs certs
 </pre>
 <p>
-The certificates are extracted in DER (binary) format and are named with a “<span class="cert">cert</span>” prefix and a two-digit suffix.  The leaf signing certificate is always named “<span class="cert">cert00</span>”.
+The certificates are extracted in DER (binary) format and are named with a “<span class="cert">cert</span>” prefix and a two-digit suffix and placed in the specified directory (in this case <tt>certs</tt>).  The leaf signing certificate is always named “<span class="cert">cert00</span>”.
 </p>
 
 <p>
@@ -468,15 +465,34 @@ and look for “Signature Algorithm:” in the output.
 
 <p>There has been a lot of interest in using the xar command line interface to sign <tt>.safariextz</tt> files.</p>
 
-<p>It may be possible to do this provided the version of xar is 1.6dev_sigv4 or later, the <tt class="nobreak">--distribution</tt> (or equivalent) and <tt class="nobreak">-z</tt> options are used when creating the initial xar archive and the full certificate chain (including the root certificate) is embedded using
-the <tt class="nobreak">--cert-loc</tt> options.  The full certificate chain may be extracted from a <tt>.safariextz</tt> file that has already been signed using Safari’s Extension Builder with the
-intended key (see <a href="#extract">here</a>).
+<p>It may be possible to do this provided the version of xar is 1.6.1 or later
+and the full certificate chain (including the root certificate)
+is embedded using the <tt class="nobreak">--cert-loc</tt> options.  The full certificate chain may be
+extracted from a <tt>.safariextz</tt> file that has already been signed using Safari’s Extension Builder
+with the intended signing key (see <a href="#extract">here</a>).
+It may also be helpful to create the XAR archive using the <tt class="nobreak">--distribution</tt> option or
+possibly the <tt class="nobreak">--prop-exclude ea</tt> option although this is probably not
+strictly necessary.
+</p>
+<p>Remember that only a single <tt>name.safariextension</tt> directory should be added to a <tt>.safariextz</tt> archive (the <tt>name</tt> part doesn’t matter, only the <tt>.safariextension</tt> suffix) and it must be at the top level of the archive.
 </p>
 
-<p>Please note that Safari seems to be hard-coded to require all extensions to be signed by a certificate whose certificate chain leads up to an Apple root certificate.  A normal code signing certificate simply will not
+<p>Please note that Safari seems to be hard-coded to require all extensions to be signed by a certificate whose
+certificate chain leads up to an Apple root certificate.  A normal code signing certificate simply will not
 produce loadable extensions.
 Furthermore, Safari Extension Signing certificates must have additional options set as described in
-<a href="http://images.apple.com/certificateauthority/pdf/Apple_WWDR_CPS_v1.8.pdf">Apple’s Certification Practice Statement</a>.  So don’t even think about trying it without a real Apple-issued Safari extension signing certificate.
+<a href="http://images.apple.com/certificateauthority/pdf/Apple_WWDR_CPS_v1.8.pdf">Apple’s Certification Practice Statement</a>.
+So don’t even think about trying it without a real Apple-issued Safari extension signing certificate.
+</p>
+
+<p>
+You may be able to obtain one of these signing certificates for free from
+<a href="https://developer.apple.com/programs/safari/">here</a>.
+</p>
+
+<p>Note that as of OS X 10.8, the phrase “identified developers” seems to be a euphemism for signed by an
+Apple-issued certificate that’s part of a certificate chain that leads to an Apple root certificate so these
+extensions would seem to qualify.
 </p>
 
 <h2 id="github">GitHub</h2>
