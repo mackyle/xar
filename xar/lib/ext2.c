@@ -51,7 +51,7 @@
 #include <sys/ioctl.h>
 #include "ext2.h"
 
-#ifdef HAVE_EXT2FS_EXT2_FS_H
+#if defined(HAVE_EXT2FS_EXT2_FS_H) && !defined(__CYGWIN__)
 #include <ext2fs/ext2_fs.h>
 #else
 #if defined(HAVE_LINUX_EXT2_FS_H)
@@ -63,7 +63,7 @@ typedef uint8_t u8;
 
 #define XAR_EXT2_FORK "ext2"
 
-#if defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)
+#if (defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)) && !defined(__CYGWIN__)
 static void x_addprop(xar_file_t f, const char *name) {
 	char opt[1024];
 	memset(opt, 0, sizeof(opt));
@@ -78,7 +78,7 @@ int xar_ext2attr_archive(xar_t x, xar_file_t f, const char* file, const char *bu
 {
 	int ret = 0;
 	
-#if defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)
+#if (defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)) && !defined(__CYGWIN__)
 	int fd, flags=0, version;
 	char *vstr;
 	const char *opt;
@@ -169,7 +169,7 @@ BAIL:
 	return ret;
 }
 
-#if defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)
+#if (defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)) && !defined(__CYGWIN__)
 static int32_t e2prop_get(xar_file_t f, const char *name, char **value) {
 	char v[1024];
 
@@ -181,7 +181,7 @@ static int32_t e2prop_get(xar_file_t f, const char *name, char **value) {
 
 int xar_ext2attr_extract(xar_t x, xar_file_t f, const char* file, char *buffer, size_t len)
 {
-#if defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)
+#if (defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)) && !defined(__CYGWIN__)
 	int fd = -1, version, flags = 0;
 	char *tmp;
 
