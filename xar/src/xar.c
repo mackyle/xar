@@ -2047,8 +2047,6 @@ int main(int argc, char *argv[]) {
 #endif
 #ifdef HAVE_LIBLZMA
 		              && (strcmp(optarg, XAR_OPT_VAL_LZMA) != 0)
-#endif
-#ifdef HAVE_XZ
 		              && (strcmp(optarg, XAR_OPT_VAL_XZ) != 0)
 #endif
 		          ) {
