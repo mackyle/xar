@@ -1,4 +1,22 @@
 ﻿devel
+	2012-09-17 Kyle J. McKay mackyle@gmail.com
+	* ChangeLog: Add recent updates
+	* Add NEWS file
+	* lib/{archive.h,c;io.c}: Increase default read buffer size
+	* lib/{archive,darwinattr,stat}.c: Do not attempt extract darwinattr, flags or stat information to a buffer
+	* lib/stat.c: Handle 6 more flags bits including UF_HIDDEN and UF_COMPRESSED
+	* lib/util.c: Fix xar_get_mode output when mode is unavailable
+	2012-09-16 Kyle J. McKay mackyle@gmail.com
+	* lib/darwinattr.c: Fix archival of FinderCreateTime on 64 bit archs
+	* src/xar.c: Include commit information in -vV output if available
+	* src/xar.c: Only fetch real options in the list when copying archives
+	* lib/archive.c: Do not crash if NULL option passed to xar_opt_get 
+	* lib/ext2.c: A little help for cygwin
+	* xar_README.txt: Update recommended configure options
+	* src/xar.c: Allow --compression=xz whenever --compression=lzma is allowed
+	* lib/lzmaxar.c: Update to compile against modern versions of liblzma
+	* Ignore *.so* library files
+	* Massive elimination of warnings including from -m64
 	2012-09-15 Kyle J. McKay mackyle@gmail.com
 	* configure.ac: Version bump to 1.6.1
 	* src/xar.c: Only spew the giant help missive on request (--help) otherwise use a very brief usage hint instead
