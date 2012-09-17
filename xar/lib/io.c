@@ -130,12 +130,14 @@ static size_t get_rsize(xar_t x) {
 
 	opt = xar_opt_get(x, "rsize");
 	if( !opt ) {
-		bsize = 4096;
+		bsize = XAR_DEFAULT_BUFFER_SIZE;
 	} else {
 		bsize = strtol(opt, NULL, 0);
 		if( ((bsize == (size_t)LONG_MAX) || (bsize == (size_t)LONG_MIN)) && (errno == ERANGE) ) {
-			bsize = 4096;
+			bsize = XAR_DEFAULT_BUFFER_SIZE;
 		}
+		if (bsize < XAR_MINIMUM_BUFFER_SIZE)
+			bsize = XAR_MINIMUM_BUFFER_SIZE;
 	}
 
 	return bsize;
@@ -798,12 +800,14 @@ int32_t xar_heap_to_archive(xar_t x) {
 
 	opt = xar_opt_get(x, "rsize");
 	if( !opt ) {
-		bsize = 4096;
+		bsize = XAR_DEFAULT_BUFFER_SIZE;
 	} else {
 		bsize = strtol(opt, NULL, 0);
 		if( ((bsize == LONG_MAX) || (bsize == LONG_MIN)) && (errno == ERANGE) ) {
-			bsize = 4096;
+			bsize = XAR_DEFAULT_BUFFER_SIZE;
 		}
+		if (bsize < XAR_MINIMUM_BUFFER_SIZE)
+			bsize = XAR_MINIMUM_BUFFER_SIZE;
 	}
 
 	b = malloc(bsize);

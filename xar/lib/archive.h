@@ -46,6 +46,9 @@
 #include "xar.h"
 #include "filetree.h"
 
+#define XAR_MINIMUM_BUFFER_SIZE 512
+#define XAR_DEFAULT_BUFFER_SIZE 32768
+
 struct errctx {
 	const char *str;
 	int         saved_errno;

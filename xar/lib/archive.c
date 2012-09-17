@@ -102,7 +102,7 @@ static xar_t xar_new() {
 	ret = malloc(sizeof(struct __xar_t));
 	if(!ret) return NULL;
 	memset(XAR(ret), 0, sizeof(struct __xar_t));
-	XAR(ret)->readbuf_len = 4096;
+	XAR(ret)->readbuf_len = XAR_DEFAULT_BUFFER_SIZE;
 	XAR(ret)->readbuf = malloc(XAR(ret)->readbuf_len);
 	if(!XAR(ret)->readbuf) {
 		free((void *)ret);
@@ -552,15 +552,17 @@ int xar_close(xar_t x) {
 		/* read the toc from the tmp file, compress it, and write it
 	 	* out to the archive.
 	 	*/
-		rsize = wsize = 4096;
+		rsize = wsize = XAR_DEFAULT_BUFFER_SIZE;
 		opt = xar_opt_get(x, XAR_OPT_RSIZE);
 		if ( opt ) {
 		  rsize = strtol(opt, NULL, 0);
 		  if ( ((rsize == LONG_MAX) || (rsize == LONG_MIN)) && (errno == ERANGE) ) {
 		    rsize = wsize;
 		  }
+		  if (rsize < XAR_MINIMUM_BUFFER_SIZE)
+		    rsize = XAR_MINIMUM_BUFFER_SIZE;
 		}
-		
+
 		rbuf = malloc(rsize);
 		if( !rbuf ) {
 			retval = -1;
