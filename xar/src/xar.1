@@ -1,4 +1,4 @@
-.TH XAR "1" "September 15, 2012" "version 1.6.1" "User Commands"
+.TH XAR "1" "September 16, 2012" "version 1.6.1" "User Commands"
 .SH NAME
 xar \- eXtensible ARchiver
 .SH SYNOPSIS
@@ -68,7 +68,7 @@ Synonym for \-f <file>
 .TP
 \-\-compression=<type>
 Specifies the compression type to use.
-Valid values: none, gzip, bzip2, lzma.  Default value: gzip
+Valid values: none, gzip, bzip2, lzma, xz.  Default value: gzip
 .TP
 \-a
 Synonym for \-\-compression=lzma
@@ -250,49 +250,85 @@ Synonym for \-\-version
 \-\-version
 Display the version number of xar.  If \-\-verbose is given before \-\-version show additional version information.
 .SH TIPS
-.TP
+.HP
 xar \-\-replace\-sign \-\-sig\-size=0 \-f sample.xar
+.PP
+.RS
 Completely removes any signatures from sample.xar
+.RE
 .SH EXAMPLES
-.TP
+.HP
 xar \-cf sample.xar /home/uid
+.PP
+.RS
 Create an xar archive of all files in /home/uid
-.TP
+.RE
+.HP
 xar \-tf sample.xar
+.PP
+.RS
 List the contents of the xar archive sample.xar
-.TP
+.RE
+.HP
 xar \-xf sample.xar
+.PP
+.RS
 Extract the contents of sample.xar to the current working directory
-.TP
-xar \-cf sample.xar \-\-toc\-cksum=whirlpool! \-\-file\-cksum=whirlpool! /home/uid
+.RE
+.HP
+xar \-cf sample.xar \-\-toc\-cksum=whirlpool! \\
+.br
+\-\-file\-cksum=whirlpool! /home/uid
+.PP
+.RS
 Create an xar archive of all files in /home/uid using the whirlpool message digest (requires EVP_get_digestbyname support for whirlpool)
+.RE
 .SH SIGNING
 In order to sign an archive, a leaf signing certificate in DER format together with its RSA private key in PEM format is required.  In addition,
 if the leaf signing certificate is not a self-signed root certificate then all the other certificates in the certificate chain
 (including the root certificate) should also be available in DER format.
 .PP
 The example here assumes the DER format certificates from leaf to root are available in the files
-leaf.crt \-> intorg.crt \-> toporg.crt \-> root.crt and the leaf.crt private key is available in PEM format in the file key.pem.
+.PP
+.RS
+leaf.crt \-> intorg.crt \-> toporg.crt \-> root.crt
+.RE
+.PP
+and the leaf.crt private key is available in PEM format in the file key.pem.
 Also the archive to be signed is archive.xar and the openssl and wc utility commands are available.
 The example commands are for an sh-compatible shell.
 .TP
 1. Determine the signature size
+.RS
+.HP
 : | openssl dgst -sign key.pem -binary | wc -c > siglen.txt
+.RE
 .TP
 2. Extract the value to be signed and insert the certificates
-xar --sign -f archive.xar --digestinfo-to-sign digestinfo.dat \\
+.RS
+.HP
+xar \-\-sign \-f archive.xar \-\-digestinfo\-to\-sign digestinfo.dat \\
 .br
---sig-size `cat siglen.txt` \\
+\-\-sig\-size `cat siglen.txt` \\
 .br
---cert-loc leaf.crt --cert-loc intorg.crt \\
+\-\-cert\-loc leaf.crt \-\-cert\-loc intorg.crt \\
 .br
---cert-loc toporg.crt --cert-loc root.crt
+\-\-cert\-loc toporg.crt \-\-cert\-loc root.crt
+.RE
 .TP
 3. Create the RSA signature
-openssl rsautl -sign -inkey key.pem -in digestinfo.dat -out signature.dat
+.RS
+.HP
+openssl rsautl \-sign \-inkey key.pem \-in digestinfo.dat \\
+.br
+\-out signature.dat
+.RE
 .TP
 4. Inject the RSA signature
-xar --inject-sig signature.dat -f archive.xar
+.RS
+.HP
+xar \-\-inject\-sig signature.dat \-f archive.xar
+.RE
 .PP
 Step 1 simply places the size in bytes as an ASCII decimal number into the file siglen.txt.
 For any given specific RSA private key, this step only needs to be done once as the length is determined by key characteristics
@@ -303,14 +339,22 @@ certificates and extracts the DigestInfo to be signed.  It does not create a val
 .PP
 Step 3 actually creates the signature using the openssl tool.
 .PP
-Step 4 inserts the real signature into the archive that previously had space reserved for it.  This final step creates a signed archive.
+Step 4 inserts the real signature into the archive that previously had space reserved for it.
+This final step creates a signed archive.
 .PP
-Note that whenever the archive data changes steps 2-4 must be repeated.  Repeating some or none of those steps will result in an invalid signature.
-Furthermore, xar makes no attempt to verify that the injected signature is compatible with the leaf signing certificate (the first \-\-cert\-loc option).
-For example, if the \-\-toc\-cksum type is "sha1" (the default) then the leaf signing certificate's signature algorithm must be "sha1WithRSAEncryption"
-in order for the resulting xar archive to have a valid signature.
+Note that whenever the archive data changes steps 2-4 must be repeated.
+Repeating some or none of those steps will result in an invalid signature.
+Furthermore, xar makes no attempt to verify that the injected signature is compatible with
+the leaf signing certificate (the first \-\-cert\-loc option).
+For example, if the \-\-toc\-cksum type is "sha1" (the default) then the leaf signing
+certificate's signature algorithm must be "sha1WithRSAEncryption" in order for the
+resulting xar archive to have a valid signature.
 .PP
-More details on signing can be found at http://mackyle.github.com/xar/howtosign.html.
+More details on signing can be found at:
+.PP
+.RS
+http://mackyle.github.com/xar/howtosign.html
+.RE
 .SH BUGS
 .TP
 Doesn't currently work with pipes or streams.  Might be fixed in a future release.
@@ -323,7 +367,11 @@ The formatting in this man page is suboptimal.
 .TP
 The option to use any available EVP_get_digestbyname hash for \-\-toc\-cksum and/or \-\-file\-cksum by simply appending an ! to its name remains mostly undocumented.
 .TP
-Probably one or two more in there somewhere.  If you find one please report it to https://github.com/mackyle/xar.
+Probably one or two more in there somewhere.  If you find one please report it to:
+.PP
+.RS
+https://github.com/mackyle/xar
+.RE
 .SH AUTHORS
 Rob Braun <bbraun AT synack DOT net>
 .br
