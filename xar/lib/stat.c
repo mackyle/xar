@@ -382,6 +382,10 @@ int32_t xar_flags_extract(xar_t x, xar_file_t f, const char *file, char *buffer,
 	u_int flags = 0;
 
 	(void)buffer; (void)len;
+	/* data buffers cannot store flags information */
+	if (len)
+		return 0;
+
 	if( xar_prop_get(f, XAR_FLAG_FORK, NULL) )
 		return 0;
 
@@ -781,7 +785,11 @@ int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, 
 	int ret, fd;
 	mode_t modet = 0;
 
-	(void)buffer; (void)len;
+	(void)buffer;
+	/* data buffers cannot store stat information */
+	if (len)
+		return 0;
+
 	xar_prop_get(f, "type", &opt);
 	if(opt && (strcmp(opt, "character special") == 0))
 		modet = S_IFCHR;

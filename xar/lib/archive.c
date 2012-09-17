@@ -1448,7 +1448,10 @@ int32_t xar_extract_tobuffer(xar_t x, xar_file_t f, char **buffer) {
 int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *size) {
 	const char *sizestring = NULL;
 	int32_t ret;
-	
+
+	if (!buffer || !size)
+		return -1;
+
 	if(0 != xar_prop_get(f,"data/size",&sizestring)){
 		if(0 != xar_prop_get(f, "type", &sizestring))
 			return -1;
@@ -1465,7 +1468,9 @@ int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *siz
 	if(!(*buffer)){
 		return -1;
 	}
-	
+	if (!*size)
+		return 0;
+
 	ret = xar_arcmod_extract(x,f,NULL,*buffer,*size);
 	if( ret ) {
 		*size = 0;

@@ -783,9 +783,10 @@ int32_t xar_darwinattr_extract(xar_t x, xar_file_t f, const char* file, char *bu
 	memset(&context,0,sizeof(struct _darwinattr_context));
 	
 	(void)buffer;
-#if defined(__APPLE__)
-	if( len )
+	/* data buffers cannot store darwinattr information */
+	if (len)
 		return 0;
+#if defined(__APPLE__)
 	stragglers_extract(x, f, file, (void *)&context);
 
 #if defined(HAVE_GETXATTR)
