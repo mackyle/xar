@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>XAR</title>
+</head>
+<body bgcolor="white" text="black" style="text-align:center">
+<p><pre style="max-width:95ex;white-space:pre-wrap;display:inline-block;text-align:left">XAR(1)                           User Commands                          XAR(1)
+
+
+
+<b>NAME</b>
+       xar - eXtensible ARchiver
+
+<b>SYNOPSIS</b>
+       <b>xar</b> <b>-</b>[<b>ctx</b>][<b>v</b>] <b>-f</b> <u>archive</u> [options] [<u>file</u> ...]]
+
+<b>DESCRIPTION</b>
+       The  XAR  project  aims to provide an easily extensible archive format.
+       Important design decisions include an easily extensible  XML  table  of
+       contents  (TOC) for random access to archived files, storing the TOC at
+       the beginning of  the  archive  to  allow  for  efficient  handling  of
+       streamed  archives,  the  ability  to handle files of arbitrarily large
+       sizes, the ability to choose independent encodings for individual files
+       in  the archive, the ability to store checksums for individual files in
+       both compressed and uncompressed form, and the ability to query the ta‐
+       ble of content's rich meta-data.
+
+<b>FUNCTIONS</b>
+       <b>One</b> <b>of</b> <b>the</b> <b>following</b> <b>options</b> <b>must</b> <b>be</b> <b>used</b>:
+
+       -c     Creates an archive
+
+       --create
+              Synonym for -c
+
+       -t     Lists the contents of an archive
+
+       --list Synonym for -t
+
+       -x     Extracts an archive
+
+       --extract
+              Synonym for -x
+
+       --sign Creates  a  placeholder  signature and saves the data to sign to
+              disk. Works with -c or just -f, requires --sig-size and  one  or
+              more  --cert-loc  options  to be set. Setting the --data-to-sign
+              and/or --sig-offset option is optional.
+
+       --replace-sign
+              Rips out  existing  signature(s)  and  makes  a  new  one.  Same
+              required options as --sign, but only works with -f.
+
+       --extract-data-to-sign
+              Extracts  data  to  be signed from an existing archive. Requires
+              --data-to-sign  (and  -f)  options  to  be  set.   Setting   the
+              --sig-offset option is optional.
+
+       --extract-certs=&lt;directory&gt;
+              Extracts  all  certificates  into  DER  (binary) format into the
+              specified directory naming them  "cert00",  "cert01"  etc.   The
+              specified  directory must already exist.  "cert00" is always the
+              leaf certificate.  "cert01", "cert02", etc. are only written  if
+              the  xar  file  contains a certificate chain (i.e. more than the
+              leaf signing certificate).  Any pre-existing files in the speci‐
+              fied  directory of the same name as the certificates being writ‐
+              ten will be overwritten without warning.
+
+       --extract-CAfile=&lt;filename&gt;
+              Extracts all certificates into  PEM  format,  concatenates  them
+              together and stores the result into the specified file.
+
+       --extract-sig=&lt;filename&gt;
+              Extracts  the  signature  and stores it into the specified file.
+              Setting the --sig-offset option is optional.
+
+       --inject-sig=&lt;filename&gt;
+              After extracting the data to be signed  and  doing  the  signing
+              externally, injects the signature.  No attempt is made to verify
+              that the signature being injected is valid other  than  that  it
+              has   the   correct  length  as  previously  reserved  with  the
+              --sig-size option.
+
+       <b>NOTE:</b> <b>all</b> <b>of</b> <b>the</b> <b>above</b> <b>require</b> <b>the</b> <b>use</b> <b>of</b> <b>the</b> <b>-f</b> <b>option</b>  <b>(filename)</b>  <b>as</b>
+       <b>this</b> <b>release</b> <b>of</b> <b>xar</b> <b>doesn't</b> <b>correctly</b> <b>handle</b> <b>pipes</b> <b>or</b> <b>sockets.</b>
+
+       -f &lt;file&gt;
+              The filename to use for creation, listing, extraction or signing
+              operations.  With  extraction,  this  can  be  a  POSIX  regular
+              expression.
+
+       --file=&lt;file&gt;
+              Synonym for -f &lt;file&gt;
+
+<b>OPTIONS</b>
+       --compression=&lt;type&gt;
+              Specifies  the  compression  type  to  use.  Valid values: none,
+              gzip, bzip2, lzma, xz.  Default value: gzip
+
+       -a     Synonym for --compression=lzma
+
+       -j     Synonym for --compression=bzip2
+
+       -z     Synonym for --compression=gzip (Default)
+
+       --compression-args=&lt;arguments&gt;
+              Specifies arguments to the compression engine  selected.   gzip,
+              bzip2, and lzma all take a single integer argument between 0 and
+              9 specifying the compression level to use.
+
+       --rfc6713
+              Only affects --compression=gzip.  Force gzip compression to  use
+              "application/zlib" as the encoding style name instead of "appli‐
+              cation/x-gzip".  As of <a href="http://tools.ietf.org/html/rfc6713">RFC 6713</a> this is the correct name to  use
+              for  the  actual  compressed data format being stored in the ar‐
+              chive.  This option will automatically be forced on by  the  xar
+              library  if  a  --toc-cksum  value  other  than "none", "md5" or
+              "sha1" is in effect.  Older  xar  versions  will  be  unable  to
+              extract  files using this encoding (and neither will they under‐
+              stand --toc-cksum values other than "none",  "md5"  or  "sha1").
+              See <a href="http://tools.ietf.org/html/rfc6713">http://tools.ietf.org/html/rfc6713</a> for details.
+
+       -C &lt;path&gt;
+              On  archive  or  extract,  xar  will chdir to the specified path
+              before processing archive members being archived or extracted.
+
+       --directory=&lt;path&gt;
+              Synonym for -C &lt;path&gt;
+
+       --dump-toc=&lt;filename&gt;
+              Has xar dump the XML header into the specified file.  "-" can be
+              specified to indicate stdout.
+
+       -d &lt;filename&gt;
+              Synonym for --dump-toc=&lt;filename&gt;
+
+       --dump-toc-raw=&lt;filename&gt;
+              Has xar dump the raw, compressed XML header data into the speci‐
+              fied file.
+
+       --dump-header
+              Has xar print out the xar binary header information to stdout.
+
+       --extract-subdoc=&lt;name&gt;
+              Extracts the specified subdocument to a document  in  cwd  named
+              &lt;name&gt;.xml
+
+       --list-subdocs
+              List the subdocuments in the XML header
+
+       --toc-cksum
+              Specifies  the hashing algorithm to use for XML header verifica‐
+              tion.  Valid  values:  none,  sha1,  and  md5.   If  the  linked
+              libcrypto  library  supports  them  sha224,  sha256,  sha384 and
+              sha512 may also be used.  Setting this option to a stronger hash
+              than  the default will also cause --file-cksum to be set to that
+              hash unless it's been explicitly set to something else.  Default
+              value: sha1
+
+       --file-cksum
+              Specifies  the  hashing  algorithm to use for file verification.
+              Same values and defaults as --toc-cksum.  Setting this option to
+              a  stronger hash than the default will also cause --toc-cksum to
+              be set to that hash unless it's been explicitly set to something
+              else.
+
+       -l     On archival, stay on the local device.
+
+       --one-file-system
+              Synonym for -l
+
+       -P     On  extract, set ownership based on uid/gid.  If the uid/gid can
+              be set on the extracted file, setuid/setgid bits  will  also  be
+              preserved.
+
+       -p     On  extract, set ownership based on symbolic names, if possible.
+              If the uid/gid can be set on the extracted  file,  setuid/setgid
+              bits will also be preserved.
+
+       -n &lt;name&gt;
+              On  archival,  specifies the subdocument name to use when adding
+              the -s &lt;filename&gt; subdocument instead of the default name  "sub‐
+              doc".
+
+       -s &lt;filename&gt;
+              On  extract,  specifies the file to extract subdocuments to.  On
+              archival, specifies an XML file to add as a subdocument.
+
+       -v     Verbose output
+
+       --verbose
+              Synonym for -v
+
+       --exclude=&lt;regexp&gt;
+              Specifies a POSIX basic regular expression of files  to  exclude
+              from  adding  to  the  archive  during  creation  or  from being
+              extracted during extraction.  This option can be specified  mul‐
+              tiple times.
+
+       --strip-components=&lt;n&gt;
+              When extracting, strip &lt;n&gt; path components from the front of the
+              path before creating the destination file.  If  the  item  being
+              extracted  does not have enough path components to strip &lt;n&gt; off
+              then it will be skipped and not extracted.
+
+       --to-stdout
+              Instead of creating files during extraction, write the file con‐
+              tents to standard output.  Only the file data will be written to
+              standard output.  All extended attributes,  resource  forks  and
+              other file properties are ignored with this option.
+
+       -O     Synonym for --to-stdout
+
+       --rsize
+              Specifies  a size (in bytes) for the internal libxar read buffer
+              while performing I/O.
+
+       --coalesce-heap
+              When multiple files in the archive are identical, only store one
+              copy  of  the  data in the heap.  This creates smaller archives,
+              but the archives created are not streamable.
+
+       --link-same
+              When the data section of multiple files are identical,  hardlink
+              them within the archive.
+
+       --recompress
+              Normally  archived  files that are already compressed in a reco‐
+              gized format will be archived but not compressed (as though they
+              matched a --no-compress expression).  If this option is set then
+              recompression of these files will be allowed (unless they  match
+              an explicit --no-compress expression).
+
+       --no-compress
+              Specifies  a  POSIX  regular expression of files to archive, but
+              not compress.  The archived files will be copied  raw  into  the
+              archive.  This can be used to exclude already gzipped files from
+              being gzipped during the archival process  when  using  --recom‐
+              press  or  unrecognized-by-xar  compressed formats.  This option
+              can be used multiple times.
+
+       --prop-include=&lt;propname&gt;
+              Specifies a file property to be included in the  archive.   When
+              this  option  is  specified,  only the specified options will be
+              included.  Anything not specifically included with  this  option
+              will be omitted.  This option can be used multiple times.
+
+       --prop-exclude=&lt;propname&gt;
+              Specifies a file property to be excluded from the archive.  When
+              this option is specified, all file properties will  be  included
+              except  the  specified properties.  Note that excluding the "ea"
+              property will exclude all extended attributes (including OS  X's
+              resource fork).  This option can be used multiple times.
+
+       --distribution
+              Creates an archive to only contain file properties safe for file
+              distribution.  Currently, only name, type, mode,  and  data  are
+              preserved with this option.
+
+       --keep-existing
+              Does  not overwrite existing files during extraction.  Keeps any
+              previously existing files while extracting.
+
+       -k     Synonym for --keep-existing.
+
+       --keep-setuid
+              When extracting without -p or -P options, xar will extract files
+              as  the  uid/gid  of the extracting process.  In this situation,
+              xar will strip setuid/setgid bits from the extracted  files  for
+              security reasons.  --keep-setuid will preserve the setuid/setgid
+              bits even though the uid/gid of the extracted file  is  not  the
+              same as the archived file.
+
+       --sig-size=&lt;n&gt;
+              Specifies the size in bytes of the signature placeholder to gen‐
+              erate when using the --sign or --replace-sign options.
+
+       --sig-len=&lt;n&gt;
+              Synonym for --sig-size=&lt;n&gt;.
+
+       --data-to-sign=&lt;file&gt;
+              Has xar dump the raw data to be signed to  the  specified  file.
+              This  is  simply the raw binary bytes of the --toc-cksum hash of
+              the raw, compressed XML header  data.   Requires  a  --toc-cksum
+              value  other than "none".  When generating a signature, this raw
+              hash value must first have the proper DigestInfo prefix added to
+              it   (see   <a href="http://tools.ietf.org/html/rfc3447">RFC   3447</a>   sections  9.2,  A.2.4  and  B.1).   The
+              --digestinfo-to-sign option automatically adds  the  appropriate
+              prefix and should normally be used instead of this option.
+
+       --digestinfo-to-sign=&lt;file&gt;
+              Has  xar  dump the DigestInfo data to be signed to the specified
+              file.  This is simply the raw binary bytes  of  the  --toc-cksum
+              hash  of  the  raw,  compressed  XML header data preceded by the
+              appropriate DigestInfo prefix (see <a href="http://tools.ietf.org/html/rfc3447">RFC 3447</a> sections 9.2,  A.2.4
+              and  B.1).   Requires  a --toc-cksum value of "md5", "sha1" (the
+              default), "sha224", "sha256", "sha384" or "sha512".
+
+       --sig-offset=&lt;file&gt;
+              Has xar dump the signature's byte offset within the archive  (as
+              an   ASCII  decimal  number)  to  the  specified  file.   Always
+              optional.
+
+       --cert-loc=&lt;filename&gt;
+              Specifies the location of a signing certificate in DER format to
+              include  in the archive.  This option can be used multiple times
+              to include a certificate chain.   The  first  --cert-loc  option
+              should specify the leaf signing certificate, the next its issuer
+              CA and so on so that the last --cert-loc= option  specifies  the
+              root      certificate      authority      for     the     chain.
+              --leaf-cert-loc=&lt;filename&gt;  and   --intermediate-cert-loc=&lt;file‐
+              name&gt;  are  accepted  as synonyms for --cert-loc= for historical
+              reasons.
+
+       --help Show a help summary.
+
+       -h     Synonym for --help
+
+       -V     Synonym for --version
+
+       --version
+              Display the version number of xar.  If --verbose is given before
+              --version show additional version information.
+
+<b>TIPS</b>
+       xar --replace-sign --sig-size=0 -f sample.xar
+
+              Completely removes any signatures from sample.xar
+
+<b>EXAMPLES</b>
+       xar -cf sample.xar /home/uid
+
+              Create an xar archive of all files in /home/uid
+
+       xar -tf sample.xar
+
+              List the contents of the xar archive sample.xar
+
+       xar -xf sample.xar
+
+              Extract the contents of sample.xar to the current working direc‐
+              tory
+
+       xar -cf sample.xar --toc-cksum=whirlpool! \
+              --file-cksum=whirlpool! /home/uid
+
+              Create an xar archive  of  all  files  in  /home/uid  using  the
+              whirlpool  message digest (requires EVP_get_digestbyname support
+              for whirlpool)
+
+<b>SIGNING</b>
+       In order to sign an archive, a leaf signing certificate in  DER  format
+       together  with its RSA private key in PEM format is required.  In addi‐
+       tion, if the leaf signing certificate is not a  self-signed  root  cer‐
+       tificate  then  all  the  other  certificates  in the certificate chain
+       (including the root certificate) should also be available in  DER  for‐
+       mat.
+
+       The  example here assumes the DER format certificates from leaf to root
+       are available in the files
+
+              leaf.crt -&gt; intorg.crt -&gt; toporg.crt -&gt; root.crt
+
+       and the leaf.crt private key is available in PEM  format  in  the  file
+       key.pem.   Also the archive to be signed is archive.xar and the openssl
+       and wc utility commands are available.  The example commands are for an
+       sh-compatible shell.
+
+       1. Determine the signature size
+
+              : | openssl dgst -sign key.pem -binary | wc -c &gt; siglen.txt
+
+       2. Extract the value to be signed and insert the certificates
+
+              xar --sign -f archive.xar --digestinfo-to-sign digestinfo.dat \
+                     --sig-size `cat siglen.txt` \
+                     --cert-loc leaf.crt --cert-loc intorg.crt \
+                     --cert-loc toporg.crt --cert-loc root.crt
+
+       3. Create the RSA signature
+
+              openssl rsautl -sign -inkey key.pem -in digestinfo.dat \
+                     -out signature.dat
+
+       4. Inject the RSA signature
+
+              xar --inject-sig signature.dat -f archive.xar
+
+       Step  1 simply places the size in bytes as an ASCII decimal number into
+       the file siglen.txt.  For any given specific RSA private key, this step
+       only  needs  to be done once as the length is determined by key charac‐
+       teristics such as bit length, signing algorithm etc. that are  indepen‐
+       dent of the data being signed.
+
+       Step  2, despite the name of the --sign option, only reserves space for
+       the signature to be injected in step 4, inserts  the  certificates  and
+       extracts  the DigestInfo to be signed.  It does not create a valid sig‐
+       nature.
+
+       Step 3 actually creates the signature using the openssl tool.
+
+       Step 4 inserts the real signature into the archive that previously  had
+       space reserved for it.  This final step creates a signed archive.
+
+       Note that whenever the archive data changes steps 2-4 must be repeated.
+       Repeating some or none of those steps will result in an invalid  signa‐
+       ture.   Furthermore,  xar  makes no attempt to verify that the injected
+       signature is compatible with the leaf signing  certificate  (the  first
+       --cert-loc  option).   For  example,  if the --toc-cksum type is "sha1"
+       (the default) then the leaf signing certificate's  signature  algorithm
+       must  be "sha1WithRSAEncryption" in order for the resulting xar archive
+       to have a valid signature.
+
+       More details on signing can be found at:
+
+              <a href="http://mackyle.github.com/xar/howtosign.html">http://mackyle.github.com/xar/howtosign.html</a>
+
+<b>BUGS</b>
+       Doesn't currently work with pipes or streams.   Might  be  fixed  in  a
+       future release.
+
+       Signature  support  is  clumsy  and  requires multiple steps and use of
+       external tools.
+
+       Should default to SHA-256 checksums if supported by the linked  library
+       but currently does not for backwards compatibility.
+
+       The formatting in this man page is suboptimal.
+
+       The   option   to  use  any  available  EVP_get_digestbyname  hash  for
+       --toc-cksum and/or --file-cksum by simply appending an !  to  its  name
+       remains mostly undocumented.
+
+       Probably  one  or  two more in there somewhere.  If you find one please
+       report it to:
+
+              <a href="https://github.com/mackyle/xar">https://github.com/mackyle/xar</a>
+
+<b>AUTHORS</b>
+       Rob Braun &lt;bbraun AT synack DOT net&gt;
+       Landon Fuller &lt;landonf AT bikemonkey DOT org&gt;
+       David Leimbach
+       Kyle J. McKay &lt;mackyle AT gmail DOT com&gt;
+       Kevin Van Vechten
+
+
+
+version 1.6.1                 September 16, 2012                        XAR(1)
+</pre></p>
+</body>
+</html>
