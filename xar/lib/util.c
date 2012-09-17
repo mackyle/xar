@@ -225,43 +225,54 @@ char *xar_get_mode(xar_t x, xar_file_t f) {
 	const char *mode = NULL;
 	const char *type = NULL;
 	char *ret;
-	mode_t m;
+	mode_t m = 0;
+	int gotmode = 0;
+	int gottype = 0;
+
 	(void)x;
 	xar_prop_get(f, "mode", &mode);
-	if( mode == NULL )
-		return  strdup("??????????");
-	errno = 0;
-	m = strtoll(mode, 0, 8);
-	if( errno )
-		return strdup("??????????");
+	if (mode) {
+		long long strmode;
+		errno = 0;
+		strmode = strtoll(mode, 0, 8);
+		if (!errno) {
+			m = (mode_t)strmode;
+			gotmode = 1;
+		}
+	}
 
 	xar_prop_get(f, "type", &type);
-	if( type == NULL )
-		return strdup("??????????");
-		
-	if( strcmp(type, "file") == 0 )
-		m |= S_IFREG;
-	else if( strcmp(type, "hardlink") == 0 )
-		m |= S_IFREG;
-	else if( strcmp(type, "directory") == 0 )
-		m |= S_IFDIR;
-	else if( strcmp(type, "symlink") == 0 )
-		m |= S_IFLNK;
-	else if( strcmp(type, "fifo") == 0 )
-		m |= S_IFIFO;
-	else if( strcmp(type, "character special") == 0 )
-		m |= S_IFCHR;
-	else if( strcmp(type, "block special") == 0 )
-		m |= S_IFBLK;
-	else if( strcmp(type, "socket") == 0 )
-		m |= S_IFSOCK;
+	if (type) {
+		if( strcmp(type, "file") == 0 )
+			m |= S_IFREG;
+		else if( strcmp(type, "hardlink") == 0 )
+			m |= S_IFREG;
+		else if( strcmp(type, "directory") == 0 )
+			m |= S_IFDIR;
+		else if( strcmp(type, "symlink") == 0 )
+			m |= S_IFLNK;
+		else if( strcmp(type, "fifo") == 0 )
+			m |= S_IFIFO;
+		else if( strcmp(type, "character special") == 0 )
+			m |= S_IFCHR;
+		else if( strcmp(type, "block special") == 0 )
+			m |= S_IFBLK;
+		else if( strcmp(type, "socket") == 0 )
+			m |= S_IFSOCK;
 #ifdef S_IFWHT
-	else if( strcmp(type, "whiteout") == 0 )
-		m |= S_IFWHT;
+		else if( strcmp(type, "whiteout") == 0 )
+			m |= S_IFWHT;
 #endif
-
-	ret = calloc(12,1);
-	strmode(m, ret);
+		gottype = 1;
+	}
+	ret = calloc(1, 12);
+	if (ret) {
+		strmode(m, ret);
+		if (!gottype)
+			ret[0] = '?';
+		if (!gotmode)
+			memset(ret+1, '?', 9);
+	}
 
 	return ret;
 }
