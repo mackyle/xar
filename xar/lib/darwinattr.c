@@ -682,7 +682,7 @@ static int32_t stragglers_archive(xar_t x, xar_file_t f, const char* file, void 
 #ifdef HAVE_GETATTRLIST
 	struct fits {
     		uint32_t     length;
-		struct timespec ts;
+		uint8_t      _ts[sizeof(struct timespec)];
 	};
 	struct fits fts;
 	struct attrlist attrs;
@@ -698,7 +698,9 @@ static int32_t stragglers_archive(xar_t x, xar_file_t f, const char* file, void 
 	ret = getattrlist(file, &attrs, &fts, sizeof(fts), 0);
 	if( ret == 0 ) {
 		xar_prop_t tmpp;
+		struct timespec ts;
 
+		memcpy(&ts, fts._ts, sizeof(ts));
 		tmpp = xar_prop_new(f, NULL);
 		if( tmpp ) {
 			char tmpc[128];
@@ -706,11 +708,11 @@ static int32_t stragglers_archive(xar_t x, xar_file_t f, const char* file, void 
 			xar_prop_setkey(tmpp, "FinderCreateTime");
 			xar_prop_setvalue(tmpp, NULL);
 			memset(tmpc, 0, sizeof(tmpc));
-			gmtime_r(&fts.ts.tv_sec, &tm);
+			gmtime_r(&ts.tv_sec, &tm);
 			strftime(tmpc, sizeof(tmpc), "%Y-%m-%dT%H:%M:%SZ", &tm);
 			xar_prop_pset(f, tmpp, "time", tmpc);
 			memset(tmpc, 0, sizeof(tmpc));
-			sprintf(tmpc, "%ld", fts.ts.tv_nsec);
+			sprintf(tmpc, "%ld", ts.tv_nsec);
 			xar_prop_pset(f, tmpp, "nanoseconds", tmpc);
 		}
 	}
