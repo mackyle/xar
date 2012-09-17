@@ -71,6 +71,18 @@
 #include "archive.h"
 #include "util.h"
 
+#ifdef __APPLE__
+#ifndef UF_COMPRESSED
+#define UF_COMPRESSED 0x00000020
+#endif
+#ifndef UF_TRACKED
+#define UF_TRACKED 0x00000040
+#endif
+#ifndef UF_HIDDEN
+#define UF_HIDDEN 0x00008000
+#endif
+#endif
+
 #ifndef LLONG_MIN
 #define LLONG_MIN LONG_LONG_MIN
 #endif
@@ -312,6 +324,22 @@ static int32_t flags_archive(xar_t x, xar_file_t f, const struct stat *sb) {
 	if( sb->st_flags & UF_OPAQUE )
 		x_addflag(f, "UserOpaque");
 #endif
+#ifdef UF_NOUNLINK
+	if( sb->st_flags & UF_NOUNLINK )
+		x_addflag(f, "UserNoUnlink");
+#endif
+#ifdef UF_COMPRESSED
+	if( sb->st_flags & UF_COMPRESSED )
+		x_addflag(f, "UserCompressed");
+#endif
+#ifdef UF_TRACKED
+	if( sb->st_flags & UF_TRACKED )
+		x_addflag(f, "UserTracked");
+#endif
+#ifdef UF_HIDDEN
+	if( sb->st_flags & UF_HIDDEN )
+		x_addflag(f, "UserHidden");
+#endif
 #ifdef SF_ARCHIVED
 	if( sb->st_flags & SF_ARCHIVED )
 		x_addflag(f, "SystemArchived");
@@ -323,6 +351,14 @@ static int32_t flags_archive(xar_t x, xar_file_t f, const struct stat *sb) {
 #ifdef SF_APPEND
 	if( sb->st_flags & SF_APPEND )
 		x_addflag(f, "SystemAppend");
+#endif
+#ifdef SF_NOUNLINK
+	if( sb->st_flags & SF_NOUNLINK )
+		x_addflag(f, "SystemNoUnlink");
+#endif
+#ifdef SF_SNAPSHOT
+	if( sb->st_flags & SF_NOUNLINK )
+		x_addflag(f, "SystemSnapshot");
 #endif
 
 #else /* !HAVE_STRUCT_STAT_ST_FLAGS */
@@ -365,6 +401,34 @@ int32_t xar_flags_extract(xar_t x, xar_file_t f, const char *file, char *buffer,
 	if( x_getprop(f, "UserOpaque", (char **)&tmp) == 0 )
 		flags |= UF_OPAQUE;
 #endif
+#ifdef UF_NOUNLINK
+	if( x_getprop(f, "UserNoUnlink", (char **)&tmp) == 0 )
+		flags |= UF_NOUNLINK;
+#endif
+#ifdef UF_COMPRESSED
+#ifdef __APPLE__
+/* The UF_COMPRESSED attribute can only be restored by reapplying HFS+
+ * file compression (which is not yet supported) which will then set the bit.
+ * But, if a compressed file was archived from a system prior to 10.6 and we've
+ * grabbed a com.apple.decmpfs attribute, then we should set the bit on
+ * extraction because the file data is already HFS+ compressed and failing to
+ * set the bit would result in an unusable file.
+ */
+	if (x_getprop(f, "UserCompressed", (char **)&tmp) == 0 && xar_ea_find(f, "com.apple.decmpfs"))
+		flags |= UF_COMPRESSED;
+#else
+	if( x_getprop(f, "UserCompressed", (char **)&tmp) == 0 )
+		flags |= UF_COMPRESSED;
+#endif
+#endif
+#ifdef UF_TRACKED
+	if( x_getprop(f, "UserTracked", (char **)&tmp) == 0 )
+		flags |= UF_TRACKED;
+#endif
+#ifdef UF_HIDDEN
+	if( x_getprop(f, "UserHidden", (char **)&tmp) == 0 )
+		flags |= UF_HIDDEN;
+#endif
 #ifdef SF_ARCHIVED
 	if( x_getprop(f, "SystemArchived", (char **)&tmp) == 0 )
 		flags |= SF_ARCHIVED;
@@ -375,6 +439,14 @@ int32_t xar_flags_extract(xar_t x, xar_file_t f, const char *file, char *buffer,
 #endif
 #ifdef SF_APPEND
 	if( x_getprop(f, "SystemAppend", (char **)&tmp) == 0 )
+		flags |= SF_APPEND;
+#endif
+#ifdef SF_NOUNLINK
+	if( x_getprop(f, "SystemNoUnlink", (char **)&tmp) == 0 )
+		flags |= SF_NOUNLINK;
+#endif
+#ifdef SF_SNAPSHOT
+	if( x_getprop(f, "SystemSnapshot", (char **)&tmp) == 0 )
 		flags |= SF_APPEND;
 #endif
 
