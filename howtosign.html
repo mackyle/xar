@@ -258,7 +258,7 @@ These example signing commands are written for an <a href="http://pubs.opengroup
 <p>
 To successfully sign an xar file using the commands in this section, the xar archive must use
 <a href="http://www.itl.nist.gov/fipspubs/fip180-1.htm">SHA-1 checksum</a> hashes (the default) and the leaf
-signing certificate must use SHA-1 with RSA Encryption (aka sha1WithRSAEncryption — see 
+signing certificate must use the SHA-1 with RSA Encryption (aka sha1WithRSAEncryption — see
 <a href="http://tools.ietf.org/html/rfc3447#appendix-A.2">RFC 3447 section A.2</a>) signature algorithm
 for signatures (see
 <a href="#checkalg">here</a> for instructions on checking a certificate’s signature algorithm).
@@ -436,7 +436,7 @@ but PEM format certificates are not helpful in creating signed xar archives.
 Given a DER format certificate file named <tt>cert.der</tt> the following command will produce a text description of it:
 </p>
 <pre>
-openssl x509 -in cert.der -noout -text
+openssl x509 -inform der -in cert.der -noout -text
 </pre>
 
 <p>
@@ -490,9 +490,9 @@ You may be able to obtain one of these signing certificates for free from
 <a href="https://developer.apple.com/programs/safari/">here</a>.
 </p>
 
-<p>Note that as of OS X 10.8, the phrase “identified developers” seems to be a euphemism for signed by an
+<p>Note that as of OS X 10.8 (and 10.7.5), the phrase “identified developers” seems to be a euphemism for signed by an
 Apple-issued certificate that’s part of a certificate chain that leads to an Apple root certificate so these
-extensions would seem to qualify.
+signed extensions would appear to qualify.
 </p>
 
 <h2 id="github">GitHub</h2>
