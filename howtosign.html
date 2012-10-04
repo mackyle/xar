@@ -12,12 +12,19 @@
       background-color: white;
       font-family: Times, "Times New Roman", serif;
       color: black;
-      margin-bottom: 55em;
     }
     #container {
       margin: 0 auto;
       max-width: 90ex;
       position: relative;
+    }
+    @media screen {
+      .last { margin-bottom: -1em; }
+      .aftermargin {
+        position: absolute;
+        height: 100%;
+        width: 1px;
+      }
     }
     h1 { font-size: 3.8em; color: black; margin-bottom: 0.1em; }
     h1 .small { font-size: 0.4em; }
@@ -496,7 +503,7 @@ signed extensions would appear to qualify.
 </p>
 
 <h2 id="github">GitHub</h2>
-<p class="left">
+<p class="left last">
   Visit the GitHub project page (source code etc.) at <a href="https://github.com/mackyle/xar">https://github.com/mackyle/xar</a>.
 </p>
 
@@ -508,5 +515,5 @@ signed extensions would appear to qualify.
 
 </div>
 
-</body>
+<span class="aftermargin"></span></body>
 </html>
