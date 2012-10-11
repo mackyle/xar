@@ -41,7 +41,7 @@
 	* include/xar.h.in lib/{archive.h,c;util.c} src/xar.c: Modify the way the new hash values are stored in the header (by name instead of number) so that any hash can be used for TOC checksum
 	* src/xar.c: Relegate signature-related chatty messages to verbose only (-v) and make sure all errors really go to stderr
 	* src/xar.c: Improve temporary file handling (honor $TMPDIR/$TMP before going to /tmp, make sure it gets removed and honor umask)
-	* src/xar.c: Tone done error messages (No! More! Freaking! Exclamation! Points! Yahoo!)
+	* src/xar.c: Tone down error messages (No! More! Freaking! Exclamation! Points! Yahoo!)
 	* src/xar.c src/xar.1: Update man page/help to reflect all current options
 	* src/xar.c: Replace --sha1-digest-info-to-sign with --digest-info-to-sign and support more 5 more digests
 	2012-09-11 Kyle J. McKay mackyle@gmail.com
