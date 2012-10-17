@@ -43,7 +43,6 @@
 	* src/xar.c: Improve temporary file handling (honor $TMPDIR/$TMP before going to /tmp, make sure it gets removed and honor umask)
 	* src/xar.c: Tone down error messages (No! More! Freaking! Exclamation! Points! Yahoo!)
 	* src/xar.c src/xar.1: Update man page/help to reflect all current options
-	* src/xar.c: Replace --sha1-digest-info-to-sign with --digest-info-to-sign and support more 5 more digests
 	2012-09-11 Kyle J. McKay mackyle@gmail.com
 	* lib/archive.c lib/hash.c src/xar.c src/xar.1 test/validate.c: Support new hash values
 	* lib/{bzxar.h,c;io.h,c;lzmaxar.h,c;zxar.h,c} src/xar.c,1: Support new XAR_OPT_RECOMPRESS/--recompress option and associated behavior of not recompressing recognized compression formats by default.
