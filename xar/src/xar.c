@@ -677,6 +677,7 @@ static int is_valid_dir(const char *dirpath) {
 	else
 		result = chdir(".");
 	err = fchdir(curdir);
+	close(curdir);
 	return result == 0;
 }
 

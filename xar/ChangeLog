@@ -1,4 +1,6 @@
 ﻿devel
+	2012-11-21 Kyle J. McKay mackyle@gmail.com
+	* xar.c: Don't leak file handle in is_valid_dir
 	2012-09-17 Kyle J. McKay mackyle@gmail.com
 	* ChangeLog: Add recent updates
 	* Add NEWS file
