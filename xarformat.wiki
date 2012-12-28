@@ -7,11 +7,11 @@ The XAR file format has three main regions, The Header, The Table of Contents, a
 
 === The Header ===
 
-The header starts with 32 bits of file magic ('xar!') in network byte order. The next 16 bits are the size of the header (including the 32 bits of file magic) in network byte order. A 16 bit xar file version number follows in network byte order, the current version is zero. Last is the 64 bit length of the table of contents regions, also in network byte order. The header may be represented as the following xar_header C structure.
+The header starts with 32 bits of file magic ('xar!') in network byte order. The next 16 bits are the size of the header (including the 32 bits of file magic) in network byte order. A 16 bit xar file version number follows in network byte order, the current version is one. Last is the 64 bit length of the table of contents regions, also in network byte order. The header may be represented as the following xar_header C structure.
 
 <pre>
 #define XAR_HEADER_MAGIC 0x78617221 /* 'xar!' */
-#define XAR_HEADER_VERSION 0
+#define XAR_HEADER_VERSION 1
 #define XAR_HEADER_SIZE sizeof(struct xar_header)
 
 /*
