@@ -34,6 +34,8 @@ The size field MUST be at least 28.  The version field SHOULD be 1 (the xar libr
 
 Older versions of the xar library do not correctly handle a header size value of other than 28 (even when cksum_alg is 0, 1 or 2).
 
+Note that all fields of the header (magic, size, version, toc_length_compressed, toc_length_uncompressed, cksum_alg) are always stored in xar files in network byte (aka big endian) order.
+
 If cksum_alg is 3 then the size field MUST be a multiple of 4 and at least 32.  Furthermore,
 immediately following the cksum_alg field a nul terminated nul padded string which is the
 long name of the hash MUST be present and MUST NOT be the empty ("") string or "none".
