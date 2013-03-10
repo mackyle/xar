@@ -71,6 +71,6 @@ be used) will install.
 See the xar/INSTALL file for additional information.
 
 Pre-bootstrapped xar release tarballs (i.e. with configure already generated)
-can be found on the downloads page at:
+can be found in the downloads section of the project page at:
 
-  https://github.com/mackyle/xar/downloads
+  http://mackyle.github.com/xar/#downloads
