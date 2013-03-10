@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+<!--
+<head>
+-->
 <head>
   <meta charset='utf-8' />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <script type="text/javascript">var NREUMQ=[];NREUMQ.f=function(){}</script>
 
-  <title>mackyle/xar @ GitHub</title>
+  <title>mackyle/xar</title>
 
   <style type="text/css">
     body {
@@ -16,16 +20,26 @@
     #container {
       margin: 0 auto;
       max-width: 90ex;
+      position: relative;
+    }
+    @media screen {
+      .last { margin-bottom: -1em; }
+      .aftermargin {
+        position: absolute;
+        height: 100%;
+        width: 1px;
+      }
     }
     h1 { font-size: 3.8em; color: black; margin-bottom: 0.1em; }
     h1 .small { font-size: 0.4em; }
     h1 a { text-decoration: none; }
     h2 { font-size: 1.5em; color: black; }
     h3 { color: black; }
-    p.note:before, h1, h2, h3, th, dt, .nb { font-family: Helvetica, Arial, FreeSans, sans-serif; font-weight: normal; }
+    p.note:before, h1, h2, h3, th, .nb { font-family: Helvetica, Arial, FreeSans, sans-serif; font-weight: normal; }
     a { color: black; }
     .description { font-size: 1.2em; margin-bottom: 2em; margin-top: 2em; font-style: italic; }
     .download { float: right; }
+    tt, .nowrap { white-space: nowrap; }
     .nb { font-weight: bold; font-size: 75% }
     pre, ttx, .hash tdx { font-family: Menlo, Monaco, Consolas, Courier, "Courier New", monospace; }
     pre { font-size: 75%;}
@@ -78,15 +92,14 @@
 </head>
 
 <body>
-  <a href="https://github.com/mackyle/xar"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 
 <div id="container">
 
 <div class="download">
-  <a href="https://github.com/mackyle/xar/zipball/master">
-    <img border="0" width="90" src="https://github.com/images/modules/download/zip.png" /></a>
-  <a href="https://github.com/mackyle/xar/tarball/master">
-    <img border="0" width="90" src="https://github.com/images/modules/download/tar.png" /></a>
+  <a href="https://github.com/mackyle/xar/archive/master.tar.gz">
+    <img border="0" src="data:image/gif;base64,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" /></a>
+  <a href="https://github.com/mackyle/xar/archive/master.zip">
+    <img border="0" src="data:image/gif;base64,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" /></a>
 </div>
 
 <h1><a href="https://github.com/mackyle/xar">xar</a>
@@ -100,7 +113,7 @@
 
 </p><p>
 
-This GitHub fork/clone of the <a href="http://code.google.com/p/xar/">xar project</a> includes all the original history (tags, branches, etc.) and wiki pages from the subversion repository with the following changes:
+This fork/clone of the <a href="http://code.google.com/p/xar/">xar project</a> includes all the original history (tags, branches, etc.) and wiki pages from the subversion repository with the following changes:
 
 <ol>
 <li>The .wiki pages were converted to a GitHub-friendly .wiki format</li>
@@ -174,38 +187,38 @@ Other unix-ish/linux-ish platforms that support sh, configure scripts, GNU make,
 <h2>Sources</h2>
 <p>
   You can download the raw source files of this project in either
-  <a href="https://github.com/mackyle/xar/zipball/master">zip</a> or
-  <a href="https://github.com/mackyle/xar/tarball/master">tar</a> formats.
+  <a href="https://github.com/mackyle/xar/archive/master.tar.gz">tar</a> or
+  <a href="https://github.com/mackyle/xar/archive/master.zip">zip</a> formats.
 </p>
 <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
   by running:
 </p>
-<pre class="inset">$ git clone git://github.com/mackyle/xar</pre>
-<p>Pre-bootstrapped source tarballs (i.e. do not require autotools and have a pre-generated configure script) are available for these tags:
+<pre class="inset">git clone git://github.com/mackyle/xar</pre>
+
+<h2 id="downloads">Downloads</h2>
+<p>Pre-bootstrapped source tarballs (i.e. do not require autotools and have a pre-generated configure script) are available for these tags:</p>
 <dl>
 
-<dt id="xar-1.6.1_tb"><a href="https://github.com/downloads/mackyle/xar/xar-1.6.1.tar.gz"><span class="down"></span>xar-1.6.1.tar.gz</a> source tarball (tag: <tt>xar-1.6.1</tt>)</dt>
+<dt id="xar-1.6.1_tb"><a href="https://github.com/downloads/mackyle/xar/xar-1.6.1.tar.gz"><span class="down"></span><tt>xar-1.6.1.tar.gz</tt></a> Pre-bootstrapped source tarball (tag: <tt>xar-1.6.1</tt>)</dt>
 <dd><table class='hash'><tr><td>MD5</td><td>a624535d6a1e8fdf420b36a6b334047b</td></tr>
 <tr><td>SHA1</td><td>6f7827a034877eda673a22af1c42dc32f14edb4c</td></tr>
 <tr><td>SHA256</td><td>ee46089968457cf710b8cf1bdeb98b7ef232eb8a4cdeb34502e1f16ef4d2153e</td></tr></table></dd>
 
 </dl>
-</p>
 <p>See also the <a href="https://github.com/mackyle/xar/downloads">project&#x2019;s downloads area</a>.</p>
 
-<h2>GitHub</h2>
+<h2>Git Repository Browser</h2>
 <p class="left">
-  Visit the GitHub project page (source code etc.) at <a href="https://github.com/mackyle/xar">https://github.com/mackyle/xar</a>.
+  Repository browsers are available at:
 </p>
-
-<!--
-<div class="footer">
-  get the xar source code on GitHub : <a href="https://github.com/mackyle/xar">mackyle/xar</a>
-</div>
--->
+<ul class="last">
+<a href="https://github.com/mackyle/xar">https://github.com/mackyle/xar</a> (GitHub)
+</ul>
 
 </div>
-
   
+<span class="aftermargin"></span></body>
+<!--
 </body>
+-->
 </html>
