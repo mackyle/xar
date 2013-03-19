@@ -96,18 +96,22 @@
     }
 
     .sidebar-fixed {
-      display: block;
+      display: none;
       position: absolute;
       left: -40ex;
       text-align: right;
       font-size: 75%;
       margin: 0;
     }
+    @media screen {
+      .sidebar-fixed { display: block; }
+    }
     .sidebar {
       display: block;
       position: fixed;
-      padding: 2px;
+      padding: 3px;
       width: 36ex;
+      border-right: thin dotted silver;
     }
     .sidebar a:visited, .sidebar a:link {
       color: inherit;
@@ -123,6 +127,20 @@
       margin-left: 8px
     }
 
+    :link, :visited {
+      text-decoration: none !important;
+      border-bottom: 1px dotted !important;
+    }
+    :link:hover, :visited:hover {
+      border-bottom: 1px solid !important;
+    }
+    @media print {
+      :link, :visited {
+        border-bottom: 0 !important;
+        color: inherit !important;
+      }
+    }
+
     span.down {
       display: inline-block;
       width: 1em;
@@ -134,23 +152,39 @@
       background-size: 1em 1em;
       background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAQnRFWHRDb21tZW50AHRJTUUgY2h1bmtsZW4gNyBpZ25vcmVkDUFTQ0lJOiAuLi4uLjA3DUhFWDogMDdENjA5MTYxMDMwMzeLgNWuAAACTUlEQVR4nJRQW2iSYRj+tgq6k5BuDILdObqoYLBRxsjBsKvoIoKKokbrMMibrZsMNseojPJAbINg0zZlFVEi1Yi8aNJWiXlG51lvdOiNiBcefp++74tfZGzQXnh43+89PN/zvoTsYhfmeoQrr3oxsngSY0v9UFvPYLfeHe2c8Yjw5rcB7z0v8fHPLNTLA3sjGNIfFqw/n+PFVzUnufu6b28Ep59JBMu6Dk9Xx/DWbcTIwon/I+h5RIrHpruK1xZPYeHHE8x8HsWK2wDNh4u4v9yHByuKnYmi0agzHA7j6MN9uG4Zwuz3STp8D5OOGzB8G+cqphyXcYse1Ww2O7cPD6ZSKVQqFWwVt6AyHsfNpWHMrWmh/XQblg0dxt+dx6V5OcrlMux2O0wmk7JNEAqFnIVCAfF4HLlcDsl0Amf1coxaVZhfm8Yd6zAllcHlcsHv9yMQCECn0/1TEQwGBzc3N1EqlcBUUDW8YePXOhTaQ7hqVmDg8UG43W74fD4kk0mwz+ga0Gg0SuL1evnv+Xwe2WwWmUyGI51OIxqPoHfqABKJBB9knqlkdY/Hg4mJCWd3vV4n1WqV0GFCCxxUCaHNJJvKEX2/g8RiMRKJRAg9MgddmdB7ETbLCPgx2EMQBEJ35A10LUJ/42BkVAEnZj21Wo1IJBI2o+xmj2azycGKIsScmN8eNxoNjv2MQBxqtVpELpdzzwCgnWdxZ575NoFUKuWNrCBCbGTGYmaddZlMxpV02Wy2L3QXFbsBI+v0IkS5DJ2rUqLVvwAAAP//AwDkwh7q3xB35AAAAABJRU5ErkJggg==);
     }
+
+    span.tar {
+      display: inline-block;
+      width: 54px;
+      height: 72px;
+      vertical-align: baseline;
+      background-repeat: no-repeat;
+      background-position: 0% 100%;
+      background-image: url(data:image/gif;base64,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);
+    }
+
+    span.zip {
+      display: inline-block;
+      width: 54px;
+      height: 72px;
+      vertical-align: baseline;
+      background-repeat: no-repeat;
+      background-position: 0% 100%;
+      background-image: url(data:image/gif;base64,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);
+    }
   </style>
 </head>
 
 <body>
-  <a href="https://github.com/mackyle/xar"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 
 <div id="container">
 
 <div class="download">
-  <a href="https://github.com/mackyle/xar/zipball/master">
-    <img border="0" width="90" src="https://github.com/images/modules/download/zip.png" /></a>
-  <a href="https://github.com/mackyle/xar/tarball/master">
-    <img border="0" width="90" src="https://github.com/images/modules/download/tar.png" /></a>
+  <a href="https://github.com/mackyle/xar/archive/master.tar.gz"><span class="tar"></span></a>
+  <a href="https://github.com/mackyle/xar/archive/master.zip"><span class="zip"></span></a>
 </div>
 
-<h1><a href="https://github.com/mackyle/xar">xar</a>
-  <!--<span class="small">by <a href="https://github.com/mackyle">mackyle</a></span>--></h1>
+<h1><a href="https://github.com/mackyle/xar">xar</a></h1>
 
 <div class="description">
   eXtensible ARchiver
@@ -167,7 +201,7 @@
 <a href="#github"      >GitHub</a><br />
 </span></span></span>
 
-<p>A fork/clone of the subversion xar repository from <a href="http://xar.googlecode.com/svn/">http://xar.googlecode.com/svn/</a> that includes several enhancements and bug fixes including very basic command line signature support (master branch).  See <a href="http://mackyle.github.com/xar/">the xar project page</a> for more information.
+<p>A fork/clone of the subversion xar repository from <a href="http://xar.googlecode.com/svn/">http://xar.googlecode.com/svn/</a> that includes several enhancements and bug fixes including very basic command line signature support (master branch).  See <a href="./">the xar project page</a> for more information.
 
 </p>
 
@@ -506,16 +540,10 @@ Apple-issued certificate that’s part of a certificate chain that leads to an A
 signed extensions would appear to qualify.
 </p>
 
-<h2 id="github">GitHub</h2>
+<h2>Project Page</h2>
 <p class="left last">
-  Visit the GitHub project page (source code etc.) at <a href="https://github.com/mackyle/xar">https://github.com/mackyle/xar</a>.
+  Visit the xar project page (source code etc.) at <a href="./">http://mackyle.github.com/xar</a>.
 </p>
-
-<!--
-<div class="footer">
-  get the xar source code on GitHub : <a href="https://github.com/mackyle/xar">mackyle/xar</a>
-</div>
--->
 
 </div>
 
