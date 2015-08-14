@@ -1618,7 +1618,7 @@ static int dump_header(const char *filename) {
 
 static int dumptoc_raw(const char *filename, const char* tocfile) {
 	int fd, toc;
-	xar_header_ex_t xh;
+	xar_header_t xh;
 	uint64_t clen;
 	uint16_t hlen;
 	unsigned buffer_size = 4096;
