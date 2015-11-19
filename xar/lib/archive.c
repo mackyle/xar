@@ -1437,22 +1437,17 @@ int32_t xar_extract_tobuffer(xar_t x, xar_file_t f, char **buffer) {
 	return xar_extract_tobuffersz(x, f, buffer, &size);
 }
 
-/* xar_extract_tobuffer
+/* xar_extract_size_needed
 * x: archive to extract from
-* buffer: buffer to extract to
-* size: On return, this will contain the size of the memory pointed to by buffer
-* Returns 0 on success, -1 on failure.
-* Summary: This is the entry point for extraction to a buffer.
-* On success, a buffer is allocated with the contents of the file
-* specified.  The caller is responsible for freeing the returend buffer.
-* Example: xar_extract_tobuffer(x, "foo/bar/blah",&buffer)
+* f: file associated with x
+* size: On return, this will contain the size of memory needed to extract
+* Summary: This method will return the required size of an external buffer
+* to pass to xar_extract_tobuffersz_external.
+* On success, 0 is returned, otherwise -1.
+* Example: xar_extract_size_needed(x, f, &size)
 */
-int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *size) {
+int32_t xar_extract_size_needed(xar_t x, xar_file_t f, size_t *size) {
 	const char *sizestring = NULL;
-	int32_t ret;
-
-	if (!buffer || !size)
-		return -1;
 
 	if(0 != xar_prop_get(f,"data/size",&sizestring)){
 		if(0 != xar_prop_get(f, "type", &sizestring))
@@ -1465,6 +1460,27 @@ int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *siz
 	}
 
 	*size = strtoull(sizestring, (char **)NULL, 10);
+
+	return 0;
+}
+
+/* xar_extract_tobuffersz
+* x: archive to extract from
+* buffer: buffer to extract to
+* size: On return, this will contain the size of the memory pointed to by buffer
+* Returns 0 on success, -1 on failure.
+* Summary: This is the entry point for extraction to an external buffer.
+* Example: xar_extract_tobuffersz(x, "foo/bar/blah", &buffer, &size)
+*/
+int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *size) {
+	int32_t ret;
+
+	if (!buffer || !size)
+		return -1;
+
+	if (0 != xar_extract_size_needed(x, f, size))
+		return -1;
+
 	*buffer = malloc(*size);
 	
 	if(!(*buffer)){
@@ -1481,6 +1497,35 @@ int32_t xar_extract_tobuffersz(xar_t x, xar_file_t f, char **buffer, size_t *siz
 	}
 
 	return ret;
+}
+
+/* xar_extract_tobuffersz_external
+* x: archive to extract from
+* buffer: buffer to extract to, preallocated
+* size: length of buffer
+* Returns 0 on success, -1 on failure.
+* Summary: This is the entry point for extraction to a buffer.
+* On success, a buffer is allocated with the contents of the file
+* specified.  The caller is responsible for freeing the returend buffer.
+* Example: xar_extract_tobuffersz_external(x, "foo/bar/blah", buffer, size)
+*/
+int32_t xar_extract_tobuffersz_external(xar_t x, xar_file_t f, char *buffer, size_t size) {
+		size_t size_needed;
+	int32_t ret;
+
+	if (!buffer)
+		return -1;
+
+	if (!size)
+		return 0;
+
+	if(0 != xar_extract_size_needed(x, f, &size_needed))
+		return -1;
+
+	if(size != size_needed)
+		return -1;
+
+	return xar_arcmod_extract(x, f, NULL, buffer, size);
 }
 
 int32_t xar_extract_tostream_init(xar_t x, xar_file_t f, xar_stream *stream) {
