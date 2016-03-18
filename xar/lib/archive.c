@@ -467,6 +467,7 @@ int xar_close(xar_t x) {
 	xar_attr_t a;
 	xar_file_t f;
 	int ret, retval = 0;
+	int fd = -1, tocfd = -1;
 
 	if (XAR(x)->heap_fd == -2)
 		goto CLOSE_BAIL;
@@ -475,12 +476,11 @@ int xar_close(xar_t x) {
 	if( XAR(x)->heap_fd != -1 ) {
 		char *tmpser;
 		void *rbuf, *wbuf = NULL;
-		int fd, r, off, wbytes, rbytes;
+		int r, off, wbytes, rbytes;
 		long rsize, wsize;
 		z_stream zs;
 		uint64_t ungztoc, gztoc;
 		unsigned char chkstr[HASH_MAX_MD_SIZE];
-		int tocfd;
 		char timestr[128];
 		struct tm tmptm;
 		time_t t;
@@ -820,6 +820,11 @@ CLOSE_BAIL:
 	free(XAR(x)->readbuf);
 	EVP_MD_CTX_destroy(XAR(x)->toc_ctx);
 	free((void *)x);
+	
+	if (fd >= 0)
+		close(fd);
+	if (tocfd >= 0)
+		close(tocfd);
 
 	return retval;
 }
