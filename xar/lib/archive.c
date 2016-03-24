@@ -1764,6 +1764,12 @@ static int32_t xar_unserialize(xar_t x) {
 					}
 
 					s = xar_subdoc_new(x, (const char *)name);
+					if( !s ) {
+						xmlFreeTextReader(reader);
+						xmlDictCleanup();
+						xmlCleanupCharEncodingHandlers();
+						return -1;
+					}
 					XAR_SUBDOC(s)->attrs = attrs;
 					xar_subdoc_unserialize(s, reader);
 				}
