@@ -92,6 +92,10 @@ char *xar_get_path(xar_file_t f) {
 	xar_file_t i;
 
 	xar_prop_get(f, "name", &name);
+	if( !name ) {
+		asprintf(&ret, "");
+		return ret;
+	}
 	ret = strdup(name);
 	for(i = XAR_FILE(f)->parent; i; i = XAR_FILE(i)->parent) {
 		int err;
