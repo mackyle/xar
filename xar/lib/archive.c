@@ -1541,6 +1541,8 @@ int32_t xar_extract(xar_t x, xar_file_t f) {
 	const char *fspath;
 
 	fspath = XAR_FILE(f)->fspath;
+	if( !fspath )
+		return -1;
 	if (XAR(x)->stripcomps && (fspath=xar_strip_components(fspath, XAR(x)->stripcomps)) == NULL)
 		return -1;
 	if (XAR(x)->tostdout) {
@@ -1556,6 +1558,11 @@ int32_t xar_extract(xar_t x, xar_file_t f) {
 	}
 	else {
 		if( (strstr(fspath, "/") != NULL) && (stat(fspath, &sb)) && (XAR_FILE(f)->parent_extracted == 0) ) {
+			if( !XAR_FILE(f)->fspath ) {
+				xar_err_set_string(x, "Unable to retrieve filename");
+				xar_err_callback(x, XAR_SEVERITY_NONFATAL, XAR_ERR_ARCHIVE_EXTRACTION);
+				return -1;
+			}
 			tmp1 = strdup(XAR_FILE(f)->fspath);
 			dname = dirname(tmp1);
 			tmpf = xar_file_find(XAR(x)->files, dname);
