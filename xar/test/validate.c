@@ -14,7 +14,7 @@
 #include <regex.h>
 #include <errno.h>
 #include <openssl/evp.h>
-#include <xar/xar.h>
+#include "xar.h"
 
 off_t HeapOff = 0;
 
@@ -129,7 +129,7 @@ void prop_check(int fd, xar_t x, xar_file_t f) {
 }
 
 int main(int argc, char *argv[]) {
-	char *file = argv[1];
+	char *file = getenv ("XARFILE");
 	xar_t x;
 	xar_iter_t ifile, iprop, iattr;
 	xar_file_t f;

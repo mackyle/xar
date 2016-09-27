@@ -38,11 +38,11 @@
 #ifndef _XAR_H_
 #define _XAR_H_
 
-#define XAR_VERSION "@XAR_VERSION@"
+#define XAR_VERSION "@PACKAGE_VERSION@"
 #define XAR_VERSION_NUM @XAR_NUMERIC_VERSION@
 
 #include <sys/types.h>
-@C99_FIXED_WIDTH_TYPE_HEADER@
+#include <stdint.h>
 #include <sys/stat.h>
 
 #ifdef __cplusplus

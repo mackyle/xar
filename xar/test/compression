@@ -1,6 +1,8 @@
 #!/bin/sh
 
-. functions
+set -x
+
+. ${srcdir}/functions
 
 echo "Testing normal archival creation/extraction with default compression"
 rm -rf bin.xar bin

@@ -121,7 +121,7 @@ static xar_file_t xar_link_lookup(xar_t x, dev_t dev, ino_t ino, xar_file_t f) {
 	xar_file_t ret;
 
 	memset(key, 0, sizeof(key));
-	snprintf(key, sizeof(key)-1, "%08" DEV_HEXSTRING "%08" INO_HEXSTRING, DEV_CAST dev, INO_CAST ino);
+	snprintf(key, sizeof(key)-1, "%08jx%08jx", (intmax_t) dev, (intmax_t) ino);
 	ret = xmlHashLookup(XAR(x)->ino_hash, BAD_CAST(key));
 	if( ret == NULL ) {
 		xmlHashAddEntry(XAR(x)->ino_hash, BAD_CAST(key), XAR_FILE(f));
@@ -547,14 +547,14 @@ int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *bu
 	}
 
 	if( xar_check_prop(x, "inode") ) {
-		if (asprintf(&tmpstr, "%"INO_STRING, XAR(x)->sbcache.st_ino) == -1)
+		if (asprintf(&tmpstr, "%jd", (intmax_t) XAR(x)->sbcache.st_ino) == -1)
 			return -1;
 		xar_prop_set(f, "inode", tmpstr);
 		free(tmpstr);
 	}
 
 	if( xar_check_prop(x, "deviceno") ) {
-		if (asprintf(&tmpstr, "%"DEV_STRING, DEV_CAST XAR(x)->sbcache.st_dev) == -1)
+		if (asprintf(&tmpstr, "%jd", (intmax_t) XAR(x)->sbcache.st_dev) == -1)
 			return -1;
 		xar_prop_set(f, "deviceno", tmpstr);
 		free(tmpstr);

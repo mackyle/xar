@@ -1,6 +1,13 @@
 #!/bin/sh
 
-. functions
+. ${srcdir}/functions
+
+if [ -z "`which setfattr`" ]
+then
+	# No ATTR installed
+	echo 'No attr utilities, skipping' >&2
+	exit 77
+fi
 
 cleanup() {
 	rm -rf h a a.xar

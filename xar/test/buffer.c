@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <sys/fcntl.h>
 #include <string.h>
-#include <xar/xar.h>
+#include "xar.h"
 
 int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
 {
@@ -19,20 +19,16 @@ int main(int argc, char *argv[])
 	ssize_t red;
 	xar_t x;
 	xar_file_t f, f2;
+	const char *FILENAME = getenv ("XARFILE");
 
-	if( argc < 2 ) {
-		fprintf(stderr, "usage: %s <filename>\n", argv[0]);
-		exit(1);
-	}
-
-	fd = open(argv[1], O_RDONLY);
+	fd = open(FILENAME, O_RDONLY);
 	if( fd < 0 ) {
-		fprintf(stderr, "Unable to open file %s\n", argv[1]);
+		fprintf(stderr, "Unable to open file %s\n", FILENAME);
 		exit(2);
 	}
 
 	if( fstat(fd, &sb) < 0 ) {
-		fprintf(stderr, "Unable to stat file %s\n", argv[1]);
+		fprintf(stderr, "Unable to stat file %s\n", FILENAME);
 		exit(3);
 	}
 
