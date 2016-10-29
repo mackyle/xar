@@ -35,6 +35,7 @@
  * Christopher Ryan <ryanc@apple.com>
  */
 
+#include <config.h>
 #include <xar/arcmod.h>
 #include <xar/archive.h>
 #include <xar/stat.h>

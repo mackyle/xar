@@ -36,7 +36,6 @@
  * Christopher Ryan <ryanc@apple.com>
 */
 
-
 #include <config.h>
 #ifndef HAVE_ASPRINTF
 #include <xar/asprintf.h>

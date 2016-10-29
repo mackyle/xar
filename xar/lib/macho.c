@@ -29,16 +29,13 @@
  * Christopher Ryan <ryanc@apple.com>
 */
 
-#define _FILE_OFFSET_BITS 64
-
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <arpa/inet.h>
-
-#include <config.h>
 #ifndef HAVE_ASPRINTF
 #include <xar/asprintf.h>
 #endif

@@ -30,13 +30,12 @@
  * Christopher Ryan <ryanc@apple.com>
 */
 
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <limits.h>
-
-#include <config.h>
 #ifndef HAVE_ASPRINTF
 #include <xar/asprintf.h>
 #endif

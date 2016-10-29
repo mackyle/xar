@@ -30,7 +30,7 @@
  * Christopher Ryan <ryanc@apple.com>
 */
 
-#define _FILE_OFFSET_BITS 64
+#include <config.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>

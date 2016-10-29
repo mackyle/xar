@@ -40,8 +40,6 @@
  * Christopher Ryan <ryanc@apple.com>
 */
 
-#define _FILE_OFFSET_BITS 64
-
 #include <config.h>
 #ifndef HAVE_ASPRINTF
 #include <xar/asprintf.h>

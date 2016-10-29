@@ -32,7 +32,7 @@ AC_CHECK_MEMBER([struct stat.st_flags])
 
 AC_SEARCH_LIBS([acl_get_file], [acl])
 
-AC_CHECK_FUNC([asprintf])
+AC_CHECK_FUNCS([asprintf])
 
 PKG_CHECK_MODULES([LIBXML2], [libxml-2.0 >= 2.6.11])
 PKG_CHECK_MODULES([OPENSSL], [openssl])
