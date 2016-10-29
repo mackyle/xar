@@ -170,8 +170,7 @@ xar_gzip_toheap_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
           tmpp = xar_prop_pset (f, p, "encoding", NULL);
           if (tmpp)
             xar_attr_pset (f, tmpp, "style",
-                           XAR (x)->
-                           rfcformat ? "application/zlib" :
+                           XAR (x)->rfcformat ? "application/zlib" :
                            "application/x-gzip");
         }
     }

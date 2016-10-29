@@ -369,27 +369,31 @@ macho_parse (xar_file_t f, void *in, size_t inlen,
               if (context->me[context->curme].byteswapped)
                 {
                   struct lc *lc = (struct lc *) tmpin;
-                  context->me[context->curme].lc[context->me[context->curme].
-                                                 curlc].cmd =
-                    xar_swap32 (lc->cmd);
-                  context->me[context->curme].lc[context->me[context->curme].
-                                                 curlc].cmdsize =
-                    xar_swap32 (lc->cmdsize);
+                  context->me[context->curme].lc[context->
+                                                 me[context->curme].curlc].
+                    cmd = xar_swap32 (lc->cmd);
+                  context->me[context->curme].lc[context->
+                                                 me[context->curme].curlc].
+                    cmdsize = xar_swap32 (lc->cmdsize);
                 }
               else
                 {
-                  memcpy (&context->me[context->curme].
-                          lc[context->me[context->curme].curlc], tmpin,
+                  memcpy (&context->
+                          me[context->curme].lc[context->me[context->curme].
+                                                curlc], tmpin,
                           sizeof (struct lc));
                 }
               consumed = (int32_t) (off + sizeof (struct lc));
               context->me[context->curme].nextlc +=
-                context->me[context->curme].lc[context->me[context->curme].
-                                               curlc].cmdsize;
-              if ((context->me[context->curme].
-                   lc[context->me[context->curme].curlc].cmd == 0xc)
-                  || (context->me[context->curme].
-                      lc[context->me[context->curme].curlc].cmd == 0xd))
+                context->me[context->curme].lc[context->
+                                               me[context->curme].curlc].
+                cmdsize;
+              if ((context->
+                   me[context->curme].lc[context->me[context->curme].curlc].
+                   cmd == 0xc)
+                  || (context->
+                      me[context->curme].lc[context->me[context->curme].
+                                            curlc].cmd == 0xd))
                 {
                   context->state = lf_lcstr;
                 }
@@ -432,13 +436,13 @@ macho_parse (xar_file_t f, void *in, size_t inlen,
       break;
     case lf_lcstr:
       if (inlen >=
-          (context->me[context->curme].lc[context->me[context->curme].curlc].
-           cmdsize - 8))
+          (context->me[context->curme].
+           lc[context->me[context->curme].curlc].cmdsize - 8))
         {
           const char *tmpstr;
           uint32_t cmdsize =
-            context->me[context->curme].lc[context->me[context->curme].curlc].
-            cmdsize;
+            context->me[context->curme].lc[context->me[context->curme].
+                                           curlc].cmdsize;
           uint32_t *offsetp, offset;
           char *lib, *propstr;
           offsetp = in;

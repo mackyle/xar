@@ -1147,8 +1147,8 @@ xar_prop_serialize (xar_prop_t p, xmlTextWriterPtr writer)
                   xmlTextWriterWriteAttribute (writer, BAD_CAST ("enctype"),
                                                BAD_CAST ("base64"));
                   xmlTextWriterWriteBase64 (writer, XAR_PROP (i)->value, 0,
-                                            (int) strlen (XAR_PROP (i)->
-                                                          value));
+                                            (int)
+                                            strlen (XAR_PROP (i)->value));
                 }
               else
                 xmlTextWriterWriteString (writer,
