@@ -34,11 +34,15 @@
  * Portions Copyright 2006, Apple Computer, Inc.
  * Christopher Ryan <ryanc@apple.com>
 */
+/*
+ * Minor modified by Jakub Kaszycki, 2016
+ * <kuba@kaszycki.net.pl>
+ */
 
 #ifndef _XAR_STAT_H_
 #define _XAR_STAT_H_
 
-#include "xar.h"
+#include <xar/xar.h>
 
 int32_t xar_stat_archive(xar_t x, xar_file_t f, const char *file, const char *buffer, size_t len);
 int32_t xar_stat_extract(xar_t x, xar_file_t f, const char *file, char *buffer, size_t len);

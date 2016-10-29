@@ -34,7 +34,10 @@
  * Portions Copyright 2006, Apple Computer, Inc.
  * Christopher Ryan <ryanc@apple.com>
  */
-
+/*
+ * Minor modified by Jakub Kaszycki, 2016
+ * <kuba@kaszycki.net.pl>
+ */
 
 #ifndef _XAR_ARCHIVE_H_
 #define _XAR_ARCHIVE_H_
@@ -43,7 +46,7 @@
 #include <openssl/evp.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "xar.h"
+#include <xar/xar.h>
 #include "filetree.h"
 
 #define XAR_MINIMUM_BUFFER_SIZE 512

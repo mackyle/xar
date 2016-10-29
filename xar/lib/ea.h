@@ -1,7 +1,12 @@
+/*
+ * Minor modified by Jakub Kaszycki, 2016
+ * <kuba@kaszycki.net.pl>
+ */
+
 #ifndef _XAR_EA_H_
 #define _XAR_EA_H_
 
-#include "xar.h"
+#include <xar/xar.h>
 #include "filetree.h"
 
 typedef struct __xar_ea_t *xar_ea_t;

@@ -34,11 +34,14 @@
  * Portions Copyright 2006, Apple Computer, Inc.
  * Christopher Ryan <ryanc@apple.com>
  */
-
+/*
+ * Minor modified by Jakub Kaszycki, 2016
+ * <kuba@kaszycki.net.pl>
+ */
 
 #ifndef _XAR_ARCMOD_H_
 #define _XAR_ARCMOD_H_
-#include "xar.h"
+#include <xar/xar.h>
 #include "filetree.h"
 
 

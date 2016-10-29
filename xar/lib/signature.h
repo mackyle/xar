@@ -30,6 +30,10 @@
  * 6-July-2006
  * DRI: Christopher Ryan <ryanc@apple.com>
 */
+/*
+ * Minor modified by Jakub Kaszycki, 2016
+ * <kuba@kaszycki.net.pl>
+ */
 
 #ifndef _XAR_SIGNATURE_H_
 #define _XAR_SIGNATURE_H_
@@ -38,7 +42,7 @@
 #define _FILE_OFFSET_BITS 64
 #endif
 
-#include "xar.h"
+#include <xar/xar.h>
 
 struct __xar_x509cert_t{
 	uint8_t *content;

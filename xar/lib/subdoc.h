@@ -30,11 +30,15 @@
  * 03-Apr-2005
  * DRI: Rob Braun <bbraun@synack.net>
  */
+/*
+ * Minor modified by Jakub Kaszycki, 2016
+ * <kuba@kaszycki.net.pl>
+ */
 
 #ifndef _XAR_SUBDOC_H_
 #define _XAR_SUBDOC_H_
 
-#include "xar.h"
+#include <xar/xar.h>
 #include "filetree.h"
 
 struct __xar_subdoc_t {
