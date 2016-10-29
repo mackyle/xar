@@ -38,50 +38,66 @@
 #ifndef _XAR_IO_H_
 #define _XAR_IO_H_
 
-typedef int (*read_callback)(xar_t, xar_file_t, void *, size_t, void *context);
-typedef int (*write_callback)(xar_t, xar_file_t, void *, size_t, void *context);
+typedef int (*read_callback) (xar_t, xar_file_t, void *, size_t,
+                              void *context);
+typedef int (*write_callback) (xar_t, xar_file_t, void *, size_t,
+                               void *context);
 
-typedef int (*fromheap_in)(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
-typedef int (*fromheap_out)(xar_t x, xar_file_t f, xar_prop_t p, void *in, size_t inlen, void **context);
-typedef int (*fromheap_done)(xar_t x, xar_file_t f, xar_prop_t p, void **context);
+typedef int (*fromheap_in) (xar_t x, xar_file_t f, xar_prop_t p, void **in,
+                            size_t * inlen, void **context);
+typedef int (*fromheap_out) (xar_t x, xar_file_t f, xar_prop_t p, void *in,
+                             size_t inlen, void **context);
+typedef int (*fromheap_done) (xar_t x, xar_file_t f, xar_prop_t p,
+                              void **context);
 
-typedef int (*toheap_in)(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
-typedef int (*toheap_out)(xar_t x, xar_file_t f, xar_prop_t p, void *in, size_t inlen, void **context);
-typedef int (*toheap_done)(xar_t x, xar_file_t f, xar_prop_t p, void **context);
+typedef int (*toheap_in) (xar_t x, xar_file_t f, xar_prop_t p, void **in,
+                          size_t * inlen, void **context);
+typedef int (*toheap_out) (xar_t x, xar_file_t f, xar_prop_t p, void *in,
+                           size_t inlen, void **context);
+typedef int (*toheap_done) (xar_t x, xar_file_t f, xar_prop_t p,
+                            void **context);
 
-typedef int (*is_compressed)(void *in, size_t inlen);
+typedef int (*is_compressed) (void *in, size_t inlen);
 
-struct datamod {
-	fromheap_in      fh_in;
-	fromheap_out     fh_out;
-	fromheap_done    fh_done;
-	toheap_in        th_in;
-	toheap_out       th_out;
-	toheap_done      th_done;
+struct datamod
+{
+  fromheap_in fh_in;
+  fromheap_out fh_out;
+  fromheap_done fh_done;
+  toheap_in th_in;
+  toheap_out th_out;
+  toheap_done th_done;
 };
 
-typedef struct xar_stream_state {
-        char      *pending_buf;
-        size_t     pending_buf_size;
+typedef struct xar_stream_state
+{
+  char *pending_buf;
+  size_t pending_buf_size;
 
-        void     **modulecontext;
-        int        modulecount;
-        size_t     bsize;
-        int64_t    fsize;
-        xar_t      x;
-        xar_file_t f;
-	xar_prop_t p;
+  void **modulecontext;
+  int modulecount;
+  size_t bsize;
+  int64_t fsize;
+  xar_t x;
+  xar_file_t f;
+  xar_prop_t p;
 } xar_stream_state_t;
 
-int32_t xar_attrcopy_to_heap(xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb, void *context);
-int32_t xar_attrcopy_from_heap(xar_t x, xar_file_t f, xar_prop_t p, write_callback wcb, void *context);
-int32_t xar_attrcopy_from_heap_to_heap(xar_t xsource, xar_file_t fsource, xar_prop_t p, xar_t xdest, xar_file_t fdest);
-int32_t xar_attrcopy_from_heap_to_stream_init(xar_t x, xar_file_t f, xar_prop_t p, xar_stream *stream);
-int32_t xar_attrcopy_from_heap_to_stream(xar_stream *stream);
-int32_t xar_attrcopy_from_heap_to_stream_end(xar_stream *stream);
+int32_t xar_attrcopy_to_heap (xar_t x, xar_file_t f, xar_prop_t p,
+                              read_callback rcb, void *context);
+int32_t xar_attrcopy_from_heap (xar_t x, xar_file_t f, xar_prop_t p,
+                                write_callback wcb, void *context);
+int32_t xar_attrcopy_from_heap_to_heap (xar_t xsource, xar_file_t fsource,
+                                        xar_prop_t p, xar_t xdest,
+                                        xar_file_t fdest);
+int32_t xar_attrcopy_from_heap_to_stream_init (xar_t x, xar_file_t f,
+                                               xar_prop_t p,
+                                               xar_stream * stream);
+int32_t xar_attrcopy_from_heap_to_stream (xar_stream * stream);
+int32_t xar_attrcopy_from_heap_to_stream_end (xar_stream * stream);
 
-int32_t xar_heap_to_archive(xar_t x);
+int32_t xar_heap_to_archive (xar_t x);
 
-int32_t xar_prevent_recompress(xar_t x, void *in, size_t inlen);
+int32_t xar_prevent_recompress (xar_t x, void *in, size_t inlen);
 
 #endif /* _XAR_IO_H_ */

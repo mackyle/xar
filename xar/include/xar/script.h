@@ -33,7 +33,8 @@
 #ifndef _SCRIPT_H_
 #define _SCRIPT_H_
 
-int32_t xar_script_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
-int32_t xar_script_done(xar_t x, xar_file_t f, xar_prop_t p, void **context);
+int32_t xar_script_in (xar_t x, xar_file_t f, xar_prop_t p, void **in,
+                       size_t * inlen, void **context);
+int32_t xar_script_done (xar_t x, xar_file_t f, xar_prop_t p, void **context);
 
 #endif /* _SCRIPT_H_ */

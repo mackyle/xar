@@ -37,8 +37,10 @@
 
 #ifndef _XAR_DATA_H_
 #define _XAR_DATA_H_
-int32_t xar_data_archive(xar_t x, xar_file_t f, const char* file, const char *buffer, size_t len);
-int32_t xar_data_extract(xar_t x, xar_file_t f, const char* file, char *buffer, size_t len);
+int32_t xar_data_archive (xar_t x, xar_file_t f, const char *file,
+                          const char *buffer, size_t len);
+int32_t xar_data_extract (xar_t x, xar_file_t f, const char *file,
+                          char *buffer, size_t len);
 
-int32_t xar_data_verify(xar_t x, xar_file_t f);
+int32_t xar_data_verify (xar_t x, xar_file_t f);
 #endif /* _XAR_DATA_H_ */

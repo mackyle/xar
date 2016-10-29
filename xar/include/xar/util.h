@@ -45,12 +45,12 @@
 #include <xar/xar.h>
 
 
-uint64_t xar_ntoh64(uint64_t num);
-uint32_t xar_swap32(uint32_t num);
-char *xar_get_path(xar_file_t f);
-ssize_t xar_read_fd(int fd, void * buffer, size_t nbytes);
-ssize_t xar_write_fd(int fd, void * buffer, size_t nbytes);
-dev_t xar_makedev(uint32_t major, uint32_t minor);
-void xar_devmake(dev_t dev, uint32_t *major, uint32_t *minor);
+uint64_t xar_ntoh64 (uint64_t num);
+uint32_t xar_swap32 (uint32_t num);
+char *xar_get_path (xar_file_t f);
+ssize_t xar_read_fd (int fd, void *buffer, size_t nbytes);
+ssize_t xar_write_fd (int fd, void *buffer, size_t nbytes);
+dev_t xar_makedev (uint32_t major, uint32_t minor);
+void xar_devmake (dev_t dev, uint32_t * major, uint32_t * minor);
 
 #endif /* _XAR_UTIL_H_ */
