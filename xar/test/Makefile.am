@@ -11,3 +11,5 @@ validate_LDADD = ../lib/libxar.la $(OPENSSL_LIBS)
 
 AM_CFLAGS = $(OPENSSL_CFLAGS)
 AM_CPPFLAGS = -I../include
+
+CLEANFILES = bin.xar
