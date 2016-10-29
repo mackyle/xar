@@ -41,10 +41,11 @@ PKG_CHECK_MODULES([LIBLZMA], [liblzma], [AC_DEFINE([HAVE_LIBLZMA], [1], [Define 
 
 AC_CONFIG_FILES([Makefile
                  include/Makefile
-                 include/xar.h
+                 include/xar/xar.h
                  lib/Makefile
                  m4/Makefile
                  src/Makefile
+		 src/xar.1
                  test/Makefile
                  xar.spec])
 AC_OUTPUT

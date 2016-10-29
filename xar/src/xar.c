@@ -32,6 +32,8 @@
  * DRI: Rob Braun <bbraun@synack.net>
  */
 
+#include <config.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -50,9 +52,8 @@
 #include <regex.h>
 #include <errno.h>
 #include <time.h>
-#include "xar.h"
-#include "../lib/filetree.h"
-#include "config.h"
+#include <xar/xar.h>
+#include <xar/filetree.h>
 
 #define MIN_XAR_NEW_OPTIONS 0x01060180
 

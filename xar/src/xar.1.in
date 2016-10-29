@@ -1,4 +1,4 @@
-.TH XAR "1" "September 16, 2012" "version 1.6.1" "User Commands"
+.TH XAR "1" "September 16, 2012" "version @PACKAGE_VERSION@" "User Commands"
 .SH NAME
 xar \- eXtensible ARchiver
 .SH SYNOPSIS

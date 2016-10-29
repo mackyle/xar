@@ -3,3 +3,6 @@ nobase_nodist_xinclude_HEADERS = xar/xar.h xar/appledouble.h xar/archive.h xar/a
 DISTCLEANFILES = config.h
 
 EXTRA_DIST = config.h.in xar/xar.h.in
+
+xar/xar.h: xar/xar.h.in $(top_builddir)/config.status
+	$(AM_V_GEN)(cd $(top_builddir) && $(SHELL) ./config.status include/xar/xar.h)

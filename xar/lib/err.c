@@ -36,57 +36,78 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "xar.h"
-#include "archive.h"
+#include <xar/xar.h>
+#include <xar/archive.h>
 
 #define ECTX(x) ((struct errctx *)(x))
 
-void xar_register_errhandler(xar_t x, err_handler callback, void *usrctx) {
-	ECTX(&XAR(x)->errctx)->x = x;
-	ECTX(&XAR(x)->errctx)->usrctx = usrctx;
-	XAR(x)->ercallback = callback;
-	return;
+void
+xar_register_errhandler (xar_t x, err_handler callback, void *usrctx)
+{
+  ECTX (&XAR (x)->errctx)->x = x;
+  ECTX (&XAR (x)->errctx)->usrctx = usrctx;
+  XAR (x)->ercallback = callback;
+  return;
 }
 
-xar_t xar_err_get_archive(xar_errctx_t ctx) {
-	return ECTX(ctx)->x;
+xar_t
+xar_err_get_archive (xar_errctx_t ctx)
+{
+  return ECTX (ctx)->x;
 }
 
-xar_file_t xar_err_get_file(xar_errctx_t ctx) {
-	return ECTX(ctx)->file;
+xar_file_t
+xar_err_get_file (xar_errctx_t ctx)
+{
+  return ECTX (ctx)->file;
 }
 
-void  xar_err_set_file(xar_t x, xar_file_t f) {
-	XAR(x)->errctx.file = f;
-	return;
+void
+xar_err_set_file (xar_t x, xar_file_t f)
+{
+  XAR (x)->errctx.file = f;
+  return;
 }
 
-const char *xar_err_get_string(xar_errctx_t ctx) {
-	return ECTX(ctx)->str;
+const char *
+xar_err_get_string (xar_errctx_t ctx)
+{
+  return ECTX (ctx)->str;
 }
 
-void  xar_err_set_string(xar_t x, const char *str) {
-	XAR(x)->errctx.str = str;
-	return;
+void
+xar_err_set_string (xar_t x, const char *str)
+{
+  XAR (x)->errctx.str = str;
+  return;
 }
 
-int xar_err_get_errno(xar_errctx_t ctx) {
-	return ECTX(ctx)->saved_errno;
+int
+xar_err_get_errno (xar_errctx_t ctx)
+{
+  return ECTX (ctx)->saved_errno;
 }
 
-void  xar_err_set_errno(xar_t x, int e) {
-	XAR(x)->errctx.saved_errno = e;
-	return;
+void
+xar_err_set_errno (xar_t x, int e)
+{
+  XAR (x)->errctx.saved_errno = e;
+  return;
 }
 
-void xar_err_new(xar_t x) {
-	memset(&XAR(x)->errctx, 0, sizeof(struct errctx));
-	XAR(x)->errctx.saved_errno = errno;
-	return;
+void
+xar_err_new (xar_t x)
+{
+  memset (&XAR (x)->errctx, 0, sizeof (struct errctx));
+  XAR (x)->errctx.saved_errno = errno;
+  return;
 }
 
-int32_t xar_err_callback(xar_t x, int32_t sev, int32_t err) {
-	if( XAR(x)->ercallback )
-		return XAR(x)->ercallback(sev, err, &XAR(x)->errctx, ECTX(&XAR(x)->errctx)->usrctx);
-	return 0;
+int32_t
+xar_err_callback (xar_t x, int32_t sev, int32_t err)
+{
+  if (XAR (x)->ercallback)
+    return XAR (x)->ercallback (sev, err, &XAR (x)->errctx,
+                                ECTX (&XAR (x)->errctx)->usrctx);
+  return 0;
 }

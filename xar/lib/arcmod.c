@@ -35,27 +35,27 @@
  * Christopher Ryan <ryanc@apple.com>
  */
 
-#include "arcmod.h"
-#include "archive.h"
-#include "stat.h"
-#include "data.h"
-#include "linuxattr.h"
-#include "fbsdattr.h"
-#include "darwinattr.h"
-#include "ext2.h"
-#include "xar.h"
+#include <xar/arcmod.h>
+#include <xar/archive.h>
+#include <xar/stat.h>
+#include <xar/data.h>
+#include <xar/linuxattr.h>
+#include <xar/fbsdattr.h>
+#include <xar/darwinattr.h>
+#include <xar/ext2.h>
+#include <xar/xar.h>
 #include <string.h>
 
 struct arcmod xar_arcmods[] = {
-	{ xar_stat_archive, xar_stat_extract },      /* must be first */
-	{ xar_linuxattr_archive, xar_linuxattr_extract },
-	{ xar_fbsdattr_archive, xar_fbsdattr_extract },
-	{ xar_darwinattr_archive, xar_darwinattr_extract },
-	{ xar_ext2attr_archive, xar_ext2attr_extract },
-	{ xar_data_archive, xar_data_extract },
-	/* Add new modules here */
-	{ NULL, xar_set_perm },
-	{ NULL, xar_flags_extract }
+  {xar_stat_archive, xar_stat_extract}, /* must be first */
+  {xar_linuxattr_archive, xar_linuxattr_extract},
+  {xar_fbsdattr_archive, xar_fbsdattr_extract},
+  {xar_darwinattr_archive, xar_darwinattr_extract},
+  {xar_ext2attr_archive, xar_ext2attr_extract},
+  {xar_data_archive, xar_data_extract},
+  /* Add new modules here */
+  {NULL, xar_set_perm},
+  {NULL, xar_flags_extract}
 };
 
 /* xar_arcmod_archive
@@ -65,21 +65,28 @@ struct arcmod xar_arcmods[] = {
  * Returns: 0 on success
  * Summary: This is the entry point to actual file archival.
  */
-int32_t xar_arcmod_archive(xar_t x, xar_file_t f, const char *file, const char *buffer, size_t len) {
-	int i;
-	int32_t ret;
-	for(i = 0; i < (int)(sizeof(xar_arcmods)/sizeof(struct arcmod)); i++) {
-		if( xar_arcmods[i].archive ) {
-			ret = xar_arcmods[i].archive(x, f, file, buffer, len);
-			if( ret < 0 ) {
-				return ret;
-			}
-			if( ret > 0 ) {
-				return 0;
-			}
-		}
-	}
-	return 0;
+int32_t
+xar_arcmod_archive (xar_t x, xar_file_t f, const char *file,
+                    const char *buffer, size_t len)
+{
+  int i;
+  int32_t ret;
+  for (i = 0; i < (int) (sizeof (xar_arcmods) / sizeof (struct arcmod)); i++)
+    {
+      if (xar_arcmods[i].archive)
+        {
+          ret = xar_arcmods[i].archive (x, f, file, buffer, len);
+          if (ret < 0)
+            {
+              return ret;
+            }
+          if (ret > 0)
+            {
+              return 0;
+            }
+        }
+    }
+  return 0;
 }
 
 /* xar_arcmod_extract
@@ -89,26 +96,35 @@ int32_t xar_arcmod_archive(xar_t x, xar_file_t f, const char *file, const char *
  * Returns: 0 on success
  * Summary: This is the entry point to actual file archival.
  */
-int32_t xar_arcmod_extract(xar_t x, xar_file_t f, const char *file, char *buffer, size_t len) {
-	int i;
-	int32_t ret;
-	for(i = 0; i < (int)(sizeof(xar_arcmods)/sizeof(struct arcmod)); i++) {
-		if( xar_arcmods[i].extract ) {
-			ret = xar_arcmods[i].extract(x, f, file, buffer, len);
-			if( ret < 0 ) {
-				return ret;
-			}
-			if( ret > 0 ) {
-				return 0;
-			}
-		}
-	}
-	return 0;
+int32_t
+xar_arcmod_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
+                    size_t len)
+{
+  int i;
+  int32_t ret;
+  for (i = 0; i < (int) (sizeof (xar_arcmods) / sizeof (struct arcmod)); i++)
+    {
+      if (xar_arcmods[i].extract)
+        {
+          ret = xar_arcmods[i].extract (x, f, file, buffer, len);
+          if (ret < 0)
+            {
+              return ret;
+            }
+          if (ret > 0)
+            {
+              return 0;
+            }
+        }
+    }
+  return 0;
 }
 
 
-int32_t xar_arcmod_verify(xar_t x, xar_file_t f){
-	return xar_data_verify(x,f);
+int32_t
+xar_arcmod_verify (xar_t x, xar_file_t f)
+{
+  return xar_data_verify (x, f);
 }
 
 /* xar_check_prop
@@ -120,27 +136,33 @@ int32_t xar_arcmod_verify(xar_t x, xar_file_t f){
  * properies specified by XAR_OPT_PROPEXCLUDE will be omitted.
  * Returns: 0 for not to include, 1 for include.
  */
-int32_t xar_check_prop(xar_t x, const char *name) {
-	xar_attr_t i;
-	char includeset = 0;
+int32_t
+xar_check_prop (xar_t x, const char *name)
+{
+  xar_attr_t i;
+  char includeset = 0;
 
-	for(i = XAR(x)->attrs; i; i = XAR_ATTR(i)->next) {
-		if( strcmp(XAR_ATTR(i)->key, XAR_OPT_PROPINCLUDE) == 0 ) {
-			if( strcmp(XAR_ATTR(i)->value, name) == 0 )
-				return 1;
-			includeset = 1;
-		}
-	}
+  for (i = XAR (x)->attrs; i; i = XAR_ATTR (i)->next)
+    {
+      if (strcmp (XAR_ATTR (i)->key, XAR_OPT_PROPINCLUDE) == 0)
+        {
+          if (strcmp (XAR_ATTR (i)->value, name) == 0)
+            return 1;
+          includeset = 1;
+        }
+    }
 
-	if( includeset )
-		return 0;
+  if (includeset)
+    return 0;
 
-	for(i = XAR(x)->attrs; i; i = XAR_ATTR(i)->next) {
-		if( strcmp(XAR_ATTR(i)->key, XAR_OPT_PROPEXCLUDE) == 0 ) {
-			if( strcmp(XAR_ATTR(i)->value, name) == 0 )
-				return 0;
-		}
-	}
+  for (i = XAR (x)->attrs; i; i = XAR_ATTR (i)->next)
+    {
+      if (strcmp (XAR_ATTR (i)->key, XAR_OPT_PROPEXCLUDE) == 0)
+        {
+          if (strcmp (XAR_ATTR (i)->value, name) == 0)
+            return 0;
+        }
+    }
 
-	return 1;
+  return 1;
 }
