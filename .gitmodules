@@ -1,0 +1,3 @@
+[submodule "m4/autoconf-archive"]
+	path = m4/autoconf-archive
+	url = git://git.savannah.gnu.org/autoconf-archive.git
