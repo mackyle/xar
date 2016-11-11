@@ -42,11 +42,15 @@ AX_CHECK_BZLIB
 
 PKG_CHECK_MODULES([LIBLZMA], [liblzma], [AC_DEFINE([HAVE_LIBLZMA], [1], [Define to 1 if you have development C headers and libraries of LZMA])], [:])
 
+AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT_VERSION([0.19.8])
+
 AC_CONFIG_FILES([Makefile
                  include/Makefile
                  include/xar/xar.h
                  lib/Makefile
                  m4/Makefile
+		 po/Makefile.in
                  src/Makefile
 		 src/xar.1
                  test/Makefile
