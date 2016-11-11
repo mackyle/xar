@@ -36,6 +36,8 @@
 
 #ifndef _XAR_LINUXATTR_H_
 #define _XAR_LINUXATTR_H_
-int32_t xar_linuxattr_archive(xar_t x, xar_file_t f, const char* file, const char *buffer, size_t len);
-int32_t xar_linuxattr_extract(xar_t x, xar_file_t f, const char* file, char *buffer, size_t len);
+int32_t xar_linuxattr_archive (xar_t x, xar_file_t f, const char *file,
+                               const char *buffer, size_t len);
+int32_t xar_linuxattr_extract (xar_t x, xar_file_t f, const char *file,
+                               char *buffer, size_t len);
 #endif /* _XAR_LINUXATTR_H_ */

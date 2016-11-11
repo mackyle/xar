@@ -37,6 +37,8 @@
 #ifndef _XAR_EXT2_H_
 #define _XAR_EXT2_H_
 #define XAR_ATTR_FORK "attribute"
-int xar_ext2attr_archive(xar_t x, xar_file_t f, const char* file, const char *buffer, size_t len);
-int xar_ext2attr_extract(xar_t x, xar_file_t f, const char* file, char *buffer, size_t len);
+int xar_ext2attr_archive (xar_t x, xar_file_t f, const char *file,
+                          const char *buffer, size_t len);
+int xar_ext2attr_extract (xar_t x, xar_file_t f, const char *file,
+                          char *buffer, size_t len);
 #endif /* _XAR_EXT2_H_ */

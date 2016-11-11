@@ -38,12 +38,16 @@
 #ifndef _XAR_LZMA_H_
 #define _XAR_LZMA_H_
 
-int xar_lzma_fromheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
-int xar_lzma_fromheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context);
+int xar_lzma_fromheap_in (xar_t x, xar_file_t f, xar_prop_t p, void **in,
+                          size_t * inlen, void **context);
+int xar_lzma_fromheap_done (xar_t x, xar_file_t f, xar_prop_t p,
+                            void **context);
 
-int32_t xar_lzma_toheap_in(xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t *inlen, void **context);
-int xar_lzma_toheap_done(xar_t x, xar_file_t f, xar_prop_t p, void **context);
+int32_t xar_lzma_toheap_in (xar_t x, xar_file_t f, xar_prop_t p, void **in,
+                            size_t * inlen, void **context);
+int xar_lzma_toheap_done (xar_t x, xar_file_t f, xar_prop_t p,
+                          void **context);
 
-int xar_lzma_is_compressed(void *in, size_t inlen);
+int xar_lzma_is_compressed (void *in, size_t inlen);
 
 #endif /* _XAR_LZMA_H_ */
