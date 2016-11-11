@@ -2,7 +2,7 @@ AC_PREREQ(2.59)
 AC_INIT([Xar], [1.6.1], [xar-devel@googlegroups.com], [xar])
 AC_CONFIG_SRCDIR([lib/util.c])
 AC_CONFIG_HEADERS([include/config.h])
-AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_AUX_DIR([../build-aux])
 AC_CONFIG_MACRO_DIR([../m4])
 AM_INIT_AUTOMAKE([foreign])
 
