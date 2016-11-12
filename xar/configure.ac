@@ -45,6 +45,8 @@ PKG_CHECK_MODULES([LIBLZMA], [liblzma], [AC_DEFINE([HAVE_LIBLZMA], [1], [Define 
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.19.8])
 
+AC_DEFINE([GETTEXT_DOMAIN], ["xar"], [Domain of messages for Gettext])
+
 AC_CONFIG_FILES([Makefile
                  include/Makefile
                  include/xar/xar.h

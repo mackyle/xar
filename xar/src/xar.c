@@ -55,6 +55,8 @@
 #include <xar/xar.h>
 #include <xar/filetree.h>
 
+#include <gettext.h>
+
 #define MIN_XAR_NEW_OPTIONS 0x01060180
 
 #define SYMBOLIC 1
@@ -258,7 +260,7 @@ add_subdoc (xar_t x)
   fd = open (Subdoc, O_RDONLY);
   if (fd < 0)
     {
-      fprintf (stderr, "ERROR: subdoc file %s doesn't exist -- ignoring\n",
+      fprintf (stderr, _("ERROR: subdoc file %s doesn't exist -- ignoring\n"),
                Subdoc);
       return;
     }
@@ -276,7 +278,7 @@ add_subdoc (xar_t x)
   close (fd);
   if (rcnt != (ssize_t) len)
     {
-      fprintf (stderr, "Error reading subdoc %s\n", Subdoc);
+      fprintf (stderr, _("Error reading subdoc %s\n"), Subdoc);
       exit (1);
     }
 
@@ -306,7 +308,7 @@ extract_subdoc (xar_t x, const char *name)
       wcnt = write (fd, sdoc, size);
       if (wcnt != (ssize_t) size)
         {
-          fprintf (stderr, "Error writing subdoc %s\n", Subdoc);
+          fprintf (stderr, _("Error writing subdoc %s\n"), Subdoc);
           exit (1);
         }
       close (fd);
@@ -334,14 +336,14 @@ extract_data_to_sign (const char *filename)
   x = xar_open (filename, READ);
   if (x == NULL)
     {
-      fprintf (stderr, "Could not open %s to extract data to sign\n",
+      fprintf (stderr, _("Could not open %s to extract data to sign\n"),
                filename);
       exit (1);
     }
   sig = xar_signature_first (x);
   if (!sig)
     {
-      fprintf (stderr, "No signatures found to extract data from\n");
+      fprintf (stderr, _("No signatures found to extract data from\n"));
       exit (E_NOSIG);
     }
 
@@ -355,7 +357,7 @@ extract_data_to_sign (const char *filename)
       if (!hash_name || !hash)
         {
           fprintf (stderr,
-                   "--digestinfo-to-sign does not support hash type \"%s\"\n",
+                   _("--digestinfo-to-sign does not support hash type \"%s\"\n"),
                    hash_name ? hash_name : XAR_OPT_VAL_NONE);
           exit (1);
         }
@@ -364,7 +366,7 @@ extract_data_to_sign (const char *filename)
   dataToSignOffset += strtoull (value, (char **) NULL, 10);
   if (0 != xar_prop_get ((xar_file_t) x, "checksum/size", &value))
     {
-      fprintf (stderr, "Could not locate checksum/size in archive\n");
+      fprintf (stderr, _("Could not locate checksum/size in archive\n"));
       exit (1);
     }
   dataToSignSize = strtoull (value, (char **) NULL, 10);
@@ -379,7 +381,7 @@ extract_data_to_sign (const char *filename)
   file = fopen (filename, "rb");
   if (!file)
     {
-      fprintf (stderr, "Could not open %s for reading data to sign\n",
+      fprintf (stderr, _("Could not open %s for reading data to sign\n"),
                filename);
       exit (1);
     }
@@ -388,7 +390,7 @@ extract_data_to_sign (const char *filename)
   i = (int) fread (buffer, dataToSignSize, 1, file);
   if (i != 1)
     {
-      fprintf (stderr, "Failed to read data to sign from %s\n", filename);
+      fprintf (stderr, _("Failed to read data to sign from %s\n"), filename);
       exit (1);
     }
   fclose (file);
@@ -397,7 +399,7 @@ extract_data_to_sign (const char *filename)
   file = fopen (DataToSignDumpPath, "wb");
   if (!file)
     {
-      fprintf (stderr, "Could not open %s for saving data to sign\n",
+      fprintf (stderr, _("Could not open %s for saving data to sign\n"),
                DataToSignDumpPath);
       exit (1);
     }
@@ -407,7 +409,7 @@ extract_data_to_sign (const char *filename)
       if (i != 1)
         {
           fprintf (stderr,
-                   "Failed to write DigestInfo data to sign prefix to %s (fwrite() returned %i)\n",
+                   _("Failed to write DigestInfo data to sign prefix to %s (fwrite() returned %i)\n"),
                    DataToSignDumpPath, i);
           exit (1);
         }
@@ -416,7 +418,7 @@ extract_data_to_sign (const char *filename)
   if (i != 1)
     {
       fprintf (stderr,
-               "Failed to write %sdata to sign to %s (fwrite() returned %i)\n",
+               _("Failed to write %sdata to sign to %s (fwrite() returned %i)\n"),
                DumpDigestInfo ? "DigestInfo " : "", DataToSignDumpPath, i);
       exit (1);
     }
@@ -428,7 +430,7 @@ extract_data_to_sign (const char *filename)
       file = fopen (SigOffsetDumpPath, "wb");
       if (!file)
         {
-          fprintf (stderr, "Could not open %s for saving signature offset\n",
+          fprintf (stderr, _("Could not open %s for saving signature offset\n"),
                    SigOffsetDumpPath);
           exit (1);
         }
@@ -436,7 +438,7 @@ extract_data_to_sign (const char *filename)
       if (i < 0)
         {
           fprintf (stderr,
-                   "Failed to write signature offset to %s (fprintf() returned %i)\n",
+                   _("Failed to write signature offset to %s (fprintf() returned %i)\n"),
                    SigOffsetDumpPath, i);
           exit (1);
         }
@@ -538,14 +540,14 @@ extract_certs (char *filename, char *cert_base_path, char *CApath)
   x = xar_open (filename, READ);
   if (x == NULL)
     {
-      fprintf (stderr, "Could not open %s to extract certificates\n",
+      fprintf (stderr, _("Could not open %s to extract certificates\n"),
                filename);
       exit (1);
     }
   sig = xar_signature_first (x);
   if (!sig)
     {
-      fprintf (stderr, "No signatures found to extract data from\n");
+      fprintf (stderr, _("No signatures found to extract data from\n"));
       exit (E_NOSIG);
     }
 
@@ -553,7 +555,7 @@ extract_certs (char *filename, char *cert_base_path, char *CApath)
   count = xar_signature_get_x509certificate_count (sig);
   if (!count)
     {
-      fprintf (stderr, "Signature bears no certificates -- how odd\n");
+      fprintf (stderr, _("Signature bears no certificates -- how odd\n"));
       exit (1);
     }
   if (CApath)
