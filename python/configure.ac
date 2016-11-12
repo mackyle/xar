@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([Xar-Python], [1.0], [kuba@kaszycki.net.pl], [xar-python])
-AC_CONFIG_SRCDIR([xarfile.c])
+AC_CONFIG_SRCDIR([xarfile.pyx])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([../build-aux])
 AC_CONFIG_MACRO_DIR([../m4])
