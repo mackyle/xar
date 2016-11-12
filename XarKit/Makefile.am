@@ -31,6 +31,8 @@ install-exec-hook: XarKit.framework
 	cp -r $< $(exec_prefix)/Library/Frameworks
 
 all-am: XarKit.framework
+mostlyclean-local: mostlyclean-hook
+	@:
 
 AM_CPPFLAGS = \
               -I../xar/include \
