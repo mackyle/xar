@@ -1,3 +1,4 @@
+if HAVE_GNUSTEP
 lib_LTLIBRARIES = libXarKit.la
 libXarKit_la_SOURCES = \
                        XarArchive.m \
@@ -48,5 +49,6 @@ AM_OBJCFLAGS = $(shell $(GNUSTEP_CONFIG) --objc-flags)
 EXTRA_DIST = Info.plist
 
 SHREXT = $(shell $(LIBTOOL) --config > __temp && . __temp && rm -f __temp && echo $$shrext_cmds)
+endif
 
 ACLOCAL_AMFLAGS = -I ../m4

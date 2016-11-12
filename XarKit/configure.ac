@@ -16,7 +16,8 @@ AC_SUBST([ac_aux_dir])
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_OBJC
-AC_CHECK_PROGS([GNUSTEP_CONFIG], [gnustep-config])
+AC_CHECK_PROGS([GNUSTEP_CONFIG], [gnustep-config], [--NONE--])
+AM_CONDITIONAL([HAVE_GNUSTEP], [test ! "$GNUSTEP_CONFIG" = '--NONE--'])
 
 # Checks for libraries.
 
