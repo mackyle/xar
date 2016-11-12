@@ -1945,18 +1945,18 @@ dump_header (const char *filename)
       exit (1);
     }
 
-  printf ("magic:                   0x%x ", ntohl (xh.magic));
+  printf (_("magic:                   0x%x "), ntohl (xh.magic));
   if (ntohl (xh.magic) != XAR_HEADER_MAGIC)
-    printf ("(BAD)\n");
+    printf (_("(BAD)\n"));
   else
-    printf ("(OK)\n");
-  printf ("size:                    %d\n", ntohs (xh.size));
-  printf ("version:                 %d\n", ntohs (xh.version));
-  printf ("Compressed TOC length:   %" PRId64 "\n",
+    printf (_("(OK)\n"));
+  printf (_("size:                    %d\n"), ntohs (xh.size));
+  printf (_("version:                 %d\n"), ntohs (xh.version));
+  printf (_("Compressed TOC length:   %lld\n"),
           xar_ntoh64 (xh.toc_length_compressed));
-  printf ("Uncompressed TOC length: %" PRId64 "\n",
+  printf (_("Uncompressed TOC length: %lld\n"),
           xar_ntoh64 (xh.toc_length_uncompressed));
-  printf ("TOC Checksum algorithm:  %d ", ntohl (xh.cksum_alg));
+  printf (_("TOC Checksum algorithm:  %d "), ntohl (xh.cksum_alg));
   switch (ntohl (xh.cksum_alg))
     {
     case XAR_CKSUM_NONE:
@@ -1973,26 +1973,26 @@ dump_header (const char *filename)
         uint16_t hsiz = ntohs (xh.size);
         if (hsiz < sizeof (xar_header_t) + 4 || (hsiz & 0x3) != 0)
           {
-            printf ("(OTHER + invalid header length)\n");
+            printf (_("(OTHER + invalid header length)\n"));
             break;
           }
         if (hsiz > sizeof (xar_header_ex_t))
           hsiz = sizeof (xar_header_ex_t);
         if (!memchr (xh.toc_cksum_name, 0, hsiz - sizeof (xar_header_t)))
           {
-            printf ("(OTHER + invalid non-nul terminated name)\n");
+            printf (_("(OTHER + invalid non-nul terminated name)\n"));
             break;
           }
         if (!xh.toc_cksum_name[0])
           {
-            printf ("(OTHER + invalid empty name)\n");
+            printf (_("(OTHER + invalid empty name)\n"));
             break;
           }
-        printf ("(OTHER + %s)\n", xh.toc_cksum_name);
+        printf (_("(OTHER + %s)\n"), xh.toc_cksum_name);
         break;
       }
     default:
-      printf ("(unknown)\n");
+      printf (_("(unknown)\n"));
       break;
     };
 
@@ -2025,13 +2025,13 @@ dumptoc_raw (const char *filename, const char *tocfile)
 
   if (read (fd, &xh, sizeof (xh)) < (int) sizeof (xar_header_t))
     {
-      fprintf (stderr, "error reading header\n");
+      fprintf (stderr, _("error reading header\n"));
       exit (1);
     }
 
   if (ntohl (xh.magic) != XAR_HEADER_MAGIC)
     {
-      fprintf (stderr, "error reading header (bad magic number)\n");
+      fprintf (stderr, _("error reading header (bad magic number)\n"));
       exit (1);
     }
 
@@ -2041,27 +2041,27 @@ dumptoc_raw (const char *filename, const char *tocfile)
   if (hlen < sizeof (xar_header_t))
     {
       fprintf (stderr,
-               "error reading header (header size field value too small)\n");
+               _("error reading header (header size field value too small)\n"));
       exit (1);
     }
   if (hlen > sizeof (xh) && (hlen - sizeof (xh) > buffer_size))
     {
       fprintf (stderr,
-               "error reading header (bad header size field -- greater than %u)\n",
+               _("error reading header (bad header size field -- greater than %u)\n"),
                buffer_size + (unsigned) sizeof (xh));
       exit (1);
     }
   if (hlen > sizeof (xh) &&
       read (fd, buffer, hlen - sizeof (xh)) < (int) (hlen - sizeof (xh)))
     {
-      fprintf (stderr, "error reading header (premature EOF)\n");
+      fprintf (stderr, _("error reading header (premature EOF)\n"));
       exit (1);
     }
 
   toc = open (tocfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (toc < 0)
     {
-      perror ("open dump file for writing");
+      perror (_("open dump file for writing"));
       exit (1);
     }
 
@@ -2073,13 +2073,13 @@ dumptoc_raw (const char *filename, const char *tocfile)
       bytes = read (fd, buffer, buffer_size);
       if (bytes != (ssize_t) buffer_size)
         {
-          fprintf (stderr, "error reading toc (premature EOF)\n");
+          fprintf (stderr, _("error reading toc (premature EOF)\n"));
           exit (1);
         }
       bytes = write (toc, buffer, buffer_size);
       if (bytes != (ssize_t) buffer_size)
         {
-          fprintf (stderr, "error writing raw toc dump file\n");
+          fprintf (stderr, _("error writing raw toc dump file\n"));
           exit (1);
         }
       clen -= (uint64_t) bytes;
@@ -2120,27 +2120,22 @@ err_callback (int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
     case XAR_SEVERITY_NONFATAL:
     case XAR_SEVERITY_FATAL:
       Err = 2;
-      fprintf (stderr, "Error while ");
-      if (err == XAR_ERR_ARCHIVE_CREATION)
-        fprintf (stderr, "creating");
-      if (err == XAR_ERR_ARCHIVE_EXTRACTION)
-        fprintf (stderr, "extracting");
-      fprintf (stderr, " archive");
+      fprintf (stderr, _("Error while %s archive"),
+      (err == XAR_ERR_ARCHIVE_CREATION ? _("creating") : (err == XAR_ERR_ARCHIVE_EXTRACTION ? _("extracting") : _("operating on"))));
       if (f)
         {
           const char *file = xar_get_path (f);
           if (file)
-            fprintf (stderr, ":(%s)", file);
+            fprintf (stderr, _(":(%s)"), file);
           free ((char *) file);
         }
       if (str)
-        fprintf (stderr, ": %s", str);
+        fprintf (stderr, _(": %s"), str);
       if (err)
-        fprintf (stderr, " (%s)", strerror (e));
+        fprintf (stderr, _(" (%s)"), strerror (e));
       if (sev == XAR_SEVERITY_NONFATAL)
         {
-          fprintf (stderr, " - ignored");
-          fprintf (stderr, "\n");
+          fprintf (stderr, _(" - ignored\n"));
         }
       else
         {
@@ -2155,236 +2150,182 @@ err_callback (int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
 static void
 _usagehint (const char *prog, FILE * helpout)
 {
-  fprintf (helpout, "Usage: %s -[ctx][v] -f <archive> ...\n", prog);
-  fprintf (helpout, "(Use %s --help for extended help)\n", prog);
+  fprintf (helpout, _("Usage: %s -[ctx][v] -f <archive> ...\n"), prog);
+  fprintf (helpout, _("(Use %s --help for extended help)\n"), prog);
 }
 
 static void
 _usage (const char *prog, FILE * helpout)
 {
-  fprintf (helpout, "Usage: %s -[ctx][v] -f <archive> ...\n", prog);
-  fprintf (helpout, "\t-c               Creates an archive\n");
-  fprintf (helpout, "\t--create         Synonym for \"-c\"\n");
-  fprintf (helpout, "\t-x               Extracts an archive\n");
-  fprintf (helpout, "\t--extract        Synonym for \"-x\"\n");
-  fprintf (helpout, "\t-t               Lists an archive\n");
-  fprintf (helpout, "\t--list           Synonym for \"-t\"\n");
-  fprintf (helpout,
-           "\t--sign           Creates a placeholder signature and saves\n");
-  fprintf (helpout,
-           "\t                 the data to sign to disk. Works with -c or -f, requires\n");
-  fprintf (helpout,
-           "\t                 --sig-size and one or more --cert-loc to be set.\n");
-  fprintf (helpout,
-           "\t                 Setting --data-to-sign and --sig-offset is optional.\n");
-  fprintf (helpout,
-           "\t                 Fails with error code %i if the archive has already\n",
-           E_SIGEXISTS);
-  fprintf (helpout, "\t                 been signed.\n");
-  fprintf (helpout,
-           "\t--replace-sign   Rips out existing signature(s) and makes a new one.\n");
-  fprintf (helpout,
-           "\t                 Same required parameter set as --sign, \n");
-  fprintf (helpout, "\t                 but -f instead of -c.\n");
-  fprintf (helpout,
-           "\t--extract-data-to-sign Extracts data to be signed from an\n");
-  fprintf (helpout,
-           "\t                 existing archive. Requires --data-to-sign (and -f)\n");
-  fprintf (helpout,
-           "\t                 to be set.  Setting --sig-offset is optional.\n");
-  fprintf (helpout,
-           "\t--extract-certs <dir> Extracts all certificates in DER (binary) format\n");
-  fprintf (helpout,
-           "\t                 into the specified pre-existing directory, naming them\n");
-  fprintf (helpout,
-           "\t                  'cert00', 'cert01', 'cert02' etc. where 'cert00' is\n");
-  fprintf (helpout,
-           "\t                 the leaf/signing cert.  Requires -f.\n");
-  fprintf (helpout,
-           "\t--extract-CAfile <filename> Extracts all certificates in PEM format,\n");
-  fprintf (helpout,
-           "\t                 concatenates them together and stores the result in the\n");
-  fprintf (helpout, "\t                 specified file.  Requires -f.\n");
-  fprintf (helpout,
-           "\t--extract-sig <filename> Extracts the signature data and stores it into\n");
-  fprintf (helpout,
-           "\t                 the specified file.  Requires -f.  Setting --sig-offset\n");
-  fprintf (helpout, "\t                 Setting --sig-offset is optional.\n");
-  fprintf (helpout,
-           "\t--inject-sig <filename> After extracting the data to be signed and\n");
-  fprintf (helpout,
-           "\t                 doing the signing externally, injects the\n");
-  fprintf (helpout, "\t                 signature. Requires -f.\n");
-  fprintf (helpout,
-           "\t-f <filename>    Specifies an archive to operate on [REQUIRED!]\n");
-  fprintf (helpout, "\t--file=<filename> Synonym for \"-f <filename>\"\n");
-  fprintf (helpout,
-           "\t-v               Print filenames as they are archived\n");
-  fprintf (helpout, "\t--verbose        Synonym for \"-v\"\n");
-  fprintf (helpout,
-           "\t-C <path>        Change directory to this location before doing anything\n");
-  fprintf (helpout, "\t--directory=<path> Synonym for \"-C <path>\"\n");
-  fprintf (helpout, "\t-n name          Provides a name for a subdocument\n");
-  fprintf (helpout,
-           "\t-s <filename>    On extract, specifies the file to extract\n");
-  fprintf (helpout, "\t                      subdocuments to.\n");
-  fprintf (helpout,
-           "\t                 On archival, specifies an xml file to add\n");
-  fprintf (helpout, "\t                      as a subdocument.\n");
-  fprintf (helpout,
-           "\t-l               On archival, stay on the local device.\n");
-  fprintf (helpout, "\t--one-file-system Synonym for \"-l\"\n");
-  fprintf (helpout,
-           "\t-p               On extract, set ownership based on symbolic\n");
-  fprintf (helpout, "\t                      names, if possible.\n");
-  fprintf (helpout,
-           "\t-P               On extract, set ownership based on uid/gid.\n");
-  fprintf (helpout,
-           "\t--toc-cksum      Specifies the hashing algorithm to use for\n");
-  fprintf (helpout, "\t                      xml header verification.\n");
-  fprintf (helpout,
-           "\t                      Valid values: none, sha1, and md5\n");
-  fprintf (helpout, "\t                      Default: sha1\n");
-  fprintf (helpout,
-           "\t                      If the linked library supports them, sha224\n");
-  fprintf (helpout,
-           "\t                      sha256, sha384 and sha512 may also be used.\n");
-  fprintf (helpout,
-           "\t                      Setting a stronger toc hash than the default will\n");
-  fprintf (helpout,
-           "\t                      also set the file hash to the same value if it's\n");
-  fprintf (helpout,
-           "\t                      not been explictly set to something else.\n");
-  fprintf (helpout,
-           "\t--file-cksum     Specifies the hashing algorithm to use for\n");
-  fprintf (helpout, "\t                      file verification.\n");
-  fprintf (helpout,
-           "\t                      Same values and defaults as --toc-cksum.\n");
-  fprintf (helpout,
-           "\t                      Setting a stronger file hash than the default will\n");
-  fprintf (helpout,
-           "\t                      also set the toc hash to the same value if it's\n");
-  fprintf (helpout,
-           "\t                      not been explictly set to something else.\n");
-  fprintf (helpout,
-           "\t--dump-toc=<filename> Has xar dump the xml header into the\n");
-  fprintf (helpout, "\t                      specified file.\n");
-  fprintf (helpout,
-           "\t-d <filename>    Synonym for \"--dump-toc=<filename>\"\n");
-  fprintf (helpout,
-           "\t--dump-toc-raw=<filename> Has xar dump the raw, compressed xml\n");
-  fprintf (helpout,
-           "\t                      header data into the specified file.\n");
-  fprintf (helpout,
-           "\t--dump-header    Prints out the xar binary header information\n");
-  fprintf (helpout,
-           "\t--compression    Specifies the compression type to use.\n");
-  fprintf (helpout,
-           "\t                      Valid values: none, gzip, bzip2, lzma, xz\n");
-  fprintf (helpout, "\t                      Default: gzip\n");
-  fprintf (helpout,
-           "\t-a               Synonym for \"--compression=lzma\"\n");
-  fprintf (helpout,
-           "\t-j               Synonym for \"--compression=bzip2\"\n");
-  fprintf (helpout,
-           "\t-z               Synonym for \"--compression=gzip\"\n");
-  fprintf (helpout,
-           "\t--compression-args=arg Specifies arguments to be passed\n");
-  fprintf (helpout, "\t                       to the compression engine.\n");
-  fprintf (helpout,
-           "\t--rfc6713        Always use application/zlib for gzip encoding style\n");
-  fprintf (helpout,
-           "\t--list-subdocs   List the subdocuments in the xml header\n");
-  fprintf (helpout,
-           "\t--extract-subdoc=name Extracts the specified subdocument\n");
-  fprintf (helpout,
-           "\t                      to a document in cwd named <name>.xml\n");
-  fprintf (helpout,
-           "\t--exclude=<regexp> POSIX basic regular expression of files to \n");
-  fprintf (helpout, "\t                      ignore while archiving.\n");
-  fprintf (helpout,
-           "\t--strip-components=n Number of path components to strip when extracting\n");
-  fprintf (helpout,
-           "\t--to-stdout      Write file contents to standard out when extracting\n");
-  fprintf (helpout, "\t-O               Synonym for \"--to-stdout\"\n");
-  fprintf (helpout,
-           "\t--rsize          Specifies the size of the buffer used\n");
-  fprintf (helpout,
-           "\t                      for read IO operations in bytes.\n");
-  fprintf (helpout,
-           "\t--coalesce-heap  When archived files are identical, only store one copy\n");
-  fprintf (helpout,
-           "\t                      This option creates an archive which\n");
-  fprintf (helpout, "\t                      is not streamable\n");
-  fprintf (helpout, "\t--link-same      Hardlink identical files\n");
-  fprintf (helpout,
-           "\t--recompress     Allow recompressing already compressed files\n");
-  fprintf (helpout, "\t--no-compress    POSIX regular expression of files\n");
-  fprintf (helpout,
-           "\t                      to archive, but not compress.\n");
-  fprintf (helpout,
-           "\t--prop-include=<p> File properties to include in archive\n");
-  fprintf (helpout,
-           "\t--prop-exclude=<p> File properties to exclude in archive\n");
-  fprintf (helpout,
-           "\t--distribution   Only includes a subset of file properties\n");
-  fprintf (helpout,
-           "\t                      appropriate for archive distribution\n");
-  fprintf (helpout,
-           "\t--keep-existing  Do not overwrite existing files while extracting\n");
-  fprintf (helpout, "\t-k               Synonym for --keep-existing\n");
-  fprintf (helpout,
-           "\t--keep-setuid    Preserve the suid/sgid bits when extracting\n");
-  fprintf (helpout,
-           "\t--sig-size=n     Size (in bytes) of the signature placeholder\n");
-  fprintf (helpout, "\t                      to generate.\n");
-  fprintf (helpout, "\t--sig-len=n      Synonym for \"--sig-size=n\"\n");
-  fprintf (helpout,
-           "\t--data-to-sign=file   Path where to dump the data to be signed.\n");
-  fprintf (helpout,
-           "\t                      Requires --toc-cksum type other than none.\n");
-  fprintf (helpout,
-           "\t--digestinfo-to-sign=file Path where to dump the DigestInfo data to be\n");
-  fprintf (helpout,
-           "\t                 signed.  This option requires the --toc-cksum type be\n");
-  fprintf (helpout,
-           "\t                 set to sha1 (the default), md5, sha224, sha256, sha384\n");
-  fprintf (helpout,
-           "\t                 or sha512.  It produces the same output data as the\n");
-  fprintf (helpout,
-           "\t                 --data-to-sign option does except that the output has\n");
-  fprintf (helpout,
-           "\t                 the appropriate DigestInfo prefix value prepended.\n");
-  fprintf (helpout,
-           "\t                 May only be used in place of the --data-to-sign option.\n");
-  fprintf (helpout,
-           "\t--sig-offset=file     Path where to dump the signature's offset\n");
-  fprintf (helpout,
-           "\t                      within the xar.  Never required.\n");
-  fprintf (helpout,
-           "\t--cert-loc=file  Location of a signing certificate to include in the\n");
-  fprintf (helpout,
-           "\t                      archive.  May be repeated to include a\n");
-  fprintf (helpout,
-           "\t                      certificate chain.  The first cert-loc option\n");
-  fprintf (helpout,
-           "\t                      should specify the leaf certificate, the next its\n");
-  fprintf (helpout,
-           "\t                      issuer and so on so that the last cert-loc option\n");
-  fprintf (helpout,
-           "\t                      specifies the root CA for the chain.\n");
-  fprintf (helpout,
-           "\t                      Certificate files must be in DER (binary) format.\n");
-  fprintf (helpout,
-           "\t                      --leaf-cert-loc= and --intermediate-cert-loc=\n");
-  fprintf (helpout,
-           "\t                      are accepted as synonyms for --cert-loc= for\n");
-  fprintf (helpout, "\t                      historical reasons.\n");
-  fprintf (helpout, "\t--help           Show this help on stdout\n");
-  fprintf (helpout, "\t-h               Synonym for \"--help\"\n");
-  fprintf (helpout, "\t-V               Synonym for \"--version\"\n");
-  fprintf (helpout,
-           "\t--version        Print xar's version number to stdout\n");
+  fprintf (helpout, _("Usage: %s -[ctx][v] -f <archive> ...\n"
+  "\t-c               Creates an archive\n"
+  "\t--create         Synonym for \"-c\"\n"
+  "\t-x               Extracts an archive\n"
+  "\t--extract        Synonym for \"-x\"\n"
+  "\t-t               Lists an archive\n"
+  "\t--list           Synonym for \"-t\"\n"
+           "\t--sign           Creates a placeholder signature and saves\n"
+           "\t                 the data to sign to disk. Works with -c or -f, requires\n"
+           "\t                 --sig-size and one or more --cert-loc to be set.\n"
+           "\t                 Setting --data-to-sign and --sig-offset is optional.\n"
+           "\t                 Fails with error code %i if the archive has already\n"
+  "\t                 been signed.\n"
+           "\t--replace-sign   Rips out existing signature(s) and makes a new one.\n"
+           "\t                 Same required parameter set as --sign, \n"
+  "\t                 but -f instead of -c.\n"
+           "\t--extract-data-to-sign Extracts data to be signed from an\n"
+  
+           "\t                 existing archive. Requires --data-to-sign (and -f)\n"
+  
+           "\t                 to be set.  Setting --sig-offset is optional.\n"
+  
+           "\t--extract-certs <dir> Extracts all certificates in DER (binary) format\n"
+ 
+           "\t                 into the specified pre-existing directory, naming them\n"
+
+           "\t                  'cert00', 'cert01', 'cert02' etc. where 'cert00' is\n"
+  
+           "\t                 the leaf/signing cert.  Requires -f.\n"
+  
+           "\t--extract-CAfile <filename> Extracts all certificates in PEM format,\n"
+  
+           "\t                 concatenates them together and stores the result in the\n"
+  "\t                 specified file.  Requires -f.\n"
+  
+           "\t--extract-sig <filename> Extracts the signature data and stores it into\n"
+ 
+           "\t                 the specified file.  Requires -f.  Setting --sig-offset\n"
+  "\t                 Setting --sig-offset is optional.\n"
+  
+           "\t--inject-sig <filename> After extracting the data to be signed and\n"
+  
+           "\t                 doing the signing externally, injects the\n"
+  "\t                 signature. Requires -f.\n"
+  
+           "\t-f <filename>    Specifies an archive to operate on [REQUIRED!]\n"
+  "\t--file=<filename> Synonym for \"-f <filename>\"\n"
+  
+           "\t-v               Print filenames as they are archived\n"
+  "\t--verbose        Synonym for \"-v\"\n"
+  
+           "\t-C <path>        Change directory to this location before doing anything\n"
+  "\t--directory=<path> Synonym for \"-C <path>\"\n"
+  "\t-n name          Provides a name for a subdocument\n"
+  
+           "\t-s <filename>    On extract, specifies the file to extract\n"
+  "\t                      subdocuments to.\n"
+  
+           "\t                 On archival, specifies an xml file to add\n"
+  "\t                      as a subdocument.\n"
+  
+           "\t-l               On archival, stay on the local device.\n"
+  "\t--one-file-system Synonym for \"-l\"\n"
+  
+           "\t-p               On extract, set ownership based on symbolic\n"
+  "\t                      names, if possible.\n"
+  
+           "\t-P               On extract, set ownership based on uid/gid.\n"
+           "\t--toc-cksum      Specifies the hashing algorithm to use for\n"
+  "\t                      xml header verification.\n"
+  
+           "\t                      Valid values: none, sha1, and md5\n"
+  "\t                      Default: sha1\n"
+  
+           "\t                      If the linked library supports them, sha224\n"
+  
+           "\t                      sha256, sha384 and sha512 may also be used.\n"
+  
+           "\t                      Setting a stronger toc hash than the default will\n"
+  
+           "\t                      also set the file hash to the same value if it's\n"
+  
+           "\t                      not been explictly set to something else.\n"
+  
+           "\t--file-cksum     Specifies the hashing algorithm to use for\n"
+  "\t                      file verification.\n"
+  
+           "\t                      Same values and defaults as --toc-cksum.\n"
+  
+           "\t                      Setting a stronger file hash than the default will\n"
+  
+           "\t                      also set the toc hash to the same value if it's\n"
+  
+           "\t                      not been explictly set to something else.\n"
+  
+           "\t--dump-toc=<filename> Has xar dump the xml header into the\n"
+  "\t                      specified file.\n"
+  
+           "\t-d <filename>    Synonym for \"--dump-toc=<filename>\"\n"
+  
+           "\t--dump-toc-raw=<filename> Has xar dump the raw, compressed xml\n"
+  
+           "\t                      header data into the specified file.\n"
+ 
+           "\t--dump-header    Prints out the xar binary header information\n"
+  
+           "\t--compression    Specifies the compression type to use.\n"
+  
+           "\t                      Valid values: none, gzip, bzip2, lzma, xz\n"
+  "\t                      Default: gzip\n"
+           "\t-a               Synonym for \"--compression=lzma\"\n"
+           "\t-j               Synonym for \"--compression=bzip2\"\n"
+           "\t-z               Synonym for \"--compression=gzip\"\n"
+           "\t--compression-args=arg Specifies arguments to be passed\n"
+           "\t                       to the compression engine.\n"
+           "\t--rfc6713        Always use application/zlib for gzip encoding style\n"
+           "\t--list-subdocs   List the subdocuments in the xml header\n"
+           "\t--extract-subdoc=name Extracts the specified subdocument\n"
+           "\t                      to a document in cwd named <name>.xml\n"
+           "\t--exclude=<regexp> POSIX basic regular expression of files to \n"
+  "\t                      ignore while archiving.\n"
+           "\t--strip-components=n Number of path components to strip when extracting\n"
+           "\t--to-stdout      Write file contents to standard out when extracting\n"
+  "\t-O               Synonym for \"--to-stdout\"\n"
+           "\t--rsize          Specifies the size of the buffer used\n"
+           "\t                      for read IO operations in bytes.\n"
+           "\t--coalesce-heap  When archived files are identical, only store one copy\n"
+           "\t                      This option creates an archive which\n"
+  "\t                      is not streamable\n"
+  "\t--link-same      Hardlink identical files\n"
+           "\t--recompress     Allow recompressing already compressed files\n"
+  "\t--no-compress    POSIX regular expression of files\n"
+           "\t                      to archive, but not compress.\n"
+           "\t--prop-include=<p> File properties to include in archive\n"
+           "\t--prop-exclude=<p> File properties to exclude in archive\n"
+           "\t--distribution   Only includes a subset of file properties\n"
+           "\t                      appropriate for archive distribution\n"
+           "\t--keep-existing  Do not overwrite existing files while extracting\n"
+  "\t-k               Synonym for --keep-existing\n"
+           "\t--keep-setuid    Preserve the suid/sgid bits when extracting\n"
+           "\t--sig-size=n     Size (in bytes) of the signature placeholder\n"
+  "\t                      to generate.\n"
+  "\t--sig-len=n      Synonym for \"--sig-size=n\"\n"
+           "\t--data-to-sign=file   Path where to dump the data to be signed.\n"
+           "\t                      Requires --toc-cksum type other than none.\n"
+           "\t--digestinfo-to-sign=file Path where to dump the DigestInfo data to be\n"
+           "\t                 signed.  This option requires the --toc-cksum type be\n"
+           "\t                 set to sha1 (the default), md5, sha224, sha256, sha384\n"
+           "\t                 or sha512.  It produces the same output data as the\n"
+           "\t                 --data-to-sign option does except that the output has\n"
+           "\t                 the appropriate DigestInfo prefix value prepended.\n"
+           "\t                 May only be used in place of the --data-to-sign option.\n"
+           "\t--sig-offset=file     Path where to dump the signature's offset\n"
+           "\t                      within the xar.  Never required.\n"
+           "\t--cert-loc=file  Location of a signing certificate to include in the\n"
+           "\t                      archive.  May be repeated to include a\n"
+           "\t                      certificate chain.  The first cert-loc option\n"
+           "\t                      should specify the leaf certificate, the next its\n"
+           "\t                      issuer and so on so that the last cert-loc option\n"
+           "\t                      specifies the root CA for the chain.\n"
+           "\t                      Certificate files must be in DER (binary) format.\n"
+           "\t                      --leaf-cert-loc= and --intermediate-cert-loc=\n"
+           "\t                      are accepted as synonyms for --cert-loc= for\n"
+  "\t                      historical reasons.\n"
+  "\t--help           Show this help on stdout\n"
+  "\t-h               Synonym for \"--help\"\n"
+  "\t-V               Synonym for \"--version\"\n"
+           "\t--version        Print xar's version number to stdout\n"), prog,
+    E_SIGEXISTS);
 }
 
 /*
@@ -2430,9 +2371,9 @@ print_version ()
 #endif
       get_libxar_version ();
       if (xar_lib_version)
-        printf ("xar library version 0x%08lX\n", xar_lib_version);
+        printf (_("xar library version 0x%08lX\n"), xar_lib_version);
       else
-        printf ("xar library version unknown\n");
+        printf (_("xar library version unknown\n"));
     }
 }
 
@@ -2533,7 +2474,7 @@ main (int argc, char *argv[])
   get_libxar_version ();
   if (xar_lib_version < XAR_VERSION_NUM)
     fprintf (stderr,
-             "%s: warning: linked xar library version older than %s executable\n",
+             _("%s: warning: linked xar library version older than %s executable\n"),
              argv0, argv0);
 
   while ((c =
@@ -2550,7 +2491,7 @@ main (int argc, char *argv[])
             if (!optarg)
               {
                 usagehint (argv0);
-                fprintf (stderr, "\n--toc-cksum requires an argument\n");
+                fprintf (stderr, _("\n--toc-cksum requires an argument\n"));
                 exit (1);
               }
             optlen = strlen (optarg);
@@ -2562,7 +2503,7 @@ main (int argc, char *argv[])
             if ((opthash = get_hash_alg (optarg)) == NULL && !custom)
               {
                 usagehint (argv0);
-                fprintf (stderr, "\n--toc-cksum unrecognized hash type %s\n",
+                fprintf (stderr, _("\n--toc-cksum unrecognized hash type %s\n"),
                          optarg);
                 exit (1);
               }
@@ -2578,7 +2519,7 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--compression requires an argument\n");
+              fprintf (stderr, _("\n--compression requires an argument\n"));
               exit (1);
             }
           if ((strcmp (optarg, XAR_OPT_VAL_NONE) != 0) &&
@@ -2594,7 +2535,7 @@ main (int argc, char *argv[])
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nThis instance of xar doesn't understand compression type %s\n",
+                       _("\nThis instance of xar doesn't understand compression type %s\n"),
                        optarg);
               exit (1);
             }
@@ -2605,7 +2546,7 @@ main (int argc, char *argv[])
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: --list-subdocs and -%c specified\n",
+                       _("\nConflicting commands: --list-subdocs and -%c specified\n"),
                        command);
               exit (1);
             }
@@ -2619,14 +2560,14 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--dump-toc requires an argument\n");
+              fprintf (stderr, _("\n--dump-toc requires an argument\n"));
               exit (1);
             }
           if (command && (command != 'd'))
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: -%c and -%c specified\n", c,
+                       _("\nConflicting commands: -%c and -%c specified\n"), c,
                        command);
               exit (1);
             }
@@ -2638,7 +2579,7 @@ main (int argc, char *argv[])
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: --dump-header and -%c specified\n",
+                       _("\nConflicting commands: --dump-header and -%c specified\n"),
                        command);
               exit (1);
             }
@@ -2649,7 +2590,7 @@ main (int argc, char *argv[])
           err = asprintf (&Subdoc, "%s.xml", SubdocName);
           if (err == -1)
             {
-              fprintf (stderr, "%s: Error with asprintf()\n", argv0);
+              fprintf (stderr, _("%s: Error with asprintf()\n"), argv0);
               exit (1);
             }
           if (!command)
@@ -2664,7 +2605,7 @@ main (int argc, char *argv[])
             {
               char errstr[1024];
               regerror (err, &tmp->reg, errstr, sizeof (errstr));
-              fprintf (stderr, "%s: Error with regular expression %s: %s\n",
+              fprintf (stderr, _("%s: Error with regular expression %s: %s\n"),
                        argv0, tmp->str, errstr);
               exit (1);
             }
@@ -2683,7 +2624,7 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--rsize requires an argument\n");
+              fprintf (stderr, _("\n--rsize requires an argument\n"));
               exit (1);
             }
           longtmp = strtol (optarg, NULL, 10);
@@ -2691,7 +2632,7 @@ main (int argc, char *argv[])
                && (errno == ERANGE)) || (longtmp < 16))
             {
               usagehint (argv0);
-              fprintf (stderr, "\nInvalid rsize value: %s\n", optarg);
+              fprintf (stderr, _("\nInvalid rsize value: %s\n"), optarg);
               exit (5);
             }
           Rsize = optarg;
@@ -2711,7 +2652,7 @@ main (int argc, char *argv[])
             {
               char errstr[1024];
               regerror (err, &tmp->reg, errstr, sizeof (errstr));
-              printf ("Error with regular expression %s: %s\n", tmp->str,
+              printf (_("Error with regular expression %s: %s\n"), tmp->str,
                       errstr);
               exit (1);
             }
@@ -2796,7 +2737,7 @@ main (int argc, char *argv[])
             if (!optarg)
               {
                 usagehint (argv0);
-                fprintf (stderr, "\n--file-cksum requires an argument\n");
+                fprintf (stderr, _("\n--file-cksum requires an argument\n"));
                 exit (1);
               }
             optlen = strlen (optarg);
@@ -2808,7 +2749,7 @@ main (int argc, char *argv[])
             if ((opthash = get_hash_alg (optarg)) == NULL && !custom)
               {
                 usagehint (argv0);
-                fprintf (stderr, "\n--file-cksum unrecognized hash type %s\n",
+                fprintf (stderr, _("\n--file-cksum unrecognized hash type %s\n"),
                          optarg);
                 exit (1);
               }
@@ -2824,7 +2765,7 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--sig-size requires an argument\n");
+              fprintf (stderr, _("\n--sig-size requires an argument\n"));
               exit (1);
             }
           SigSize = strtol (optarg, (char **) NULL, 10);
@@ -2834,20 +2775,20 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--data-to-sign requires an argument\n");
+              fprintf (stderr, _("\n--data-to-sign requires an argument\n"));
               exit (1);
             }
           if (DumpDigestInfo)
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\n--data-to-sign may not be used with --digestinfo-to-sign\n");
+                       _("\n--data-to-sign may not be used with --digestinfo-to-sign\n"));
               exit (1);
             }
           if (DataToSignDumpPath)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--data-to-sign may only be used once\n");
+              fprintf (stderr, _("\n--data-to-sign may only be used once\n"));
               exit (1);
             }
           DataToSignDumpPath = optarg;
@@ -2856,7 +2797,7 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--sig-offset requires an argument\n");
+              fprintf (stderr, _("\n--sig-offset requires an argument\n"));
               exit (1);
             }
           SigOffsetDumpPath = optarg;
@@ -2866,7 +2807,7 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--cert-loc requires an argument\n");
+              fprintf (stderr, _("\n--cert-loc requires an argument\n"));
               exit (1);
             }
           ctmp = malloc (sizeof (struct cnode));
@@ -2896,7 +2837,7 @@ main (int argc, char *argv[])
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: --extract-data-to-sign and -%c specified\n",
+                       _("\nConflicting commands: --extract-data-to-sign and -%c specified\n"),
                        command);
               exit (1);
             }
@@ -2910,7 +2851,7 @@ main (int argc, char *argv[])
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: --replace-sign and -%c specified\n",
+                       _("\nConflicting commands: --replace-sign and -%c specified\n"),
                        command);
               exit (1);
             }
@@ -2921,14 +2862,14 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--inject-sig requires an argument\n");
+              fprintf (stderr, _("\n--inject-sig requires an argument\n"));
               exit (1);
             }
           if (command && (command != 'i'))
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: --inject-sig and -%c specified\n",
+                       _("\nConflicting commands: --inject-sig and -%c specified\n"),
                        command);
               exit (1);
             }
@@ -2939,14 +2880,14 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--extract-certs requires an argument\n");
+              fprintf (stderr, _("\n--extract-certs requires an argument\n"));
               exit (1);
             }
           if (command && (command != 'j' || cert_CAfile))
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: --extract-certs and -%c specified\n",
+                       _("\nConflicting commands: --extract-certs and -%c specified\n"),
                        command);
               exit (1);
             }
@@ -2955,7 +2896,7 @@ main (int argc, char *argv[])
           if (err || !(stat_struct.st_mode & S_IFDIR))
             {
               usagehint (argv0);
-              fprintf (stderr, "\n%s is not a directory\n", cert_path);
+              fprintf (stderr, _("\n%s is not a directory\n"), cert_path);
               exit (1);
             }
           command = 'j';
@@ -2964,14 +2905,14 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--extract-CAfile requires an argument\n");
+              fprintf (stderr, _("\n--extract-CAfile requires an argument\n"));
               exit (1);
             }
           if (command && (command != 'j' || cert_path))
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: --extract-CAfile and -%c specified\n",
+                       _("\nConflicting commands: --extract-CAfile and -%c specified\n"),
                        command);
               exit (1);
             }
@@ -2980,7 +2921,7 @@ main (int argc, char *argv[])
           if (!err && (stat_struct.st_mode & S_IFDIR))
             {
               usagehint (argv0);
-              fprintf (stderr, "\n%s is a directory\n", cert_CAfile);
+              fprintf (stderr, _("\n%s is a directory\n"), cert_CAfile);
               exit (1);
             }
           command = 'j';
@@ -2989,14 +2930,14 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--extract-sig requires an argument\n");
+              fprintf (stderr, _("\n--extract-sig requires an argument\n"));
               exit (1);
             }
           if (command && (command != 'g'))
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: --extract-sig and -%c specified\n",
+                       _("\nConflicting commands: --extract-sig and -%c specified\n"),
                        command);
               exit (1);
             }
@@ -3005,7 +2946,7 @@ main (int argc, char *argv[])
           if (!err && (stat_struct.st_mode & S_IFDIR))
             {
               usagehint (argv0);
-              fprintf (stderr, "\n%s is a directory\n", SignatureDumpPath);
+              fprintf (stderr, _("\n%s is a directory\n"), SignatureDumpPath);
               exit (1);
             }
           command = 'g';
@@ -3014,14 +2955,14 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n--dump-toc-raw requires an argument\n");
+              fprintf (stderr, _("\n--dump-toc-raw requires an argument\n"));
               exit (1);
             }
           if (command && (command != 'w'))
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: --dump-toc-raw and -%c specified\n",
+                       _("\nConflicting commands: --dump-toc-raw and -%c specified\n"),
                        command);
               exit (1);
             }
@@ -3033,21 +2974,21 @@ main (int argc, char *argv[])
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\n--digestinfo-to-sign requires an argument\n");
+                       _("\n--digestinfo-to-sign requires an argument\n"));
               exit (1);
             }
           if (DataToSignDumpPath && !DumpDigestInfo)
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\n--digestinfo-to-sign may not be used with --data-to-sign\n");
+                       _("\n--digestinfo-to-sign may not be used with --data-to-sign\n"));
               exit (1);
             }
           if (DataToSignDumpPath)
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\n--digestinfo-to-sign may only be used once\n");
+                       _("\n--digestinfo-to-sign may only be used once\n"));
               exit (1);
             }
           DataToSignDumpPath = optarg;
@@ -3064,14 +3005,14 @@ main (int argc, char *argv[])
               {
                 usagehint (argv0);
                 fprintf (stderr,
-                         "\n--strip-components requires an argument\n");
+                         _("\n--strip-components requires an argument\n"));
                 exit (1);
               }
             if (xar_lib_version < MIN_XAR_NEW_OPTIONS)
               {
                 usagehint (argv0);
                 fprintf (stderr,
-                         "\n--strip-components requires a newer xar library\n");
+                         _("\n--strip-components requires a newer xar library\n"));
                 exit (1);
               }
             comps = strtol (optarg, &endptr, 0);
@@ -3079,7 +3020,7 @@ main (int argc, char *argv[])
               {
                 usagehint (argv0);
                 fprintf (stderr,
-                         "\n--strip-components requires a non-negative number argument\n");
+                         _("\n--strip-components requires a non-negative number argument\n"));
                 exit (1);
               }
             StripComponents = optarg;
@@ -3092,7 +3033,7 @@ main (int argc, char *argv[])
           if (!optarg)
             {
               usagehint (argv0);
-              fprintf (stderr, "\n-C requires an argument\n");
+              fprintf (stderr, _("\n-C requires an argument\n"));
               exit (1);
             }
           Chdir = optarg;
@@ -3104,7 +3045,7 @@ main (int argc, char *argv[])
             {
               usagehint (argv0);
               fprintf (stderr,
-                       "\nConflicting commands: -%c and -%c specified\n", c,
+                       _("\nConflicting commands: -%c and -%c specified\n"), c,
                        command);
               exit (1);
             }
@@ -3138,7 +3079,7 @@ main (int argc, char *argv[])
           if (xar_lib_version < MIN_XAR_NEW_OPTIONS)
             {
               fprintf (stderr,
-                       "%s: --to-stdout requires a newer xar library\n",
+                       _("%s: --to-stdout requires a newer xar library\n"),
                        argv0);
               exit (1);
             }
@@ -3181,7 +3122,7 @@ main (int argc, char *argv[])
         {
           usagehint (argv0);
           fprintf (stderr,
-                   "\n--sign requires a --toc-cksum type value other than \"%s\"\n",
+                   _("\n--sign requires a --toc-cksum type value other than \"%s\"\n"),
                    XAR_OPT_VAL_NONE);
           exit (1);
         }
@@ -3191,7 +3132,7 @@ main (int argc, char *argv[])
     {
       usagehint (argv0);
       fprintf (stderr,
-               "\nNeither --sig-size nor --cert-loc may be used without either --sign or --replace-sign\n");
+               _("\nNeither --sig-size nor --cert-loc may be used without either --sign or --replace-sign\n"));
       exit (1);
     }
 
@@ -3199,14 +3140,14 @@ main (int argc, char *argv[])
       || (Filecksum && strcmp (Filecksum->name, XAR_OPT_VAL_MD5) == 0))
     {
       fprintf (stderr,
-               "%s: warning: The md5 hash is obsolete and should not be used anymore -- continuing anyway\n",
+               _("%s: warning: The md5 hash is obsolete and should not be used anymore -- continuing anyway\n"),
                argv0);
     }
 
   if (!required_dash_f)
     {
       usagehint (argv0);
-      fprintf (stderr, "\n-f option is REQUIRED\n");
+      fprintf (stderr, _("\n-f option is REQUIRED\n"));
       exit (1);
     }
 
@@ -3215,7 +3156,7 @@ main (int argc, char *argv[])
     {
       usagehint (argv0);
       fprintf (stderr,
-               "\n--extract-data-to-sign also requires either --data-to-sign or --digestinfo-to-sign\n");
+               _("\n--extract-data-to-sign also requires either --data-to-sign or --digestinfo-to-sign\n"));
       exit (1);
     }
 
@@ -3224,7 +3165,7 @@ main (int argc, char *argv[])
     {
       usagehint (argv0);
       fprintf (stderr,
-               "\n--data-to-sign requires a --toc-cksum type value other than \"%s\"\n",
+               _("\n--data-to-sign requires a --toc-cksum type value other than \"%s\"\n"),
                XAR_OPT_VAL_NONE);
       exit (1);
     }
@@ -3234,7 +3175,7 @@ main (int argc, char *argv[])
     {
       usagehint (argv0);
       fprintf (stderr,
-               "\n--digestinfo-to-sign requires --toc-cksum of \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" or \"%s\"\n",
+               _("\n--digestinfo-to-sign requires --toc-cksum of \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" or \"%s\"\n"),
                XAR_OPT_VAL_MD5, XAR_OPT_VAL_SHA1, XAR_OPT_VAL_SHA224,
                XAR_OPT_VAL_SHA256, XAR_OPT_VAL_SHA384, XAR_OPT_VAL_SHA512);
       exit (1);
@@ -3247,7 +3188,7 @@ main (int argc, char *argv[])
         {
           usagehint (argv0);
           fprintf (stderr,
-                   "\nNeither --cert-loc nor --sig-offset may be used when removing signatures with --sig-size=0\n");
+                   _("\nNeither --cert-loc nor --sig-offset may be used when removing signatures with --sig-size=0\n"));
           exit (1);
         }
     }
@@ -3257,7 +3198,7 @@ main (int argc, char *argv[])
         {
           usagehint (argv0);
           fprintf (stderr,
-                   "\n--sig-size > 0 and at least one --cert-loc option are required to sign\n");
+                   _("\n--sig-size > 0 and at least one --cert-loc option are required to sign\n"));
           exit (1);
         }
       if (!command)
@@ -3286,14 +3227,14 @@ main (int argc, char *argv[])
   if ((command == 'i') && ((!filename) || (!sig_path)))
     {
       usagehint (argv0);
-      fprintf (stderr, "\n--inject-sig requires an argument and also -f\n");
+      fprintf (stderr, _("\n--inject-sig requires an argument and also -f\n"));
       exit (1);
     }
 
   if ((command == 'j' || command == 'g') && (!filename))
     {
       usagehint (argv0);
-      fprintf (stderr, "\nmissing required -f\n");
+      fprintf (stderr, _("\nmissing required -f\n"));
       exit (1);
     }
 
@@ -3307,7 +3248,7 @@ main (int argc, char *argv[])
       if (optind == argc)
         {
           usagehint (argv0);
-          fprintf (stderr, "\nNo files to operate on\n");
+          fprintf (stderr, _("\nNo files to operate on\n"));
           exit (1);
         }
       arglen = argc - optind;
@@ -3321,7 +3262,7 @@ main (int argc, char *argv[])
       if (!tocfile)
         {
           usagehint (argv0);
-          fprintf (stderr, "\nmissing --dump-toc argument\n");
+          fprintf (stderr, _("\nmissing --dump-toc argument\n"));
           exit (1);
         }
       return dumptoc (filename, tocfile);
@@ -3329,7 +3270,7 @@ main (int argc, char *argv[])
       if (!tocfile)
         {
           usagehint (argv0);
-          fprintf (stderr, "\nmissing --dump-toc-raw argument\n");
+          fprintf (stderr, _("\nmissing --dump-toc-raw argument\n"));
           exit (1);
         }
       return dumptoc_raw (filename, tocfile);
@@ -3353,7 +3294,7 @@ main (int argc, char *argv[])
       x = xar_open (filename, READ);
       if (!x)
         {
-          fprintf (stderr, "%s: Error opening xar archive: %s\n", argv0,
+          fprintf (stderr, _("%s: Error opening xar archive: %s\n"), argv0,
                    filename);
           exit (1);
         }
@@ -3382,7 +3323,7 @@ main (int argc, char *argv[])
       exit (Err);
     default:
       usagehint (argv0);
-      fprintf (stderr, "\nUnrecognized command\n");
+      fprintf (stderr, _("\nUnrecognized command\n"));
       exit (1);
     }
 
