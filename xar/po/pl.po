@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xar-core 1.6.1\n"
 "Report-Msgid-Bugs-To: xar-devel@googlegroups.com\n"
-"POT-Creation-Date: 2016-11-12 13:28+0100\n"
+"POT-Creation-Date: 2016-11-12 13:43+0100\n"
 "PO-Revision-Date: 2016-11-12 13:31+0100\n"
 "Last-Translator: Jakub Kaszycki <kuba@kaszycki.net.pl>\n"
 "Language-Team: \n"
@@ -344,7 +344,7 @@ msgstr ""
 msgid "Error re-closing the archive\n"
 msgstr ""
 
-#: src/xar.c:1579 src/xar.c:1607 src/xar.c:1833 src/xar.c:2655
+#: src/xar.c:1579 src/xar.c:1607 src/xar.c:1833 src/xar.c:2661
 #, c-format
 msgid "Error with regular expression %s: %s\n"
 msgstr ""
@@ -680,307 +680,307 @@ msgstr ""
 msgid "xar library version unknown\n"
 msgstr ""
 
-#: src/xar.c:2477
+#: src/xar.c:2483
 #, c-format
 msgid "%s: warning: linked xar library version older than %s executable\n"
 msgstr ""
 
-#: src/xar.c:2494
+#: src/xar.c:2500
 #, c-format
 msgid ""
 "\n"
 "--toc-cksum requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2506
+#: src/xar.c:2512
 #, c-format
 msgid ""
 "\n"
 "--toc-cksum unrecognized hash type %s\n"
 msgstr ""
 
-#: src/xar.c:2522
+#: src/xar.c:2528
 #, c-format
 msgid ""
 "\n"
 "--compression requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2538
+#: src/xar.c:2544
 #, c-format
 msgid ""
 "\n"
 "This instance of xar doesn't understand compression type %s\n"
 msgstr ""
 
-#: src/xar.c:2549
+#: src/xar.c:2555
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --list-subdocs and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2563
+#: src/xar.c:2569
 #, c-format
 msgid ""
 "\n"
 "--dump-toc requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2570 src/xar.c:3048
+#: src/xar.c:2576 src/xar.c:3054
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: -%c and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2582
+#: src/xar.c:2588
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --dump-header and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2593
+#: src/xar.c:2599
 #, c-format
 msgid "%s: Error with asprintf()\n"
 msgstr ""
 
-#: src/xar.c:2608
+#: src/xar.c:2614
 #, c-format
 msgid "%s: Error with regular expression %s: %s\n"
 msgstr ""
 
-#: src/xar.c:2627
+#: src/xar.c:2633
 #, c-format
 msgid ""
 "\n"
 "--rsize requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2635
+#: src/xar.c:2641
 #, c-format
 msgid ""
 "\n"
 "Invalid rsize value: %s\n"
 msgstr ""
 
-#: src/xar.c:2740
+#: src/xar.c:2746
 #, c-format
 msgid ""
 "\n"
 "--file-cksum requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2752
+#: src/xar.c:2758
 #, c-format
 msgid ""
 "\n"
 "--file-cksum unrecognized hash type %s\n"
 msgstr ""
 
-#: src/xar.c:2768
+#: src/xar.c:2774
 #, c-format
 msgid ""
 "\n"
 "--sig-size requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2778
+#: src/xar.c:2784
 #, c-format
 msgid ""
 "\n"
 "--data-to-sign requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2785
+#: src/xar.c:2791
 #, c-format
 msgid ""
 "\n"
 "--data-to-sign may not be used with --digestinfo-to-sign\n"
 msgstr ""
 
-#: src/xar.c:2791
+#: src/xar.c:2797
 #, c-format
 msgid ""
 "\n"
 "--data-to-sign may only be used once\n"
 msgstr ""
 
-#: src/xar.c:2800
+#: src/xar.c:2806
 #, c-format
 msgid ""
 "\n"
 "--sig-offset requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2810
+#: src/xar.c:2816
 #, c-format
 msgid ""
 "\n"
 "--cert-loc requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2840
+#: src/xar.c:2846
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --extract-data-to-sign and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2854
+#: src/xar.c:2860
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --replace-sign and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2865
+#: src/xar.c:2871
 #, c-format
 msgid ""
 "\n"
 "--inject-sig requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2872
+#: src/xar.c:2878
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --inject-sig and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2883
+#: src/xar.c:2889
 #, c-format
 msgid ""
 "\n"
 "--extract-certs requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2890
+#: src/xar.c:2896
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --extract-certs and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2899
+#: src/xar.c:2905
 #, c-format
 msgid ""
 "\n"
 "%s is not a directory\n"
 msgstr ""
 
-#: src/xar.c:2908
+#: src/xar.c:2914
 #, c-format
 msgid ""
 "\n"
 "--extract-CAfile requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2915
+#: src/xar.c:2921
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --extract-CAfile and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2924 src/xar.c:2949
+#: src/xar.c:2930 src/xar.c:2955
 #, c-format
 msgid ""
 "\n"
 "%s is a directory\n"
 msgstr ""
 
-#: src/xar.c:2933
+#: src/xar.c:2939
 #, c-format
 msgid ""
 "\n"
 "--extract-sig requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2940
+#: src/xar.c:2946
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --extract-sig and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2958
+#: src/xar.c:2964
 #, c-format
 msgid ""
 "\n"
 "--dump-toc-raw requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2965
+#: src/xar.c:2971
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --dump-toc-raw and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2977
+#: src/xar.c:2983
 #, c-format
 msgid ""
 "\n"
 "--digestinfo-to-sign requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2984
+#: src/xar.c:2990
 #, c-format
 msgid ""
 "\n"
 "--digestinfo-to-sign may not be used with --data-to-sign\n"
 msgstr ""
 
-#: src/xar.c:2991
+#: src/xar.c:2997
 #, c-format
 msgid ""
 "\n"
 "--digestinfo-to-sign may only be used once\n"
 msgstr ""
 
-#: src/xar.c:3008
+#: src/xar.c:3014
 #, c-format
 msgid ""
 "\n"
 "--strip-components requires an argument\n"
 msgstr ""
 
-#: src/xar.c:3015
+#: src/xar.c:3021
 #, c-format
 msgid ""
 "\n"
 "--strip-components requires a newer xar library\n"
 msgstr ""
 
-#: src/xar.c:3023
+#: src/xar.c:3029
 #, c-format
 msgid ""
 "\n"
 "--strip-components requires a non-negative number argument\n"
 msgstr ""
 
-#: src/xar.c:3036
+#: src/xar.c:3042
 #, c-format
 msgid ""
 "\n"
 "-C requires an argument\n"
 msgstr ""
 
-#: src/xar.c:3082
+#: src/xar.c:3088
 #, c-format
 msgid "%s: --to-stdout requires a newer xar library\n"
 msgstr ""
 
-#: src/xar.c:3125
+#: src/xar.c:3131
 #, c-format
 msgid ""
 "\n"
 "--sign requires a --toc-cksum type value other than \"%s\"\n"
 msgstr ""
 
-#: src/xar.c:3135
+#: src/xar.c:3141
 #, c-format
 msgid ""
 "\n"
@@ -988,21 +988,21 @@ msgid ""
 "replace-sign\n"
 msgstr ""
 
-#: src/xar.c:3143
+#: src/xar.c:3149
 #, c-format
 msgid ""
 "%s: warning: The md5 hash is obsolete and should not be used anymore -- "
 "continuing anyway\n"
 msgstr ""
 
-#: src/xar.c:3150
+#: src/xar.c:3156
 #, c-format
 msgid ""
 "\n"
 "-f option is REQUIRED\n"
 msgstr ""
 
-#: src/xar.c:3159
+#: src/xar.c:3165
 #, c-format
 msgid ""
 "\n"
@@ -1010,14 +1010,14 @@ msgid ""
 "to-sign\n"
 msgstr ""
 
-#: src/xar.c:3168
+#: src/xar.c:3174
 #, c-format
 msgid ""
 "\n"
 "--data-to-sign requires a --toc-cksum type value other than \"%s\"\n"
 msgstr ""
 
-#: src/xar.c:3178
+#: src/xar.c:3184
 #, c-format
 msgid ""
 "\n"
@@ -1025,7 +1025,7 @@ msgid ""
 "\"%s\" or \"%s\"\n"
 msgstr ""
 
-#: src/xar.c:3191
+#: src/xar.c:3197
 #, c-format
 msgid ""
 "\n"
@@ -1033,54 +1033,54 @@ msgid ""
 "with --sig-size=0\n"
 msgstr ""
 
-#: src/xar.c:3201
+#: src/xar.c:3207
 #, c-format
 msgid ""
 "\n"
 "--sig-size > 0 and at least one --cert-loc option are required to sign\n"
 msgstr ""
 
-#: src/xar.c:3230
+#: src/xar.c:3236
 #, c-format
 msgid ""
 "\n"
 "--inject-sig requires an argument and also -f\n"
 msgstr ""
 
-#: src/xar.c:3237
+#: src/xar.c:3243
 #, c-format
 msgid ""
 "\n"
 "missing required -f\n"
 msgstr ""
 
-#: src/xar.c:3251
+#: src/xar.c:3257
 #, c-format
 msgid ""
 "\n"
 "No files to operate on\n"
 msgstr ""
 
-#: src/xar.c:3265
+#: src/xar.c:3271
 #, c-format
 msgid ""
 "\n"
 "missing --dump-toc argument\n"
 msgstr ""
 
-#: src/xar.c:3273
+#: src/xar.c:3279
 #, c-format
 msgid ""
 "\n"
 "missing --dump-toc-raw argument\n"
 msgstr ""
 
-#: src/xar.c:3297
+#: src/xar.c:3303
 #, c-format
 msgid "%s: Error opening xar archive: %s\n"
 msgstr ""
 
-#: src/xar.c:3326
+#: src/xar.c:3332
 #, c-format
 msgid ""
 "\n"
