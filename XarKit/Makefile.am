@@ -27,8 +27,14 @@ XarKit.framework: libXarKit.la $(srcdir)/Info.plist $(ac_aux_dir)/mkframework \
         "$(xincludedir)"
 
 install-exec-hook: XarKit.framework
-	cp -r $< $(libdir)/GNUstep/Frameworks
-	cp -r $< $(exec_prefix)/Library/Frameworks
+	$(INSTALL) -d $(libdir)/GNUstep/Frameworks && \
+        cp -r $< $(libdir)/GNUstep/Frameworks
+	$(INSTALL) -d $(exec_prefix)/Library/Frameworks && \
+        cp -r $< $(exec_prefix)/Library/Frameworks
+
+uninstall-hook:
+	rm -rf $(libdir)/GNUstep/Frameworks/XarKit \
+        $(exec_prefix)/Library/Frameworks/XarKit
 
 all-am: XarKit.framework
 mostlyclean-local: mostlyclean-hook
