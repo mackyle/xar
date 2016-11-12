@@ -10,7 +10,8 @@ PASS_ENV = \
            CFLAGS='$(CFLAGS) $(AM_CFLAGS)' \
            LIBS='$(LIBS) $(LDADD)' \
            CC='$(CC)' \
-           LD='$(CCLD)' \
+           CCLD='$(CC)' \
+           LD='$(CC)' \
            PYTHON='$(PYTHON)'
 
 stamp-all: $(srcdir)/setup.py $(srcdir)/xarfile.pyx
@@ -21,7 +22,7 @@ stamp-all: $(srcdir)/setup.py $(srcdir)/xarfile.pyx
 mostlyclean-am:
 	rm -f stamp-all; \
 	$(PASS_ENV) \
-	$(PYTHON) $(srcdir)/setup.py clean
+	$(PYTHON) $(srcdir)/setup.py clean -a
 
 install-exec-hook:
 	$(PASS_ENV) \
