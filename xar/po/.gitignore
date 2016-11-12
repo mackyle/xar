@@ -12,7 +12,7 @@
 /Rules-quot
 /remove-potcdate.sed
 /POTFILES
-/xar-core.pot
+/xar.pot
 /stamp-po
 /*.mo
 /*.gmo

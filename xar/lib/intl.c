@@ -6,7 +6,7 @@
 
 static bool init_done = false;
 
-__attribute__ ((__constructor__))
+//__attribute__ ((__constructor__))
 void
 xar__init_intl (void)
 {
