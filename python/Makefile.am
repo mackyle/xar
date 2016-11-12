@@ -4,21 +4,31 @@ _EMPTY =
 
 noinst_DATA = stamp-all
 
+PASS_ENV = \
+           CPPFLAGS='$(CPPFLAGS) $(AM_CPPFLAGS) $(INCLUDES)' \
+           LDFLAGS='$(LDFLAGS) $(AM_LDFLAGS)' \
+           CFLAGS='$(CFLAGS) $(AM_CFLAGS)' \
+           LIBS='$(LIBS) $(LDADD)' \
+           CC='$(CC)' \
+           LD='$(CCLD)' \
+           PYTHON='$(PYTHON)'
+
 stamp-all: $(srcdir)/setup.py $(srcdir)/xarfile.pyx
-	CPPFLAGS='$(CPPFLAGS) $(AM_CPPFLAGS)' LDFLAGS='$(LDFLAGS) $(AM_LDFLAGS)' \
+	$(PASS_ENV) \
         $(PYTHON) $(srcdir)/setup.py build; \
         touch $@
 
-clean-hook:
+mostlyclean-am:
 	rm -f stamp-all; \
-	CPPFLAGS='$(CPPFLAGS) $(AM_CPPFLAGS)' LDFLAGS='$(LDFLAGS) $(AM_LDFLAGS)' \
+	$(PASS_ENV) \
 	$(PYTHON) $(srcdir)/setup.py clean
 
 install-exec-hook:
-	CPPFLAGS='$(CPPFLAGS) $(AM_CPPFLAGS)' LDFLAGS='$(LDFLAGS) $(AM_LDFLAGS)' \
+	$(PASS_ENV) \
 	$(PYTHON) $(srcdir)/setup.py install
 
 check-am:
+	$(PASS_ENV) \
 	$(PYTHON) $(srcdir)/setup.py check
 
 @_EMPTY@ifneq (-$(srcdir)-,-$(builddir)-)
