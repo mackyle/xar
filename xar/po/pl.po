@@ -1,0 +1,1087 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Xar developers and contributors
+# This file is distributed under the same license as the xar-core package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: xar-core 1.6.1\n"
+"Report-Msgid-Bugs-To: xar-devel@googlegroups.com\n"
+"POT-Creation-Date: 2016-11-12 13:29+0100\n"
+"PO-Revision-Date: 2016-11-12 13:31+0100\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.11\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+"Language: pl_PL\n"
+
+#: src/xar.c:263
+#, c-format
+msgid "ERROR: subdoc file %s doesn't exist -- ignoring\n"
+msgstr "BŁĄD: plik subdoc %s nie istnieje -- ignorowanie\n"
+
+#: src/xar.c:281
+#, c-format
+msgid "Error reading subdoc %s\n"
+msgstr "Błąd czytania subdoc %s\n"
+
+#: src/xar.c:311
+#, c-format
+msgid "Error writing subdoc %s\n"
+msgstr "Błąd zapisywania subdoc %s\n"
+
+#: src/xar.c:339
+#, c-format
+msgid "Could not open %s to extract data to sign\n"
+msgstr "Nie można było otworzyć %s aby rozpakować dane do podpisania\n"
+
+#: src/xar.c:346 src/xar.c:550 src/xar.c:734
+#, c-format
+msgid "No signatures found to extract data from\n"
+msgstr ""
+
+#: src/xar.c:360 src/xar.c:926
+#, c-format
+msgid "--digestinfo-to-sign does not support hash type \"%s\"\n"
+msgstr ""
+
+#: src/xar.c:369
+#, c-format
+msgid "Could not locate checksum/size in archive\n"
+msgstr ""
+
+#: src/xar.c:384
+#, c-format
+msgid "Could not open %s for reading data to sign\n"
+msgstr ""
+
+#: src/xar.c:393
+#, c-format
+msgid "Failed to read data to sign from %s\n"
+msgstr ""
+
+#: src/xar.c:402 src/xar.c:1183
+#, c-format
+msgid "Could not open %s for saving data to sign\n"
+msgstr ""
+
+#: src/xar.c:412 src/xar.c:1194
+#, c-format
+msgid ""
+"Failed to write DigestInfo data to sign prefix to %s (fwrite() returned %i)\n"
+msgstr ""
+
+#: src/xar.c:421 src/xar.c:1203
+#, c-format
+msgid "Failed to write %sdata to sign to %s (fwrite() returned %i)\n"
+msgstr ""
+
+#: src/xar.c:433 src/xar.c:681
+#, c-format
+msgid "Could not open %s for saving signature offset\n"
+msgstr ""
+
+#: src/xar.c:441 src/xar.c:689
+#, c-format
+msgid "Failed to write signature offset to %s (fprintf() returned %i)\n"
+msgstr ""
+
+#: src/xar.c:543
+#, c-format
+msgid "Could not open %s to extract certificates\n"
+msgstr ""
+
+#: src/xar.c:558
+#, c-format
+msgid "Signature bears no certificates -- how odd\n"
+msgstr ""
+
+#: src/xar.c:566 src/xar.c:606
+#, c-format
+msgid "Could not save certificates to %s\n"
+msgstr ""
+
+#: src/xar.c:577 src/xar.c:584
+#, c-format
+msgid "Could not save certificate %i to %s\n"
+msgstr ""
+
+#: src/xar.c:592
+#, c-format
+msgid "Failed to write certificate to %s (fwrite() returned %i)\n"
+msgstr ""
+
+#: src/xar.c:611 src/xar.c:621 src/xar.c:631 src/xar.c:638
+#, c-format
+msgid "Failed to write certificates to %s\n"
+msgstr ""
+
+#: src/xar.c:704
+#, c-format
+msgid "Could not read signature offset from %s\n"
+msgstr ""
+
+#: src/xar.c:727
+#, c-format
+msgid "Could not open %s to extract signature data\n"
+msgstr ""
+
+#: src/xar.c:742
+#, c-format
+msgid "Could not read signature data from %s!\n"
+msgstr ""
+
+#: src/xar.c:751
+#, c-format
+msgid "Could not open %s for saving signature data\n"
+msgstr ""
+
+#: src/xar.c:759
+#, c-format
+msgid "Failed to write signature data to %s (fwrite() returned %i)\n"
+msgstr ""
+
+#: src/xar.c:900 src/xar.c:1154
+#, c-format
+msgid "Could not open archive %s\n"
+msgstr ""
+
+#: src/xar.c:910
+#, c-format
+msgid ""
+"A TOC checksum style value other than \"%s\" is required for signatures\n"
+msgstr ""
+
+#: src/xar.c:948
+#, c-format
+msgid ""
+"No temporary directory available (none of $TMPDIR $TMP or /tmp are "
+"directories)\n"
+msgstr ""
+
+#: src/xar.c:955
+#, c-format
+msgid "Could not allocate memory for temporary file path\n"
+msgstr ""
+
+#: src/xar.c:964 src/xar.c:975
+#, c-format
+msgid "Error creating new archive %s\n"
+msgstr ""
+
+#: src/xar.c:1000 src/xar.c:1371
+#, c-format
+msgid "Unsupported TOC checksum type %s\n"
+msgstr ""
+
+#: src/xar.c:1018
+#, c-format
+msgid "old_xar -> %s (parent: %s)\n"
+msgstr ""
+
+#: src/xar.c:1040
+#, c-format
+msgid "root: %s\n"
+msgstr ""
+
+#: src/xar.c:1049
+#, c-format
+msgid "child: %s -> %s\n"
+msgstr ""
+
+#: src/xar.c:1060
+#, c-format
+msgid "searching for parent: %s ?\n"
+msgstr ""
+
+#: src/xar.c:1064
+#, c-format
+msgid "popping: %s\n"
+msgstr ""
+
+#: src/xar.c:1070
+#, c-format
+msgid "found: %s -> %s\n"
+msgstr ""
+
+#: src/xar.c:1092
+#, c-format
+msgid "new_xar -> %s\n"
+msgstr ""
+
+#: src/xar.c:1102 src/xar.c:1510
+#, c-format
+msgid "Error creating the archive\n"
+msgstr ""
+
+#: src/xar.c:1112
+#, c-format
+msgid "Error re-opening new archive %s\n"
+msgstr ""
+
+#: src/xar.c:1125
+#, c-format
+msgid "Could not copy new archive to final location (asprintf() error %i)\n"
+msgstr ""
+
+#: src/xar.c:1133
+#, c-format
+msgid "Could not copy new archive to final location (system() returned %i)\n"
+msgstr ""
+
+#: src/xar.c:1161
+#, c-format
+msgid "Archive has already been signed. Use --replace-sign instead\n"
+msgstr ""
+
+#: src/xar.c:1228
+#, c-format
+msgid "Could not stat() certificate file %s (errno == %i)\n"
+msgstr ""
+
+#: src/xar.c:1236
+#, c-format
+msgid "Could not open %s for reading certificate\n"
+msgstr ""
+
+#: src/xar.c:1243
+#, c-format
+msgid "Failed to read certificate from %s\n"
+msgstr ""
+
+#: src/xar.c:1266
+#, c-format
+msgid "inject_signature(%s, %s)\n"
+msgstr ""
+
+#: src/xar.c:1273
+#, c-format
+msgid "Could not open xar archive %s to get signature offset\n"
+msgstr ""
+
+#: src/xar.c:1280
+#, c-format
+msgid "Could not read xar archive %s to get signature offset\n"
+msgstr ""
+
+#: src/xar.c:1290
+#, c-format
+msgid "Could not open %s for reading signature\n"
+msgstr ""
+
+#: src/xar.c:1295
+#, c-format
+msgid "Could not get length of %s\n"
+msgstr ""
+
+#: src/xar.c:1301
+#, c-format
+msgid "Could not rewind %s\n"
+msgstr ""
+
+#: src/xar.c:1306
+#, c-format
+msgid "Bad signature length\n"
+msgstr ""
+
+#: src/xar.c:1314
+#, c-format
+msgid "Could not open xar archive %s for injecting signature\n"
+msgstr ""
+
+#: src/xar.c:1325
+#, c-format
+msgid "Failed to read signature from %s\n"
+msgstr ""
+
+#: src/xar.c:1352
+#, c-format
+msgid "Error creating archive %s\n"
+msgstr ""
+
+#: src/xar.c:1379
+#, c-format
+msgid "Unsupported file checksum type %s\n"
+msgstr ""
+
+#: src/xar.c:1439
+#, c-format
+msgid "Unable to get current directory\n"
+msgstr ""
+
+#: src/xar.c:1444 src/xar.c:1634
+#, c-format
+msgid "Unable to chdir to %s\n"
+msgstr ""
+
+#: src/xar.c:1451
+#, c-format
+msgid "Error traversing file tree\n"
+msgstr ""
+
+#: src/xar.c:1477 src/xar.c:1709
+#, c-format
+msgid "Excluding %s\n"
+msgstr ""
+
+#: src/xar.c:1493
+#, c-format
+msgid "Error adding file %s\n"
+msgstr ""
+
+#: src/xar.c:1538
+#, c-format
+msgid "Error re-opening archive %s\n"
+msgstr ""
+
+#: src/xar.c:1544
+#, c-format
+msgid "Error re-closing the archive\n"
+msgstr ""
+
+#: src/xar.c:1579 src/xar.c:1607 src/xar.c:1833 src/xar.c:2655
+#, c-format
+msgid "Error with regular expression %s: %s\n"
+msgstr ""
+
+#: src/xar.c:1598
+#, c-format
+msgid "Error with asprintf()\n"
+msgstr ""
+
+#: src/xar.c:1626 src/xar.c:1796 src/xar.c:1852 src/xar.c:1915
+#, c-format
+msgid "Error opening xar archive: %s\n"
+msgstr ""
+
+#: src/xar.c:1669 src/xar.c:1859
+#, c-format
+msgid "Error creating xar iterator\n"
+msgstr ""
+
+#: src/xar.c:1719
+#, c-format
+msgid "%s already exists, not overwriting\n"
+msgstr ""
+
+#: src/xar.c:1746
+#, c-format
+msgid "Unable to extract file %s\n"
+msgstr ""
+
+#: src/xar.c:1760
+#, c-format
+msgid "No files matched extraction criteria\n"
+msgstr ""
+
+#: src/xar.c:1770
+#, c-format
+msgid "Error extracting the archive\n"
+msgstr ""
+
+#: src/xar.c:1944 src/xar.c:2028
+#, c-format
+msgid "error reading header\n"
+msgstr ""
+
+#: src/xar.c:1948
+#, c-format
+msgid "magic:                   0x%x "
+msgstr ""
+
+#: src/xar.c:1950
+#, c-format
+msgid "(BAD)\n"
+msgstr ""
+
+#: src/xar.c:1952
+#, c-format
+msgid "(OK)\n"
+msgstr ""
+
+#: src/xar.c:1953
+#, c-format
+msgid "size:                    %d\n"
+msgstr ""
+
+#: src/xar.c:1954
+#, c-format
+msgid "version:                 %d\n"
+msgstr ""
+
+#: src/xar.c:1955
+#, c-format
+msgid "Compressed TOC length:   %lld\n"
+msgstr ""
+
+#: src/xar.c:1957
+#, c-format
+msgid "Uncompressed TOC length: %lld\n"
+msgstr ""
+
+#: src/xar.c:1959
+#, c-format
+msgid "TOC Checksum algorithm:  %d "
+msgstr ""
+
+#: src/xar.c:1976
+#, c-format
+msgid "(OTHER + invalid header length)\n"
+msgstr ""
+
+#: src/xar.c:1983
+#, c-format
+msgid "(OTHER + invalid non-nul terminated name)\n"
+msgstr ""
+
+#: src/xar.c:1988
+#, c-format
+msgid "(OTHER + invalid empty name)\n"
+msgstr ""
+
+#: src/xar.c:1991
+#, c-format
+msgid "(OTHER + %s)\n"
+msgstr ""
+
+#: src/xar.c:1995
+#, c-format
+msgid "(unknown)\n"
+msgstr ""
+
+#: src/xar.c:2034
+#, c-format
+msgid "error reading header (bad magic number)\n"
+msgstr ""
+
+#: src/xar.c:2044
+#, c-format
+msgid "error reading header (header size field value too small)\n"
+msgstr ""
+
+#: src/xar.c:2050
+#, c-format
+msgid "error reading header (bad header size field -- greater than %u)\n"
+msgstr ""
+
+#: src/xar.c:2057
+#, c-format
+msgid "error reading header (premature EOF)\n"
+msgstr ""
+
+#: src/xar.c:2064
+msgid "open dump file for writing"
+msgstr ""
+
+#: src/xar.c:2076
+#, c-format
+msgid "error reading toc (premature EOF)\n"
+msgstr ""
+
+#: src/xar.c:2082
+#, c-format
+msgid "error writing raw toc dump file\n"
+msgstr ""
+
+#: src/xar.c:2123
+#, c-format
+msgid "Error while %s archive"
+msgstr ""
+
+#: src/xar.c:2124
+msgid "creating"
+msgstr ""
+
+#: src/xar.c:2124
+msgid "extracting"
+msgstr ""
+
+#: src/xar.c:2124
+msgid "operating on"
+msgstr ""
+
+#: src/xar.c:2129
+#, c-format
+msgid ":(%s)"
+msgstr ""
+
+#: src/xar.c:2133
+#, c-format
+msgid ": %s"
+msgstr ""
+
+#: src/xar.c:2135
+#, c-format
+msgid " (%s)"
+msgstr ""
+
+#: src/xar.c:2138
+#, c-format
+msgid " - ignored\n"
+msgstr ""
+
+#: src/xar.c:2153
+#, c-format
+msgid "Usage: %s -[ctx][v] -f <archive> ...\n"
+msgstr "Użycie: %s -[ctx][v] -f <archiwum> ...\n"
+
+#: src/xar.c:2154
+#, c-format
+msgid "(Use %s --help for extended help)\n"
+msgstr "(Użyj %s --help dla rozszerzonej pomocy)\n"
+
+#: src/xar.c:2160
+#, c-format
+msgid ""
+"Usage: %s -[ctx][v] -f <archive> ...\n"
+"\t-c               Creates an archive\n"
+"\t--create         Synonym for \"-c\"\n"
+"\t-x               Extracts an archive\n"
+"\t--extract        Synonym for \"-x\"\n"
+"\t-t               Lists an archive\n"
+"\t--list           Synonym for \"-t\"\n"
+"\t--sign           Creates a placeholder signature and saves\n"
+"\t                 the data to sign to disk. Works with -c or -f, requires\n"
+"\t                 --sig-size and one or more --cert-loc to be set.\n"
+"\t                 Setting --data-to-sign and --sig-offset is optional.\n"
+"\t                 Fails with error code %i if the archive has already\n"
+"\t                 been signed.\n"
+"\t--replace-sign   Rips out existing signature(s) and makes a new one.\n"
+"\t                 Same required parameter set as --sign, \n"
+"\t                 but -f instead of -c.\n"
+"\t--extract-data-to-sign Extracts data to be signed from an\n"
+"\t                 existing archive. Requires --data-to-sign (and -f)\n"
+"\t                 to be set.  Setting --sig-offset is optional.\n"
+"\t--extract-certs <dir> Extracts all certificates in DER (binary) format\n"
+"\t                 into the specified pre-existing directory, naming them\n"
+"\t                  'cert00', 'cert01', 'cert02' etc. where 'cert00' is\n"
+"\t                 the leaf/signing cert.  Requires -f.\n"
+"\t--extract-CAfile <filename> Extracts all certificates in PEM format,\n"
+"\t                 concatenates them together and stores the result in the\n"
+"\t                 specified file.  Requires -f.\n"
+"\t--extract-sig <filename> Extracts the signature data and stores it into\n"
+"\t                 the specified file.  Requires -f.  Setting --sig-offset\n"
+"\t                 Setting --sig-offset is optional.\n"
+"\t--inject-sig <filename> After extracting the data to be signed and\n"
+"\t                 doing the signing externally, injects the\n"
+"\t                 signature. Requires -f.\n"
+"\t-f <filename>    Specifies an archive to operate on [REQUIRED!]\n"
+"\t--file=<filename> Synonym for \"-f <filename>\"\n"
+"\t-v               Print filenames as they are archived\n"
+"\t--verbose        Synonym for \"-v\"\n"
+"\t-C <path>        Change directory to this location before doing anything\n"
+"\t--directory=<path> Synonym for \"-C <path>\"\n"
+"\t-n name          Provides a name for a subdocument\n"
+"\t-s <filename>    On extract, specifies the file to extract\n"
+"\t                      subdocuments to.\n"
+"\t                 On archival, specifies an xml file to add\n"
+"\t                      as a subdocument.\n"
+"\t-l               On archival, stay on the local device.\n"
+"\t--one-file-system Synonym for \"-l\"\n"
+"\t-p               On extract, set ownership based on symbolic\n"
+"\t                      names, if possible.\n"
+"\t-P               On extract, set ownership based on uid/gid.\n"
+"\t--toc-cksum      Specifies the hashing algorithm to use for\n"
+"\t                      xml header verification.\n"
+"\t                      Valid values: none, sha1, and md5\n"
+"\t                      Default: sha1\n"
+"\t                      If the linked library supports them, sha224\n"
+"\t                      sha256, sha384 and sha512 may also be used.\n"
+"\t                      Setting a stronger toc hash than the default will\n"
+"\t                      also set the file hash to the same value if it's\n"
+"\t                      not been explictly set to something else.\n"
+"\t--file-cksum     Specifies the hashing algorithm to use for\n"
+"\t                      file verification.\n"
+"\t                      Same values and defaults as --toc-cksum.\n"
+"\t                      Setting a stronger file hash than the default will\n"
+"\t                      also set the toc hash to the same value if it's\n"
+"\t                      not been explictly set to something else.\n"
+"\t--dump-toc=<filename> Has xar dump the xml header into the\n"
+"\t                      specified file.\n"
+"\t-d <filename>    Synonym for \"--dump-toc=<filename>\"\n"
+"\t--dump-toc-raw=<filename> Has xar dump the raw, compressed xml\n"
+"\t                      header data into the specified file.\n"
+"\t--dump-header    Prints out the xar binary header information\n"
+"\t--compression    Specifies the compression type to use.\n"
+"\t                      Valid values: none, gzip, bzip2, lzma, xz\n"
+"\t                      Default: gzip\n"
+"\t-a               Synonym for \"--compression=lzma\"\n"
+"\t-j               Synonym for \"--compression=bzip2\"\n"
+"\t-z               Synonym for \"--compression=gzip\"\n"
+"\t--compression-args=arg Specifies arguments to be passed\n"
+"\t                       to the compression engine.\n"
+"\t--rfc6713        Always use application/zlib for gzip encoding style\n"
+"\t--list-subdocs   List the subdocuments in the xml header\n"
+"\t--extract-subdoc=name Extracts the specified subdocument\n"
+"\t                      to a document in cwd named <name>.xml\n"
+"\t--exclude=<regexp> POSIX basic regular expression of files to \n"
+"\t                      ignore while archiving.\n"
+"\t--strip-components=n Number of path components to strip when extracting\n"
+"\t--to-stdout      Write file contents to standard out when extracting\n"
+"\t-O               Synonym for \"--to-stdout\"\n"
+"\t--rsize          Specifies the size of the buffer used\n"
+"\t                      for read IO operations in bytes.\n"
+"\t--coalesce-heap  When archived files are identical, only store one copy\n"
+"\t                      This option creates an archive which\n"
+"\t                      is not streamable\n"
+"\t--link-same      Hardlink identical files\n"
+"\t--recompress     Allow recompressing already compressed files\n"
+"\t--no-compress    POSIX regular expression of files\n"
+"\t                      to archive, but not compress.\n"
+"\t--prop-include=<p> File properties to include in archive\n"
+"\t--prop-exclude=<p> File properties to exclude in archive\n"
+"\t--distribution   Only includes a subset of file properties\n"
+"\t                      appropriate for archive distribution\n"
+"\t--keep-existing  Do not overwrite existing files while extracting\n"
+"\t-k               Synonym for --keep-existing\n"
+"\t--keep-setuid    Preserve the suid/sgid bits when extracting\n"
+"\t--sig-size=n     Size (in bytes) of the signature placeholder\n"
+"\t                      to generate.\n"
+"\t--sig-len=n      Synonym for \"--sig-size=n\"\n"
+"\t--data-to-sign=file   Path where to dump the data to be signed.\n"
+"\t                      Requires --toc-cksum type other than none.\n"
+"\t--digestinfo-to-sign=file Path where to dump the DigestInfo data to be\n"
+"\t                 signed.  This option requires the --toc-cksum type be\n"
+"\t                 set to sha1 (the default), md5, sha224, sha256, sha384\n"
+"\t                 or sha512.  It produces the same output data as the\n"
+"\t                 --data-to-sign option does except that the output has\n"
+"\t                 the appropriate DigestInfo prefix value prepended.\n"
+"\t                 May only be used in place of the --data-to-sign option.\n"
+"\t--sig-offset=file     Path where to dump the signature's offset\n"
+"\t                      within the xar.  Never required.\n"
+"\t--cert-loc=file  Location of a signing certificate to include in the\n"
+"\t                      archive.  May be repeated to include a\n"
+"\t                      certificate chain.  The first cert-loc option\n"
+"\t                      should specify the leaf certificate, the next its\n"
+"\t                      issuer and so on so that the last cert-loc option\n"
+"\t                      specifies the root CA for the chain.\n"
+"\t                      Certificate files must be in DER (binary) format.\n"
+"\t                      --leaf-cert-loc= and --intermediate-cert-loc=\n"
+"\t                      are accepted as synonyms for --cert-loc= for\n"
+"\t                      historical reasons.\n"
+"\t--help           Show this help on stdout\n"
+"\t-h               Synonym for \"--help\"\n"
+"\t-V               Synonym for \"--version\"\n"
+"\t--version        Print xar's version number to stdout\n"
+msgstr ""
+
+#: src/xar.c:2374
+#, c-format
+msgid "xar library version 0x%08lX\n"
+msgstr ""
+
+#: src/xar.c:2376
+#, c-format
+msgid "xar library version unknown\n"
+msgstr ""
+
+#: src/xar.c:2477
+#, c-format
+msgid "%s: warning: linked xar library version older than %s executable\n"
+msgstr ""
+
+#: src/xar.c:2494
+#, c-format
+msgid ""
+"\n"
+"--toc-cksum requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2506
+#, c-format
+msgid ""
+"\n"
+"--toc-cksum unrecognized hash type %s\n"
+msgstr ""
+
+#: src/xar.c:2522
+#, c-format
+msgid ""
+"\n"
+"--compression requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2538
+#, c-format
+msgid ""
+"\n"
+"This instance of xar doesn't understand compression type %s\n"
+msgstr ""
+
+#: src/xar.c:2549
+#, c-format
+msgid ""
+"\n"
+"Conflicting commands: --list-subdocs and -%c specified\n"
+msgstr ""
+
+#: src/xar.c:2563
+#, c-format
+msgid ""
+"\n"
+"--dump-toc requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2570 src/xar.c:3048
+#, c-format
+msgid ""
+"\n"
+"Conflicting commands: -%c and -%c specified\n"
+msgstr ""
+
+#: src/xar.c:2582
+#, c-format
+msgid ""
+"\n"
+"Conflicting commands: --dump-header and -%c specified\n"
+msgstr ""
+
+#: src/xar.c:2593
+#, c-format
+msgid "%s: Error with asprintf()\n"
+msgstr ""
+
+#: src/xar.c:2608
+#, c-format
+msgid "%s: Error with regular expression %s: %s\n"
+msgstr ""
+
+#: src/xar.c:2627
+#, c-format
+msgid ""
+"\n"
+"--rsize requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2635
+#, c-format
+msgid ""
+"\n"
+"Invalid rsize value: %s\n"
+msgstr ""
+
+#: src/xar.c:2740
+#, c-format
+msgid ""
+"\n"
+"--file-cksum requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2752
+#, c-format
+msgid ""
+"\n"
+"--file-cksum unrecognized hash type %s\n"
+msgstr ""
+
+#: src/xar.c:2768
+#, c-format
+msgid ""
+"\n"
+"--sig-size requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2778
+#, c-format
+msgid ""
+"\n"
+"--data-to-sign requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2785
+#, c-format
+msgid ""
+"\n"
+"--data-to-sign may not be used with --digestinfo-to-sign\n"
+msgstr ""
+
+#: src/xar.c:2791
+#, c-format
+msgid ""
+"\n"
+"--data-to-sign may only be used once\n"
+msgstr ""
+
+#: src/xar.c:2800
+#, c-format
+msgid ""
+"\n"
+"--sig-offset requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2810
+#, c-format
+msgid ""
+"\n"
+"--cert-loc requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2840
+#, c-format
+msgid ""
+"\n"
+"Conflicting commands: --extract-data-to-sign and -%c specified\n"
+msgstr ""
+
+#: src/xar.c:2854
+#, c-format
+msgid ""
+"\n"
+"Conflicting commands: --replace-sign and -%c specified\n"
+msgstr ""
+
+#: src/xar.c:2865
+#, c-format
+msgid ""
+"\n"
+"--inject-sig requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2872
+#, c-format
+msgid ""
+"\n"
+"Conflicting commands: --inject-sig and -%c specified\n"
+msgstr ""
+
+#: src/xar.c:2883
+#, c-format
+msgid ""
+"\n"
+"--extract-certs requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2890
+#, c-format
+msgid ""
+"\n"
+"Conflicting commands: --extract-certs and -%c specified\n"
+msgstr ""
+
+#: src/xar.c:2899
+#, c-format
+msgid ""
+"\n"
+"%s is not a directory\n"
+msgstr ""
+
+#: src/xar.c:2908
+#, c-format
+msgid ""
+"\n"
+"--extract-CAfile requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2915
+#, c-format
+msgid ""
+"\n"
+"Conflicting commands: --extract-CAfile and -%c specified\n"
+msgstr ""
+
+#: src/xar.c:2924 src/xar.c:2949
+#, c-format
+msgid ""
+"\n"
+"%s is a directory\n"
+msgstr ""
+
+#: src/xar.c:2933
+#, c-format
+msgid ""
+"\n"
+"--extract-sig requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2940
+#, c-format
+msgid ""
+"\n"
+"Conflicting commands: --extract-sig and -%c specified\n"
+msgstr ""
+
+#: src/xar.c:2958
+#, c-format
+msgid ""
+"\n"
+"--dump-toc-raw requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2965
+#, c-format
+msgid ""
+"\n"
+"Conflicting commands: --dump-toc-raw and -%c specified\n"
+msgstr ""
+
+#: src/xar.c:2977
+#, c-format
+msgid ""
+"\n"
+"--digestinfo-to-sign requires an argument\n"
+msgstr ""
+
+#: src/xar.c:2984
+#, c-format
+msgid ""
+"\n"
+"--digestinfo-to-sign may not be used with --data-to-sign\n"
+msgstr ""
+
+#: src/xar.c:2991
+#, c-format
+msgid ""
+"\n"
+"--digestinfo-to-sign may only be used once\n"
+msgstr ""
+
+#: src/xar.c:3008
+#, c-format
+msgid ""
+"\n"
+"--strip-components requires an argument\n"
+msgstr ""
+
+#: src/xar.c:3015
+#, c-format
+msgid ""
+"\n"
+"--strip-components requires a newer xar library\n"
+msgstr ""
+
+#: src/xar.c:3023
+#, c-format
+msgid ""
+"\n"
+"--strip-components requires a non-negative number argument\n"
+msgstr ""
+
+#: src/xar.c:3036
+#, c-format
+msgid ""
+"\n"
+"-C requires an argument\n"
+msgstr ""
+
+#: src/xar.c:3082
+#, c-format
+msgid "%s: --to-stdout requires a newer xar library\n"
+msgstr ""
+
+#: src/xar.c:3125
+#, c-format
+msgid ""
+"\n"
+"--sign requires a --toc-cksum type value other than \"%s\"\n"
+msgstr ""
+
+#: src/xar.c:3135
+#, c-format
+msgid ""
+"\n"
+"Neither --sig-size nor --cert-loc may be used without either --sign or --"
+"replace-sign\n"
+msgstr ""
+
+#: src/xar.c:3143
+#, c-format
+msgid ""
+"%s: warning: The md5 hash is obsolete and should not be used anymore -- "
+"continuing anyway\n"
+msgstr ""
+
+#: src/xar.c:3150
+#, c-format
+msgid ""
+"\n"
+"-f option is REQUIRED\n"
+msgstr ""
+
+#: src/xar.c:3159
+#, c-format
+msgid ""
+"\n"
+"--extract-data-to-sign also requires either --data-to-sign or --digestinfo-"
+"to-sign\n"
+msgstr ""
+
+#: src/xar.c:3168
+#, c-format
+msgid ""
+"\n"
+"--data-to-sign requires a --toc-cksum type value other than \"%s\"\n"
+msgstr ""
+
+#: src/xar.c:3178
+#, c-format
+msgid ""
+"\n"
+"--digestinfo-to-sign requires --toc-cksum of \"%s\", \"%s\", \"%s\", \"%s\", "
+"\"%s\" or \"%s\"\n"
+msgstr ""
+
+#: src/xar.c:3191
+#, c-format
+msgid ""
+"\n"
+"Neither --cert-loc nor --sig-offset may be used when removing signatures "
+"with --sig-size=0\n"
+msgstr ""
+
+#: src/xar.c:3201
+#, c-format
+msgid ""
+"\n"
+"--sig-size > 0 and at least one --cert-loc option are required to sign\n"
+msgstr ""
+
+#: src/xar.c:3230
+#, c-format
+msgid ""
+"\n"
+"--inject-sig requires an argument and also -f\n"
+msgstr ""
+
+#: src/xar.c:3237
+#, c-format
+msgid ""
+"\n"
+"missing required -f\n"
+msgstr ""
+
+#: src/xar.c:3251
+#, c-format
+msgid ""
+"\n"
+"No files to operate on\n"
+msgstr ""
+
+#: src/xar.c:3265
+#, c-format
+msgid ""
+"\n"
+"missing --dump-toc argument\n"
+msgstr ""
+
+#: src/xar.c:3273
+#, c-format
+msgid ""
+"\n"
+"missing --dump-toc-raw argument\n"
+msgstr ""
+
+#: src/xar.c:3297
+#, c-format
+msgid "%s: Error opening xar archive: %s\n"
+msgstr ""
+
+#: src/xar.c:3326
+#, c-format
+msgid ""
+"\n"
+"Unrecognized command\n"
+msgstr ""

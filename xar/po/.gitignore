@@ -14,3 +14,9 @@
 /POTFILES
 /xar-core.pot
 /stamp-po
+/*.mo
+/*.gmo
+/en@quot.po
+/en@quot.insert-header
+/en@boldquot.po
+/en@boldquot.insert-header
