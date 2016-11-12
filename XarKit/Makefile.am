@@ -19,7 +19,8 @@ xinclude_HEADERS = \
 mostlyclean-hook:
 	rm -rf XarKit.framework
 
-XarKit.framework: libXarKit.la $(srcdir)/Info.plist $(ac_aux_dir)/mkframework
+XarKit.framework: libXarKit.la $(srcdir)/Info.plist $(ac_aux_dir)/mkframework \
+    $(xinclude_HEADERS)
 	$(AM_V_GEN)MKDIR_P='$(MKDIR_P)' LN_S='$(LN_S)' \
         $(SHELL) $(ac_aux_dir)/mkframework $(SHREXT) $(srcdir)/Info.plist \
         XarKit "$(PACKAGE_VERSION)" "$(libdir)" "$(xinclude_HEADERS)" \
@@ -28,6 +29,8 @@ XarKit.framework: libXarKit.la $(srcdir)/Info.plist $(ac_aux_dir)/mkframework
 install-exec-hook: XarKit.framework
 	cp -r $< $(libdir)/GNUstep/Frameworks
 	cp -r $< $(exec_prefix)/Library/Frameworks
+
+all-am: XarKit.framework
 
 AM_CPPFLAGS = \
               -I../xar/include \

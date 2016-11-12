@@ -9,6 +9,8 @@ fi
 
 set -e
 
+rm -f -r "${NAME}.framework"
+
 LIBEXT="$1"
 INFOPLIST="$2"
 NAME="$3"
@@ -17,6 +19,10 @@ LIBDIR="$5"
 HEADERS="$6"
 INCLUDEDIR="$7"
 
+mklink () {
+  ${LN_S} -s -f -T $@
+}
+
 ${MKDIR_P} "${NAME}.framework"
 ${MKDIR_P} "${NAME}.framework/Versions"
 ${MKDIR_P} "${NAME}.framework/Versions/${VERSION}"
@@ -24,27 +30,27 @@ ${MKDIR_P} "${NAME}.framework/Versions/${VERSION}/Resources"
 ${MKDIR_P} "${NAME}.framework/Versions/${VERSION}/Headers"
 ${MKDIR_P} "${NAME}.framework/Versions/${VERSION}/Headers/${NAME}"
 
-${LN_S} "${VERSION}" "${NAME}.framework/Versions/Current"
+mklink "${VERSION}" "${NAME}.framework/Versions/Current"
 
-${LN_S} "Info.plist" \
+mklink "Info.plist" \
 "${NAME}.framework/Versions/${VERSION}/Resources/Info-gnustep.plist"
 
-${LN_S} "Resources/Info.plist" \
+mklink "Resources/Info.plist" \
 "${NAME}.framework/Versions/${VERSION}/Info.plist"
 
-${LN_S} "Resources/Info-gnustep.plist" \
+mklink "Resources/Info-gnustep.plist" \
 "${NAME}.framework/Versions/${VERSION}/Info-gnustep.plist"
 
 for X in "${NAME}" Headers Resources Info.plist Info-gnustep.plist
 do
-  ${LN_S} "Versions/Current/${NAME}" "${NAME}.framework/${NAME}"
+  mklink "Versions/Current/${NAME}" "${NAME}.framework/${NAME}"
 done
 
-${LN_S} "${LIBDIR}/lib${NAME}${LIBEXT}" "${NAME}.framework/Versions/${VERSION}/${NAME}"
+mklink "${LIBDIR}/lib${NAME}${LIBEXT}" "${NAME}.framework/Versions/${VERSION}/${NAME}"
 cp "${INFOPLIST}" "${NAME}.framework/Versions/${VERSION}/Resources/Info.plist"
 
 for X in ${HEADERS}
 do
-  ${LN_S} "${INCLUDEDIR}/${NAME}/$X" \
+  mklink "${INCLUDEDIR}/${NAME}/$X" \
   "${NAME}.framework/Versions/${VERSION}/Headers/${NAME}/$X"
 done
