@@ -37,8 +37,6 @@ xarfile.pyx: $(srcdir)/xarfile.pyx
 	$(AM_V_GEN)$(LN_S) $< $@
 setup.py: $(srcdir)/setup.py
 	$(AM_V_GEN)$(LN_S) $< $@
-
-DISTCLEANFILES = xarfile.pyx setup.py
 @_EMPTY@endif
 
 ACLOCAL_AMFLAGS = -I ../m4
