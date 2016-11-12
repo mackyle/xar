@@ -14,9 +14,13 @@ AM_MAINTAINER_MODE([enable])
 
 # Checks for programs.
 AC_PROG_CC
+HAVE_PYTHON=yes
 AX_PYTHON([> '2.7' and ver < '3'])
+AS_IF([test "$ax_python_bin" = no], [HAVE_PYTHON=])
 AX_PYTHON_DEVEL([> '2.7' and ver < '3'])
-AC_CHECK_PROGS([PYREXC], [pyrexc2.7 pyrexc2 pyrexc])
+AC_CHECK_PROGS([PYREXC], [pyrexc2.7 pyrexc2 pyrexc], [--NONE--])
+AS_IF([test "$PYREXC" = "--NONE--"], [HAVE_PYTHON=])
+AM_CONDITIONAL([HAVE_PYTHON], [test -n "$HAVE_PYTHON"])
 
 # Checks for libraries.
 

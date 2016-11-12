@@ -1,6 +1,6 @@
-EXTRA_DIST = xarfile.pyx setup.py test.sh
+EXTRA_DIST = xarfile.pyx setup.py
 
-_EMPTY = 
+if HAVE_PYTHON
 
 noinst_DATA = stamp-all
 
@@ -43,3 +43,5 @@ ACLOCAL_AMFLAGS = -I ../m4
 
 AM_CPPFLAGS = -I../xar/include -I$(srcdir)/../xar/include
 AM_LDFLAGS = -L../xar/lib -L../xar/lib/.libs
+
+endif
