@@ -18,3 +18,4 @@
 /XarKit
 /XarKit.framework
 /*.lo
+/*.o
