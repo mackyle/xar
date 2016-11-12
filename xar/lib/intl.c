@@ -15,6 +15,6 @@ xar__init_intl (void)
   init_done = true;
 
 #if ENABLE_NLS
-  bindtextdomain ("xar", LOCALEDIR);
+  bindtextdomain (GETTEXT_DOMAIN, LOCALEDIR);
 #endif
 }
