@@ -563,7 +563,7 @@ extract_certs (char *filename, char *cert_base_path, char *CApath)
       CAfile = fopen (CApath, "wb");
       if (!CAfile)
         {
-          fprintf (stderr, "Could not save certificates to %s\n", CApath);
+          fprintf (stderr, _("Could not save certificates to %s\n"), CApath);
           exit (1);
         }
     }
@@ -574,14 +574,14 @@ extract_certs (char *filename, char *cert_base_path, char *CApath)
         {
           if (asprintf (&cert_path, "%s/cert%02i", cert_base_path, i) == -1)
             {
-              fprintf (stderr, "Could not save certificate %i to %s\n", i,
+              fprintf (stderr, _("Could not save certificate %i to %s\n"), i,
                        cert_path);
               exit (1);
             }
           file = fopen (cert_path, "wb");
           if (!file)
             {
-              fprintf (stderr, "Could not save certificate %i to %s\n", i,
+              fprintf (stderr, _("Could not save certificate %i to %s\n"), i,
                        cert_path);
               exit (1);
             }
@@ -589,7 +589,7 @@ extract_certs (char *filename, char *cert_base_path, char *CApath)
           if (n < 0)
             {
               fprintf (stderr,
-                       "Failed to write certificate to %s (fwrite() returned %i)\n",
+                       _("Failed to write certificate to %s (fwrite() returned %i)\n"),
                        cert_path, n);
               exit (1);
             }
@@ -603,12 +603,12 @@ extract_certs (char *filename, char *cert_base_path, char *CApath)
           char *b64 = xar_to_base64 (cert_data, cert_len, &cnt);
           if (!b64 || !cnt)
             {
-              fprintf (stderr, "Could not save certificates to %s\n", CApath);
+              fprintf (stderr, _("Could not save certificates to %s\n"), CApath);
               exit (1);
             }
           if (fputs ("-----BEGIN CERTIFICATE-----", CAfile) == -1)
             {
-              fprintf (stderr, "Failed to write certificates to %s\n",
+              fprintf (stderr, _("Failed to write certificates to %s\n"),
                        CApath);
               exit (1);
             }
@@ -618,7 +618,7 @@ extract_certs (char *filename, char *cert_base_path, char *CApath)
               if (fputs ("\n", CAfile) == -1
                   || (n = (int) fwrite (p, 64, 1, CAfile)) < 0)
                 {
-                  fprintf (stderr, "Failed to write certificates to %s\n",
+                  fprintf (stderr, _("Failed to write certificates to %s\n"),
                            CApath);
                   exit (1);
                 }
@@ -628,14 +628,14 @@ extract_certs (char *filename, char *cert_base_path, char *CApath)
               if (fputs ("\n", CAfile) == -1
                   || (n = (int) fwrite (p, cnt, 1, CAfile)) < 0)
                 {
-                  fprintf (stderr, "Failed to write certificates to %s\n",
+                  fprintf (stderr, _("Failed to write certificates to %s\n"),
                            CApath);
                   exit (1);
                 }
             }
           if (fputs ("\n-----END CERTIFICATE-----\n", CAfile) == -1)
             {
-              fprintf (stderr, "Failed to write certificates to %s\n",
+              fprintf (stderr, _("Failed to write certificates to %s\n"),
                        CApath);
               exit (1);
             }
@@ -678,7 +678,7 @@ write_sig_offset (const char *filename, uint64_t signedDataOffset)
   FILE *file = fopen (filename, "wb");
   if (!file)
     {
-      fprintf (stderr, "Could not open %s for saving signature offset\n",
+      fprintf (stderr, _("Could not open %s for saving signature offset\n"),
                filename);
       exit (1);
     }
@@ -686,7 +686,7 @@ write_sig_offset (const char *filename, uint64_t signedDataOffset)
   if (i < 0)
     {
       fprintf (stderr,
-               "Failed to write signature offset to %s (fprintf() returned %i)\n",
+               _("Failed to write signature offset to %s (fprintf() returned %i)\n"),
                filename, i);
       exit (1);
     }
@@ -701,7 +701,7 @@ extract_sig_offset (xar_t x, const char *filename)
   /* get offset */
   if (get_sig_info (x, &signedDataOffset, NULL, NULL) != 0)
     {
-      fprintf (stderr, "Could not read signature offset from %s\n", filename);
+      fprintf (stderr, _("Could not read signature offset from %s\n"), filename);
       exit (1);
     }
 
@@ -724,14 +724,14 @@ extract_signature (const char *filename, const char *sigfile)
   x = xar_open (filename, READ);
   if (x == NULL)
     {
-      fprintf (stderr, "Could not open %s to extract signature data\n",
+      fprintf (stderr, _("Could not open %s to extract signature data\n"),
                filename);
       exit (1);
     }
   sig = xar_signature_first (x);
   if (!sig)
     {
-      fprintf (stderr, "No signatures found to extract data from\n");
+      fprintf (stderr, _("No signatures found to extract data from\n"));
       exit (E_NOSIG);
     }
 
@@ -739,7 +739,7 @@ extract_signature (const char *filename, const char *sigfile)
   if (get_sig_info (x, &signedDataOffset, &signedDataLength, &signedData) != 0
       || !signedDataLength || !signedData)
     {
-      fprintf (stderr, "Could not read signature data from %s!\n", filename);
+      fprintf (stderr, _("Could not read signature data from %s!\n"), filename);
       exit (1);
     }
   xar_close (x);
@@ -748,7 +748,7 @@ extract_signature (const char *filename, const char *sigfile)
   file = fopen (sigfile, "wb");
   if (!file)
     {
-      fprintf (stderr, "Could not open %s for saving signature data\n",
+      fprintf (stderr, _("Could not open %s for saving signature data\n"),
                sigfile);
       exit (1);
     }
@@ -756,7 +756,7 @@ extract_signature (const char *filename, const char *sigfile)
   if (i < 0)
     {
       fprintf (stderr,
-               "Failed to write signature data to %s (fwrite() returned %i)\n",
+               _("Failed to write signature data to %s (fwrite() returned %i)\n"),
                filename, i);
       exit (1);
     }
@@ -897,7 +897,7 @@ XAR_OPT_OWNERSHIP };
   old_xar = xar_open (filename, READ);
   if (old_xar == NULL)
     {
-      fprintf (stderr, "Could not open archive %s\n", filename);
+      fprintf (stderr, _("Could not open archive %s\n"), filename);
       exit (1);
     }
 
@@ -907,7 +907,7 @@ XAR_OPT_OWNERSHIP };
       if (!hash_name || strcmp (hash_name, XAR_OPT_VAL_NONE) == 0)
         {
           fprintf (stderr,
-                   "A TOC checksum style value other than \"%s\" is required for signatures\n",
+                   _("A TOC checksum style value other than \"%s\" is required for signatures\n"),
                    XAR_OPT_VAL_NONE);
           exit (1);
         }
@@ -923,7 +923,7 @@ XAR_OPT_OWNERSHIP };
       if (!hash_name || !hash)
         {
           fprintf (stderr,
-                   "--digestinfo-to-sign does not support hash type \"%s\"\n",
+                   _("--digestinfo-to-sign does not support hash type \"%s\"\n"),
                    hash_name ? hash_name : XAR_OPT_VAL_NONE);
           exit (1);
         }
@@ -945,14 +945,14 @@ XAR_OPT_OWNERSHIP };
   if (!temp_dir)
     {
       fprintf (stderr,
-               "No temporary directory available (none of $TMPDIR $TMP or /tmp are directories)\n");
+               _("No temporary directory available (none of $TMPDIR $TMP or /tmp are directories)\n"));
       exit (1);
     }
   new_xar_path_len = strlen (temp_dir) + 12;
   new_xar_path = (char *) malloc (new_xar_path_len);
   if (!new_xar_path)
     {
-      fprintf (stderr, "Could not allocate memory for temporary file path\n");
+      fprintf (stderr, _("Could not allocate memory for temporary file path\n"));
       exit (1);
     }
   strncpy (new_xar_path, temp_dir, new_xar_path_len);
@@ -961,7 +961,7 @@ XAR_OPT_OWNERSHIP };
   if (tempfd == -1)
     {
       free (new_xar_path);
-      fprintf (stderr, "Error creating new archive %s\n", new_xar_path);
+      fprintf (stderr, _("Error creating new archive %s\n"), new_xar_path);
       exit (1);
     }
   fchmod (tempfd, 0666 & ~get_umask ());
@@ -972,7 +972,7 @@ XAR_OPT_OWNERSHIP };
   new_xar = xar_open (new_xar_path, WRITE);
   if (!new_xar)
     {
-      fprintf (stderr, "Error creating new archive %s\n", new_xar_path);
+      fprintf (stderr, _("Error creating new archive %s\n"), new_xar_path);
       exit (1);
     }
 
@@ -997,7 +997,7 @@ XAR_OPT_OWNERSHIP };
     }
   if (xar_opt_set (new_xar, XAR_OPT_TOCCKSUM, hash_name) != 0)
     {
-      fprintf (stderr, "Unsupported TOC checksum type %s\n", hash_name);
+      fprintf (stderr, _("Unsupported TOC checksum type %s\n"), hash_name);
       exit (1);
     }
 
@@ -1015,7 +1015,7 @@ XAR_OPT_OWNERSHIP };
        current_xar_file; current_xar_file = xar_file_next (loopIter))
     {
       if (Verbose)
-        printf ("old_xar -> %s (parent: %s)\n",
+        printf (_("old_xar -> %s (parent: %s)\n"),
                 xar_get_path (current_xar_file),
                 XAR_FILE (current_xar_file)->
                 parent ? xar_get_path (XAR_FILE (current_xar_file)->
@@ -1037,7 +1037,7 @@ XAR_OPT_OWNERSHIP };
       if (!XAR_FILE (f)->parent)
         {                       /* case 1 */
           if (Verbose)
-            printf ("root: %s\n", xar_get_path (f));
+            printf (_("root: %s\n"), xar_get_path (f));
           last_added = xar_add_from_archive (new_xar, NULL, name, old_xar, f);
           last_copied = f;
           stack_push (s_new, (void *) last_added);
@@ -1046,7 +1046,7 @@ XAR_OPT_OWNERSHIP };
       else if (f->parent == last_copied)
         {                       /* case 2 */
           if (Verbose)
-            printf ("child: %s -> %s\n", xar_get_path (f->parent),
+            printf (_("child: %s -> %s\n"), xar_get_path (f->parent),
                     xar_get_path (f));
           last_added =
             xar_add_from_archive (new_xar, last_added, name, old_xar, f);
@@ -1057,17 +1057,17 @@ XAR_OPT_OWNERSHIP };
       else
         {                       /* case 3 */
           if (Verbose)
-            printf ("searching for parent: %s ?\n", xar_get_path (f));
+            printf (_("searching for parent: %s ?\n"), xar_get_path (f));
           while (XAR_FILE (f)->parent != XAR_FILE (s_old->top->data)->parent)
             {
               if (Verbose)
-                printf ("popping: %s\n",
+                printf (_("popping: %s\n"),
                         xar_get_path (XAR_FILE (s_old->top->data)));
               stack_pop (s_new);
               stack_pop (s_old);
             }
           if (Verbose)
-            printf ("found: %s -> %s\n",
+            printf (_("found: %s -> %s\n"),
                     xar_get_path (XAR_FILE (s_new->top->data)),
                     xar_get_path (f));
           stack_pop (s_new);
@@ -1089,7 +1089,7 @@ XAR_OPT_OWNERSHIP };
       if (Verbose)
         {
           char *current_path = xar_get_path (current_xar_file);
-          printf ("new_xar -> %s\n", current_path);
+          printf (_("new_xar -> %s\n"), current_path);
         }
     }
   xar_iter_free (loopIter);
@@ -1099,7 +1099,7 @@ XAR_OPT_OWNERSHIP };
   stack_free (s_old);
   if (xar_close (new_xar) != 0)
     {
-      fprintf (stderr, "Error creating the archive\n");
+      fprintf (stderr, _("Error creating the archive\n"));
       if (!Err)
         Err = 42;
     }
@@ -1109,7 +1109,7 @@ XAR_OPT_OWNERSHIP };
   new_xar = xar_open (new_xar_path, READ);
   if (!new_xar)
     {
-      fprintf (stderr, "Error re-opening new archive %s\n", new_xar_path);
+      fprintf (stderr, _("Error re-opening new archive %s\n"), new_xar_path);
       exit (1);
     }
   if (SigOffsetDumpPath)
@@ -1122,7 +1122,7 @@ XAR_OPT_OWNERSHIP };
   if (err == -1)
     {
       fprintf (stderr,
-               "Could not copy new archive to final location (asprintf() error %i)\n",
+               _("Could not copy new archive to final location (asprintf() error %i)\n"),
                errno);
       exit (1);
     }
@@ -1130,7 +1130,7 @@ XAR_OPT_OWNERSHIP };
   if (err)
     {
       fprintf (stderr,
-               "Could not copy new archive to final location (system() returned %i)\n",
+               _("Could not copy new archive to final location (system() returned %i)\n"),
                err);
       exit (1);
     }
@@ -1151,14 +1151,14 @@ belated_sign (const char *filename)
   xar_t x = xar_open (filename, READ);
   if (x == NULL)
     {
-      fprintf (stderr, "Could not open archive %s\n", filename);
+      fprintf (stderr, _("Could not open archive %s\n"), filename);
       exit (1);
     }
   sig = xar_signature_first (x);
   if (sig)
     {
       fprintf (stderr,
-               "Archive has already been signed. Use --replace-sign instead\n");
+               _("Archive has already been signed. Use --replace-sign instead\n"));
       exit (E_SIGEXISTS);
     }
   xar_close (x);
@@ -1180,7 +1180,7 @@ signingCallback (xar_signature_t sig, void *context, uint8_t * data,
       int i;
       if (!file)
         {
-          fprintf (stderr, "Could not open %s for saving data to sign\n",
+          fprintf (stderr, _("Could not open %s for saving data to sign\n"),
                    DataToSignDumpPath);
           exit (1);
         }
@@ -1191,7 +1191,7 @@ signingCallback (xar_signature_t sig, void *context, uint8_t * data,
           if (i != 1)
             {
               fprintf (stderr,
-                       "Failed to write DigestInfo data to sign prefix to %s (fwrite() returned %i)\n",
+                       _("Failed to write DigestInfo data to sign prefix to %s (fwrite() returned %i)\n"),
                        DataToSignDumpPath, i);
               exit (1);
             }
@@ -1200,7 +1200,7 @@ signingCallback (xar_signature_t sig, void *context, uint8_t * data,
       if (i != 1)
         {
           fprintf (stderr,
-                   "Failed to write %sdata to sign to %s (fwrite() returned %i)\n",
+                   _("Failed to write %sdata to sign to %s (fwrite() returned %i)\n"),
                    DumpDigestInfo ? "DigestInfo " : "", DataToSignDumpPath,
                    i);
           exit (1);
@@ -1225,7 +1225,7 @@ insert_cert (xar_signature_t sig, const char *cert_path)
   int i;
   if (stat (cert_path, s) == -1)
     {
-      fprintf (stderr, "Could not stat() certificate file %s (errno == %i)\n",
+      fprintf (stderr, _("Could not stat() certificate file %s (errno == %i)\n"),
                cert_path, errno);
       exit (1);
     }
@@ -1233,14 +1233,14 @@ insert_cert (xar_signature_t sig, const char *cert_path)
   file = fopen (cert_path, "rb");
   if (!file)
     {
-      fprintf (stderr, "Could not open %s for reading certificate\n",
+      fprintf (stderr, _("Could not open %s for reading certificate\n"),
                cert_path);
       exit (1);
     }
   i = (int) fread (cert, (size_t) s->st_size, 1, file);
   if (i != 1)
     {
-      fprintf (stderr, "Failed to read certificate from %s\n", cert_path);
+      fprintf (stderr, _("Failed to read certificate from %s\n"), cert_path);
       exit (1);
     }
   fclose (file);
@@ -1263,21 +1263,21 @@ inject_signature (const char *xar_path, const char *sig_path)
   int i;
 
   if (Verbose)
-    printf ("inject_signature(%s, %s)\n", xar_path, sig_path);
+    printf (_("inject_signature(%s, %s)\n"), xar_path, sig_path);
 
   /* open xar via the API first to determine the signature offset */
   x = xar_open (xar_path, READ);
   if (x == NULL)
     {
       fprintf (stderr,
-               "Could not open xar archive %s to get signature offset\n",
+               _("Could not open xar archive %s to get signature offset\n"),
                xar_path);
       exit (1);
     }
   if (get_sig_info (x, &signedDataOffset, &signedDataLength, NULL) != 0)
     {
       fprintf (stderr,
-               "Could not read xar archive %s to get signature offset\n",
+               _("Could not read xar archive %s to get signature offset\n"),
                xar_path);
       exit (1);
     }
@@ -1287,23 +1287,23 @@ inject_signature (const char *xar_path, const char *sig_path)
   sig = fopen (sig_path, "rb");
   if (!sig)
     {
-      fprintf (stderr, "Could not open %s for reading signature\n", sig_path);
+      fprintf (stderr, _("Could not open %s for reading signature\n"), sig_path);
       exit (1);
     }
   if (fseek (sig, 0, SEEK_END) == -1)
     {
-      fprintf (stderr, "Could not get length of %s\n", sig_path);
+      fprintf (stderr, _("Could not get length of %s\n"), sig_path);
       exit (1);
     }
   sig_data_len = (uint32_t) ftell (sig);
   if (fseek (sig, 0, SEEK_SET) == -1)
     {
-      fprintf (stderr, "Could not rewind %s\n", sig_path);
+      fprintf (stderr, _("Could not rewind %s\n"), sig_path);
       exit (1);
     }
   if (!signedDataLength || !sig_data_len || signedDataLength != sig_data_len)
     {
-      fprintf (stderr, "Bad signature length\n");
+      fprintf (stderr, _("Bad signature length\n"));
       exit (1);
     }
 
@@ -1311,7 +1311,7 @@ inject_signature (const char *xar_path, const char *sig_path)
   if (!xar)
     {
       fprintf (stderr,
-               "Could not open xar archive %s for injecting signature\n",
+               _("Could not open xar archive %s for injecting signature\n"),
                xar_path);
       exit (1);
     }
@@ -1322,7 +1322,7 @@ inject_signature (const char *xar_path, const char *sig_path)
       i = (int) fread (buffer, 1, buffer_size, sig);
       if (ferror (sig))
         {
-          fprintf (stderr, "Failed to read signature from %s\n", sig_path);
+          fprintf (stderr, _("Failed to read signature from %s\n"), sig_path);
           exit (1);
         }
       fwrite (buffer, 1, i, xar);
@@ -1349,7 +1349,7 @@ archive (const char *filename, int arglen, char *args[])
   x = xar_open (filename, WRITE);
   if (!x)
     {
-      fprintf (stderr, "Error creating archive %s\n", filename);
+      fprintf (stderr, _("Error creating archive %s\n"), filename);
       exit (1);
     }
 
@@ -1368,7 +1368,7 @@ archive (const char *filename, int arglen, char *args[])
   if (Toccksum)
     if (xar_opt_set (x, XAR_OPT_TOCCKSUM, Toccksum->name) != 0)
       {
-        fprintf (stderr, "Unsupported TOC checksum type %s\n",
+        fprintf (stderr, _("Unsupported TOC checksum type %s\n"),
                  Toccksum->name);
         exit (1);
       }
@@ -1376,7 +1376,7 @@ archive (const char *filename, int arglen, char *args[])
   if (Filecksum)
     if (xar_opt_set (x, XAR_OPT_FILECKSUM, Filecksum->name) != 0)
       {
-        fprintf (stderr, "Unsupported file checksum type %s\n",
+        fprintf (stderr, _("Unsupported file checksum type %s\n"),
                  Filecksum->name);
         exit (1);
       }
@@ -1436,19 +1436,19 @@ archive (const char *filename, int arglen, char *args[])
     {
       if (curdir < 0)
         {
-          fprintf (stderr, "Unable to get current directory\n");
+          fprintf (stderr, _("Unable to get current directory\n"));
           exit (1);
         }
       if (chdir (Chdir) != 0)
         {
-          fprintf (stderr, "Unable to chdir to %s\n", Chdir);
+          fprintf (stderr, _("Unable to chdir to %s\n"), Chdir);
           exit (1);
         }
     }
   fts = fts_open (args, flags, NULL);
   if (!fts)
     {
-      fprintf (stderr, "Error traversing file tree\n");
+      fprintf (stderr, _("Error traversing file tree\n"));
       exit (1);
     }
 
@@ -1474,7 +1474,7 @@ archive (const char *filename, int arglen, char *args[])
       if (!exclude_match)
         {
           if (Verbose)
-            printf ("Excluding %s\n", ent->fts_path);
+            printf (_("Excluding %s\n"), ent->fts_path);
           continue;
         }
 
@@ -1490,7 +1490,7 @@ archive (const char *filename, int arglen, char *args[])
       f = xar_add (x, ent->fts_path);
       if (!f)
         {
-          fprintf (stderr, "Error adding file %s\n", ent->fts_path);
+          fprintf (stderr, _("Error adding file %s\n"), ent->fts_path);
         }
       else
         {
@@ -1507,7 +1507,7 @@ archive (const char *filename, int arglen, char *args[])
     }
   if (xar_close (x) != 0)
     {
-      fprintf (stderr, "Error creating the archive\n");
+      fprintf (stderr, _("Error creating the archive\n"));
       if (!Err)
         Err = 42;
     }
@@ -1535,13 +1535,13 @@ archive (const char *filename, int arglen, char *args[])
       x = xar_open (filename, READ);
       if (!x)
         {
-          fprintf (stderr, "Error re-opening archive %s\n", filename);
+          fprintf (stderr, _("Error re-opening archive %s\n"), filename);
           exit (1);
         }
       extract_sig_offset (x, SigOffsetDumpPath);
       if (xar_close (x) != 0)
         {
-          fprintf (stderr, "Error re-closing the archive\n");
+          fprintf (stderr, _("Error re-closing the archive\n"));
           if (!Err)
             Err = 42;
         }
@@ -1576,7 +1576,7 @@ extract (const char *filename, int arglen, char *args[])
         {
           char errstr[1024];
           regerror (err, &tmp->reg, errstr, sizeof (errstr));
-          fprintf (stderr, "Error with regular expression %s: %s\n", tmp->str,
+          fprintf (stderr, _("Error with regular expression %s: %s\n"), tmp->str,
                    errstr);
           exit (1);
         }
@@ -1595,7 +1595,7 @@ extract (const char *filename, int arglen, char *args[])
       tmp = malloc (sizeof (struct lnode));
       if (asprintf (&tmp->str, "%s/.*", args[argi]) == -1)
         {
-          fprintf (stderr, "Error with asprintf()\n");
+          fprintf (stderr, _("Error with asprintf()\n"));
           exit (1);
         }
       tmp->next = NULL;
@@ -1604,7 +1604,7 @@ extract (const char *filename, int arglen, char *args[])
         {
           char errstr[1024];
           regerror (err, &tmp->reg, errstr, sizeof (errstr));
-          fprintf (stderr, "Error with regular expression %s: %s\n", tmp->str,
+          fprintf (stderr, _("Error with regular expression %s: %s\n"), tmp->str,
                    errstr);
           exit (1);
         }
@@ -1623,7 +1623,7 @@ extract (const char *filename, int arglen, char *args[])
   x = xar_open (filename, READ);
   if (!x)
     {
-      fprintf (stderr, "Error opening xar archive: %s\n", filename);
+      fprintf (stderr, _("Error opening xar archive: %s\n"), filename);
       exit (1);
     }
 
@@ -1631,7 +1631,7 @@ extract (const char *filename, int arglen, char *args[])
     {
       if (chdir (Chdir) != 0)
         {
-          fprintf (stderr, "Unable to chdir to %s\n", Chdir);
+          fprintf (stderr, _("Unable to chdir to %s\n"), Chdir);
           exit (1);
         }
     }
@@ -1666,7 +1666,7 @@ extract (const char *filename, int arglen, char *args[])
   i = xar_iter_new ();
   if (!i)
     {
-      fprintf (stderr, "Error creating xar iterator\n");
+      fprintf (stderr, _("Error creating xar iterator\n"));
       exit (1);
     }
 
@@ -1706,7 +1706,7 @@ extract (const char *filename, int arglen, char *args[])
       if (!exclude_match)
         {
           if (Verbose)
-            printf ("Excluding %s\n", path);
+            printf (_("Excluding %s\n"), path);
           free (path);
           continue;
         }
@@ -1716,7 +1716,7 @@ extract (const char *filename, int arglen, char *args[])
           struct stat sb;
           if (!ToStdout && NoOverwrite && (lstat (path, &sb) == 0))
             {
-              fprintf (stderr, "%s already exists, not overwriting\n", path);
+              fprintf (stderr, _("%s already exists, not overwriting\n"), path);
             }
           else
             {
@@ -1743,7 +1743,7 @@ extract (const char *filename, int arglen, char *args[])
                   if (xar_extract (x, f) == 0)
                     files_extracted++;
                   else if (!ToStdout)
-                    fprintf (stderr, "Unable to extract file %s\n", path);
+                    fprintf (stderr, _("Unable to extract file %s\n"), path);
                 }
             }
         }
@@ -1757,7 +1757,7 @@ extract (const char *filename, int arglen, char *args[])
     }
   if (args[0] && (files_extracted == 0))
     {
-      fprintf (stderr, "No files matched extraction criteria\n");
+      fprintf (stderr, _("No files matched extraction criteria\n"));
       Err = 3;
     }
 
@@ -1767,7 +1767,7 @@ extract (const char *filename, int arglen, char *args[])
   xar_iter_free (i);
   if (xar_close (x) != 0)
     {
-      fprintf (stderr, "Error extracting the archive\n");
+      fprintf (stderr, _("Error extracting the archive\n"));
       if (!Err)
         Err = 42;
     }
@@ -1793,7 +1793,7 @@ list_subdocs (const char *filename)
   x = xar_open (filename, READ);
   if (!x)
     {
-      fprintf (stderr, "Error opening xar archive: %s\n", filename);
+      fprintf (stderr, _("Error opening xar archive: %s\n"), filename);
       exit (1);
     }
 
@@ -1830,7 +1830,7 @@ list (const char *filename, int arglen, char *args[])
         {
           char errstr[1024];
           regerror (err, &tmp->reg, errstr, sizeof (errstr));
-          fprintf (stderr, "Error with regular expression %s: %s\n", tmp->str,
+          fprintf (stderr, _("Error with regular expression %s: %s\n"), tmp->str,
                    errstr);
           exit (1);
         }
@@ -1849,14 +1849,14 @@ list (const char *filename, int arglen, char *args[])
   x = xar_open (filename, READ);
   if (!x)
     {
-      fprintf (stderr, "Error opening xar archive: %s\n", filename);
+      fprintf (stderr, _("Error opening xar archive: %s\n"), filename);
       exit (1);
     }
 
   i = xar_iter_new ();
   if (!i)
     {
-      fprintf (stderr, "Error creating xar iterator\n");
+      fprintf (stderr, _("Error creating xar iterator\n"));
       exit (1);
     }
 
@@ -1912,7 +1912,7 @@ dumptoc (const char *filename, const char *tocfile)
   x = xar_open (filename, READ);
   if (!x)
     {
-      fprintf (stderr, "Error opening xar archive: %s\n", filename);
+      fprintf (stderr, _("Error opening xar archive: %s\n"), filename);
       exit (1);
     }
 
@@ -1941,7 +1941,7 @@ dump_header (const char *filename)
 
   if (read (fd, &xh, sizeof (xh)) < (int) sizeof (xar_header_t))
     {
-      fprintf (stderr, "error reading header\n");
+      fprintf (stderr, _("error reading header\n"));
       exit (1);
     }
 
