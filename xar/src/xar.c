@@ -2389,9 +2389,15 @@ get_hash_alg (const char *str)
   return NULL;
 }
 
+extern void xar__init_intl (void);
+
 int
 main (int argc, char *argv[])
 {
+#if ENABLE_NLS
+  setlocale (LC_ALL, "");
+  xar__init_intl ();
+#endif
   int ret;
   char *filename = NULL;
   char *sig_path = NULL;

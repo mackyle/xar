@@ -5,3 +5,4 @@
 /*.la
 /Makefile
 /Makefile.in
+/localedir.h

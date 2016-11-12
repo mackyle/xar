@@ -11,6 +11,7 @@
 #endif
 
 #ifdef ENABLE_NLS
+#include <locale.h>
 #include <libintl.h>
 
 #ifdef GETTEXT_DOMAIN
