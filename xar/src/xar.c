@@ -875,7 +875,6 @@ replace_sign (const char *filename)
 XAR_OPT_OWNERSHIP };
   xar_t old_xar, new_xar;
   char *new_xar_path;
-  char *systemcall;
   const char *temp_dir;
   size_t new_xar_path_len;
   struct cnode *c;
@@ -1118,23 +1117,14 @@ XAR_OPT_OWNERSHIP };
 
   /* delete old archive, move new in its place */
   unlink (filename);
-  err = asprintf (&systemcall, "cp \"%s\" \"%s\"", new_xar_path, filename);
+  err = rename (new_xar_path, filename);
   if (err == -1)
     {
       fprintf (stderr,
-               _("Could not copy new archive to final location (asprintf() error %i)\n"),
-               errno);
+               _("Could not copy new archive to final location: %s\n"),
+               strerror (errno));
       exit (1);
     }
-  err = system (systemcall);
-  if (err)
-    {
-      fprintf (stderr,
-               _("Could not copy new archive to final location (system() returned %i)\n"),
-               err);
-      exit (1);
-    }
-  free (systemcall);
   /* delete temporary archive */
   remove_temp ();
 }
