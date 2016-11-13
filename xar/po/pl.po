@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xar-core 1.6.1\n"
 "Report-Msgid-Bugs-To: xar-devel@googlegroups.com\n"
-"POT-Creation-Date: 2016-11-12 13:46+0100\n"
+"POT-Creation-Date: 2016-11-12 13:52+0100\n"
 "PO-Revision-Date: 2016-11-12 13:31+0100\n"
 "Last-Translator: Jakub Kaszycki <kuba@kaszycki.net.pl>\n"
 "Language-Team: \n"
@@ -43,83 +43,86 @@ msgstr "Nie można było otworzyć %s aby rozpakować dane do podpisania\n"
 #: src/xar.c:346 src/xar.c:550 src/xar.c:734
 #, c-format
 msgid "No signatures found to extract data from\n"
-msgstr ""
+msgstr "Nie znaleziono podpisów żeby z nich wydobyć informacje\n"
 
 #: src/xar.c:360 src/xar.c:926
 #, c-format
 msgid "--digestinfo-to-sign does not support hash type \"%s\"\n"
-msgstr ""
+msgstr "--digestinfo-to-sign nie obsługuje typu sumy kontrolnej \"%s\"\n"
 
 #: src/xar.c:369
 #, c-format
 msgid "Could not locate checksum/size in archive\n"
-msgstr ""
+msgstr "Nie można było znaleźć sumy kontrolnej/rozmiaru w archiwum\n"
 
 #: src/xar.c:384
 #, c-format
 msgid "Could not open %s for reading data to sign\n"
-msgstr ""
+msgstr "Nie można było otworzyć %s do odczytu aby podpisać\n"
 
 #: src/xar.c:393
 #, c-format
 msgid "Failed to read data to sign from %s\n"
-msgstr ""
+msgstr "Odczyt danych w celu podpisu z %s nieudany\n"
 
 #: src/xar.c:402 src/xar.c:1183
 #, c-format
 msgid "Could not open %s for saving data to sign\n"
-msgstr ""
+msgstr "Nie można było otworzyć %s do zapisu aby podpisać\n"
 
 #: src/xar.c:412 src/xar.c:1194
 #, c-format
 msgid ""
 "Failed to write DigestInfo data to sign prefix to %s (fwrite() returned %i)\n"
 msgstr ""
+"Zapis danych DigestInfo do prefiksu podpisu do %s (fwrite() zwróciło "
+"%i)nieudany\n"
 
 #: src/xar.c:421 src/xar.c:1203
 #, c-format
 msgid "Failed to write %sdata to sign to %s (fwrite() returned %i)\n"
 msgstr ""
+"Zapis danych %s w celu podpisania do %s (fwrite() zwróciło %i)nieudany\n"
 
 #: src/xar.c:433 src/xar.c:681
 #, c-format
 msgid "Could not open %s for saving signature offset\n"
-msgstr ""
+msgstr "Nie można było otworzyć %s aby zapisać lokalizację podpisu\n"
 
 #: src/xar.c:441 src/xar.c:689
 #, c-format
 msgid "Failed to write signature offset to %s (fprintf() returned %i)\n"
-msgstr ""
+msgstr "Zapis lokalizacji podpisu do %s (fprintf() zwróciło %i) nieudany\n"
 
 #: src/xar.c:543
 #, c-format
 msgid "Could not open %s to extract certificates\n"
-msgstr ""
+msgstr "Nie można było otworzyć %s aby wypakować certyfikaty\n"
 
 #: src/xar.c:558
 #, c-format
 msgid "Signature bears no certificates -- how odd\n"
-msgstr ""
+msgstr "Podpis nie zawiera certyfikatów -- jakie dziwne\n"
 
 #: src/xar.c:566 src/xar.c:606
 #, c-format
 msgid "Could not save certificates to %s\n"
-msgstr ""
+msgstr "Nie można było zapisać certyfikatów do %s\n"
 
 #: src/xar.c:577 src/xar.c:584
 #, c-format
 msgid "Could not save certificate %i to %s\n"
-msgstr ""
+msgstr "Nie można było zapisać certyfikatu %i do %s\n"
 
 #: src/xar.c:592
 #, c-format
 msgid "Failed to write certificate to %s (fwrite() returned %i)\n"
-msgstr ""
+msgstr "Zapis certyfikatu do %s (fwrite() zwróciło %i) nieudany\n"
 
 #: src/xar.c:611 src/xar.c:621 src/xar.c:631 src/xar.c:638
 #, c-format
 msgid "Failed to write certificates to %s\n"
-msgstr ""
+msgstr "Zapis certyfikatów do %s nieudany\n"
 
 #: src/xar.c:704
 #, c-format
