@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <sys/fcntl.h>
 #include <string.h>
-#include "xar.h"
+#include <xar/xar.h>
 
 int32_t err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
 {

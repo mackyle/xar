@@ -14,7 +14,7 @@
 #include <regex.h>
 #include <errno.h>
 #include <openssl/evp.h>
-#include "xar.h"
+#include <xar/xar.h>
 
 off_t HeapOff = 0;
 
