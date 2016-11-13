@@ -12,6 +12,12 @@
 int
 main (int argc, char *argv[])
 {
+  if (argc < 2)
+    {
+      fprintf (stderr, "Usage: %s <FILE>\n", argv[0]);
+      return 2;
+    }
+
   char *bufcomp, *bufuncomp;
   struct xar_header h;
   int fd, len;
@@ -22,13 +28,13 @@ main (int argc, char *argv[])
   if (fd < 0)
     {
       perror ("open");
-      exit (1);
+      return 1;
     }
 
   if (read (fd, &h, 8) < 0)
     {
       fprintf (stderr, "Error reading magic, size, version from header\n");
-      exit (1);
+      return 1;
     }
 
   h.magic = ntohl (h.magic);
