@@ -34,6 +34,7 @@
  *   ----------------------
  */
 
+#pragma pack(1) // Align to one byte
 struct AppleSingleHeader
 {
   uint32_t magic;               /* Magic Number (0x00051600 for AS) */
@@ -41,9 +42,7 @@ struct AppleSingleHeader
   char filler[16];              /* All zeros */
   uint16_t entries;             /* Number of entries in the file */
 };
-
-#define XAR_ASH_SIZE 26         /* sizeof(struct AppleSingleHeader) will be wrong
-                                 * due to padding. */
+#pragma pack()
 
 #define APPLESINGLE_MAGIC 0x00051600
 #define APPLEDOUBLE_MAGIC 0x00051607

@@ -592,8 +592,8 @@ underbar_archive (xar_t x, xar_file_t f, const char *file, void *context)
 
   memset (&ash, 0, sizeof (ash));
   memset (&ase, 0, sizeof (ase));
-  r = (int) read (DARWINATTR_CONTEXT (context)->fd, &ash, XAR_ASH_SIZE);
-  if (r < XAR_ASH_SIZE)
+  r = (int) read (DARWINATTR_CONTEXT (context)->fd, &ash, sizeof (ash));
+  if (r < sizeof (ash))
     {
       close (DARWINATTR_CONTEXT (context)->fd);
       return -1;
@@ -610,7 +610,7 @@ underbar_archive (xar_t x, xar_file_t f, const char *file, void *context)
       return -1;
     }
 
-  off = XAR_ASH_SIZE;
+  off = sizeof (ash);
   num_entries = ntohs (ash.entries);
 
   for (i = 0; i < num_entries; i++)
@@ -745,11 +745,11 @@ underbar_extract (xar_t x, xar_file_t f, const char *file, void *context)
   ash.version = htonl (APPLEDOUBLE_VERSION);
   ash.entries = htons (num_entries);
 
-  if (write (DARWINATTR_CONTEXT (context)->fd, &ash, XAR_ASH_SIZE) !=
-      XAR_ASH_SIZE)
+  if (write (DARWINATTR_CONTEXT (context)->fd, &ash, sizeof (ash)) !=
+      sizeof (ash))
     return -1;
 
-  ase.offset = htonl (XAR_ASH_SIZE + ntohs (ash.entries) * 12);
+  ase.offset = htonl (sizeof (ash) + ntohs (ash.entries) * 12);
   if (have_fi)
     {
       ase.entry_id = htonl (AS_ID_FINDER);
