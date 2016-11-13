@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <xar/xar.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 static int32_t
 err_callback (int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
