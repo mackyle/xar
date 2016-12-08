@@ -6,3 +6,5 @@
 /*.trs
 /.deps
 /.libs
+/buffer.o
+/validate.o
