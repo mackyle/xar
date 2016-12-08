@@ -19,7 +19,7 @@ main (int argc, char *argv[])
 {
   if (argc < 2)
     {
-      fprintf (stderr, "Usage: xar-strextract <FILE>\n");
+      fprintf (stderr, "Usage: %s <FILE>\n", argv[0]);
       return 77;
     }
 
@@ -32,7 +32,7 @@ main (int argc, char *argv[])
   x = xar_open (argv[1], READ);
   if (!x)
     {
-      fprintf (stderr, "Error opening archive\n");
+      fprintf (stderr, "%s: Error opening archive: %s\n", argv[0], argv[1]);
       return 1;
     }
 
@@ -41,7 +41,8 @@ main (int argc, char *argv[])
   i = xar_iter_new ();
   if (!i)
     {
-      fprintf (stderr, "Error creating xar iterator\n");
+      fprintf (stderr, "%s: Error creating xar iterator: %s\n", argv[0],
+               argv[1]);
       return 1;
     }
 
@@ -57,21 +58,21 @@ main (int argc, char *argv[])
       xar_prop_get (f, "type", &type);
       if (!type)
         {
-          fprintf (stderr, "File has no type %s\n", path);
+          fprintf (stderr, "%s: File has no type: %s\n", argv[0], path);
           free (path);
           continue;
         }
       if (strcmp (type, "file") != 0)
         {
-          fprintf (stderr, "Skipping %s\n", path);
+          fprintf (stderr, "%s: Not a file, skipping: %s\n", argv[0], path);
           free (path);
           continue;
         }
 
-      fprintf (stderr, "Extracting %s\n", path);
+      fprintf (stderr, "%s: Extracting: %s\n", argv[0], path);
       if (xar_extract_tostream_init (x, f, &s) != XAR_STREAM_OK)
         {
-          fprintf (stderr, "Error initializing stream %s\n", path);
+          fprintf (stderr, "%s: Error initializing stream: %s\n", argv[0], path);
           free (path);
           continue;
         }
@@ -79,7 +80,7 @@ main (int argc, char *argv[])
       fd = open (path, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
       if (!fd)
         {
-          fprintf (stderr, "Error opening output file %s\n", path);
+          fprintf (stderr, "%s: Error opening output file: %s\n", argv[0], path);
           free (path);
           continue;
         }
@@ -90,7 +91,7 @@ main (int argc, char *argv[])
         {
           if (ret == XAR_STREAM_ERR)
             {
-              fprintf (stderr, "Error extracting stream %s\n", path);
+              fprintf (stderr, "%s: Error extracting stream: %s\n", argv[0], path);
               return 2;
             }
 
@@ -102,7 +103,7 @@ main (int argc, char *argv[])
 
       if (xar_extract_tostream_end (&s) != XAR_STREAM_OK)
         {
-          fprintf (stderr, "Error ending stream %s\n", path);
+          fprintf (stderr, "%s: Error ending stream: %s\n", argv[0], path);
         }
 
       close (fd);
