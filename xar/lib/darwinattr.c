@@ -565,8 +565,8 @@ underbar_archive (xar_t x, xar_file_t f, const char *file, void *context)
   struct stat sb;
   char underbarname[4096], z[32];
   char *dname, *bname, *tmp, *tmp2;
-  struct AppleSingleHeader ash;
-  struct AppleSingleEntry ase;
+  AppleSingleHeader ash;
+  AppleSingleEntry ase;
   int num_entries = 0, i, r;
   off_t off;
 
@@ -691,8 +691,8 @@ underbar_extract (xar_t x, xar_file_t f, const char *file, void *context)
   char underbarname[4096];
   char *dname, *bname, *tmp, *tmp2;
   const char *rsrclenstr;
-  struct AppleSingleHeader ash;
-  struct AppleSingleEntry ase;
+  AppleSingleHeader ash;
+  AppleSingleEntry ase;
   int num_entries = 0, rsrclen = 0, have_rsrc = 0, have_fi = 0;
   xar_prop_t p;
   xar_prop_t rfprop = NULL, fiprop = NULL;
