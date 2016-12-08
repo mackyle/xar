@@ -165,8 +165,10 @@ FULL_PATH_NAMES        = YES
 STRIP_FROM_PATH        = \
                          "@top_srcdir@/include" \
                          "@top_srcdir@/lib" \
+                         "@top_srcdir@/test" \
                          "@top_builddir@/include" \
-                         "@top_builddir@/lib"
+                         "@top_builddir@/lib" \
+                         "@top_builddir@/test"
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
 # path mentioned in the documentation of a class, which tells the reader which
@@ -178,8 +180,10 @@ STRIP_FROM_PATH        = \
 STRIP_FROM_INC_PATH    = \
                          "@top_srcdir@/include" \
                          "@top_srcdir@/lib" \
+                         "@top_srcdir@/test" \
                          "@top_builddir@/include" \
-                         "@top_builddir@/lib"
+                         "@top_builddir@/lib" \
+                         "@top_builddir@/test"
 
 # If the SHORT_NAMES tag is set tco YES, doxygen will generate much shorter (but
 # less readable) file names. This can be useful is your file systems doesn't
