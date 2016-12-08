@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xar-core 1.6.1\n"
 "Report-Msgid-Bugs-To: xar-devel@googlegroups.com\n"
-"POT-Creation-Date: 2016-11-12 13:52+0100\n"
+"POT-Creation-Date: 2016-12-08 23:36+0100\n"
 "PO-Revision-Date: 2016-11-12 13:31+0100\n"
 "Last-Translator: Jakub Kaszycki <kuba@kaszycki.net.pl>\n"
 "Language-Team: \n"
@@ -45,7 +45,7 @@ msgstr "Nie można było otworzyć %s aby rozpakować dane do podpisania\n"
 msgid "No signatures found to extract data from\n"
 msgstr "Nie znaleziono podpisów żeby z nich wydobyć informacje\n"
 
-#: src/xar.c:360 src/xar.c:926
+#: src/xar.c:360 src/xar.c:925
 #, c-format
 msgid "--digestinfo-to-sign does not support hash type \"%s\"\n"
 msgstr "--digestinfo-to-sign nie obsługuje typu sumy kontrolnej \"%s\"\n"
@@ -65,12 +65,12 @@ msgstr "Nie można było otworzyć %s do odczytu aby podpisać\n"
 msgid "Failed to read data to sign from %s\n"
 msgstr "Odczyt danych w celu podpisu z %s nieudany\n"
 
-#: src/xar.c:402 src/xar.c:1183
+#: src/xar.c:402 src/xar.c:1173
 #, c-format
 msgid "Could not open %s for saving data to sign\n"
 msgstr "Nie można było otworzyć %s do zapisu aby podpisać\n"
 
-#: src/xar.c:412 src/xar.c:1194
+#: src/xar.c:412 src/xar.c:1184
 #, c-format
 msgid ""
 "Failed to write DigestInfo data to sign prefix to %s (fwrite() returned %i)\n"
@@ -78,7 +78,7 @@ msgstr ""
 "Zapis danych DigestInfo do prefiksu podpisu do %s (fwrite() zwróciło "
 "%i)nieudany\n"
 
-#: src/xar.c:421 src/xar.c:1203
+#: src/xar.c:421 src/xar.c:1193
 #, c-format
 msgid "Failed to write %sdata to sign to %s (fwrite() returned %i)\n"
 msgstr ""
@@ -149,396 +149,391 @@ msgstr ""
 msgid "Failed to write signature data to %s (fwrite() returned %i)\n"
 msgstr ""
 
-#: src/xar.c:900 src/xar.c:1154
+#: src/xar.c:899 src/xar.c:1144
 #, c-format
 msgid "Could not open archive %s\n"
 msgstr ""
 
-#: src/xar.c:910
+#: src/xar.c:909
 #, c-format
 msgid ""
 "A TOC checksum style value other than \"%s\" is required for signatures\n"
 msgstr ""
 
-#: src/xar.c:948
+#: src/xar.c:947
 #, c-format
 msgid ""
 "No temporary directory available (none of $TMPDIR $TMP or /tmp are "
 "directories)\n"
 msgstr ""
 
-#: src/xar.c:955
+#: src/xar.c:954
 #, c-format
 msgid "Could not allocate memory for temporary file path\n"
 msgstr ""
 
-#: src/xar.c:964 src/xar.c:975
+#: src/xar.c:963 src/xar.c:974
 #, c-format
 msgid "Error creating new archive %s\n"
 msgstr ""
 
-#: src/xar.c:1000 src/xar.c:1371
+#: src/xar.c:999 src/xar.c:1361
 #, c-format
 msgid "Unsupported TOC checksum type %s\n"
 msgstr ""
 
-#: src/xar.c:1018
+#: src/xar.c:1017
 #, c-format
 msgid "old_xar -> %s (parent: %s)\n"
 msgstr ""
 
-#: src/xar.c:1040
+#: src/xar.c:1039
 #, c-format
 msgid "root: %s\n"
 msgstr ""
 
-#: src/xar.c:1049
+#: src/xar.c:1048
 #, c-format
 msgid "child: %s -> %s\n"
 msgstr ""
 
-#: src/xar.c:1060
+#: src/xar.c:1059
 #, c-format
 msgid "searching for parent: %s ?\n"
 msgstr ""
 
-#: src/xar.c:1064
+#: src/xar.c:1063
 #, c-format
 msgid "popping: %s\n"
 msgstr ""
 
-#: src/xar.c:1070
+#: src/xar.c:1069
 #, c-format
 msgid "found: %s -> %s\n"
 msgstr ""
 
-#: src/xar.c:1092
+#: src/xar.c:1091
 #, c-format
 msgid "new_xar -> %s\n"
 msgstr ""
 
-#: src/xar.c:1102 src/xar.c:1510
+#: src/xar.c:1101 src/xar.c:1500
 #, c-format
 msgid "Error creating the archive\n"
 msgstr ""
 
-#: src/xar.c:1112
+#: src/xar.c:1111
 #, c-format
 msgid "Error re-opening new archive %s\n"
 msgstr ""
 
-#: src/xar.c:1125
-#, c-format
-msgid "Could not copy new archive to final location (asprintf() error %i)\n"
-msgstr ""
+#: src/xar.c:1124
+#, fuzzy, c-format
+msgid "Could not copy new archive to final location: %s\n"
+msgstr "Nie można było zapisać certyfikatu %i do %s\n"
 
-#: src/xar.c:1133
-#, c-format
-msgid "Could not copy new archive to final location (system() returned %i)\n"
-msgstr ""
-
-#: src/xar.c:1161
+#: src/xar.c:1151
 #, c-format
 msgid "Archive has already been signed. Use --replace-sign instead\n"
 msgstr ""
 
-#: src/xar.c:1228
+#: src/xar.c:1218
 #, c-format
 msgid "Could not stat() certificate file %s (errno == %i)\n"
 msgstr ""
 
-#: src/xar.c:1236
+#: src/xar.c:1226
 #, c-format
 msgid "Could not open %s for reading certificate\n"
 msgstr ""
 
-#: src/xar.c:1243
+#: src/xar.c:1233
 #, c-format
 msgid "Failed to read certificate from %s\n"
 msgstr ""
 
-#: src/xar.c:1266
+#: src/xar.c:1256
 #, c-format
 msgid "inject_signature(%s, %s)\n"
 msgstr ""
 
-#: src/xar.c:1273
+#: src/xar.c:1263
 #, c-format
 msgid "Could not open xar archive %s to get signature offset\n"
 msgstr ""
 
-#: src/xar.c:1280
+#: src/xar.c:1270
 #, c-format
 msgid "Could not read xar archive %s to get signature offset\n"
 msgstr ""
 
-#: src/xar.c:1290
+#: src/xar.c:1280
 #, c-format
 msgid "Could not open %s for reading signature\n"
 msgstr ""
 
-#: src/xar.c:1295
+#: src/xar.c:1285
 #, c-format
 msgid "Could not get length of %s\n"
 msgstr ""
 
-#: src/xar.c:1301
+#: src/xar.c:1291
 #, c-format
 msgid "Could not rewind %s\n"
 msgstr ""
 
-#: src/xar.c:1306
+#: src/xar.c:1296
 #, c-format
 msgid "Bad signature length\n"
 msgstr ""
 
-#: src/xar.c:1314
+#: src/xar.c:1304
 #, c-format
 msgid "Could not open xar archive %s for injecting signature\n"
 msgstr ""
 
-#: src/xar.c:1325
+#: src/xar.c:1315
 #, c-format
 msgid "Failed to read signature from %s\n"
 msgstr ""
 
-#: src/xar.c:1352
+#: src/xar.c:1342
 #, c-format
 msgid "Error creating archive %s\n"
 msgstr ""
 
-#: src/xar.c:1379
+#: src/xar.c:1369
 #, c-format
 msgid "Unsupported file checksum type %s\n"
 msgstr ""
 
-#: src/xar.c:1439
+#: src/xar.c:1429
 #, c-format
 msgid "Unable to get current directory\n"
 msgstr ""
 
-#: src/xar.c:1444 src/xar.c:1634
+#: src/xar.c:1434 src/xar.c:1624
 #, c-format
 msgid "Unable to chdir to %s\n"
 msgstr ""
 
-#: src/xar.c:1451
+#: src/xar.c:1441
 #, c-format
 msgid "Error traversing file tree\n"
 msgstr ""
 
-#: src/xar.c:1477 src/xar.c:1709
+#: src/xar.c:1467 src/xar.c:1699
 #, c-format
 msgid "Excluding %s\n"
 msgstr ""
 
-#: src/xar.c:1493
+#: src/xar.c:1483
 #, c-format
 msgid "Error adding file %s\n"
 msgstr ""
 
-#: src/xar.c:1538
+#: src/xar.c:1528
 #, c-format
 msgid "Error re-opening archive %s\n"
 msgstr ""
 
-#: src/xar.c:1544
+#: src/xar.c:1534
 #, c-format
 msgid "Error re-closing the archive\n"
 msgstr ""
 
-#: src/xar.c:1579 src/xar.c:1607 src/xar.c:1833 src/xar.c:2661
+#: src/xar.c:1569 src/xar.c:1597 src/xar.c:1823 src/xar.c:2651
 #, c-format
 msgid "Error with regular expression %s: %s\n"
 msgstr ""
 
-#: src/xar.c:1598
+#: src/xar.c:1588
 #, c-format
 msgid "Error with asprintf()\n"
 msgstr ""
 
-#: src/xar.c:1626 src/xar.c:1796 src/xar.c:1852 src/xar.c:1915
+#: src/xar.c:1616 src/xar.c:1786 src/xar.c:1842 src/xar.c:1905
 #, c-format
 msgid "Error opening xar archive: %s\n"
 msgstr ""
 
-#: src/xar.c:1669 src/xar.c:1859
+#: src/xar.c:1659 src/xar.c:1849
 #, c-format
 msgid "Error creating xar iterator\n"
 msgstr ""
 
-#: src/xar.c:1719
+#: src/xar.c:1709
 #, c-format
 msgid "%s already exists, not overwriting\n"
 msgstr ""
 
-#: src/xar.c:1746
+#: src/xar.c:1736
 #, c-format
 msgid "Unable to extract file %s\n"
 msgstr ""
 
-#: src/xar.c:1760
+#: src/xar.c:1750
 #, c-format
 msgid "No files matched extraction criteria\n"
 msgstr ""
 
-#: src/xar.c:1770
+#: src/xar.c:1760
 #, c-format
 msgid "Error extracting the archive\n"
 msgstr ""
 
-#: src/xar.c:1944 src/xar.c:2028
+#: src/xar.c:1934 src/xar.c:2018
 #, c-format
 msgid "error reading header\n"
 msgstr ""
 
-#: src/xar.c:1948
+#: src/xar.c:1938
 #, c-format
 msgid "magic:                   0x%x "
 msgstr ""
 
-#: src/xar.c:1950
+#: src/xar.c:1940
 #, c-format
 msgid "(BAD)\n"
 msgstr ""
 
-#: src/xar.c:1952
+#: src/xar.c:1942
 #, c-format
 msgid "(OK)\n"
 msgstr ""
 
-#: src/xar.c:1953
+#: src/xar.c:1943
 #, c-format
 msgid "size:                    %d\n"
 msgstr ""
 
-#: src/xar.c:1954
+#: src/xar.c:1944
 #, c-format
 msgid "version:                 %d\n"
 msgstr ""
 
-#: src/xar.c:1955
+#: src/xar.c:1945
 #, c-format
 msgid "Compressed TOC length:   %lld\n"
 msgstr ""
 
-#: src/xar.c:1957
+#: src/xar.c:1947
 #, c-format
 msgid "Uncompressed TOC length: %lld\n"
 msgstr ""
 
-#: src/xar.c:1959
+#: src/xar.c:1949
 #, c-format
 msgid "TOC Checksum algorithm:  %d "
 msgstr ""
 
-#: src/xar.c:1976
+#: src/xar.c:1966
 #, c-format
 msgid "(OTHER + invalid header length)\n"
 msgstr ""
 
-#: src/xar.c:1983
+#: src/xar.c:1973
 #, c-format
 msgid "(OTHER + invalid non-nul terminated name)\n"
 msgstr ""
 
-#: src/xar.c:1988
+#: src/xar.c:1978
 #, c-format
 msgid "(OTHER + invalid empty name)\n"
 msgstr ""
 
-#: src/xar.c:1991
+#: src/xar.c:1981
 #, c-format
 msgid "(OTHER + %s)\n"
 msgstr ""
 
-#: src/xar.c:1995
+#: src/xar.c:1985
 #, c-format
 msgid "(unknown)\n"
 msgstr ""
 
-#: src/xar.c:2034
+#: src/xar.c:2024
 #, c-format
 msgid "error reading header (bad magic number)\n"
 msgstr ""
 
-#: src/xar.c:2044
+#: src/xar.c:2034
 #, c-format
 msgid "error reading header (header size field value too small)\n"
 msgstr ""
 
-#: src/xar.c:2050
+#: src/xar.c:2040
 #, c-format
 msgid "error reading header (bad header size field -- greater than %u)\n"
 msgstr ""
 
-#: src/xar.c:2057
+#: src/xar.c:2047
 #, c-format
 msgid "error reading header (premature EOF)\n"
 msgstr ""
 
-#: src/xar.c:2064
+#: src/xar.c:2054
 msgid "open dump file for writing"
 msgstr ""
 
-#: src/xar.c:2076
+#: src/xar.c:2066
 #, c-format
 msgid "error reading toc (premature EOF)\n"
 msgstr ""
 
-#: src/xar.c:2082
+#: src/xar.c:2072
 #, c-format
 msgid "error writing raw toc dump file\n"
 msgstr ""
 
-#: src/xar.c:2123
+#: src/xar.c:2113
 #, c-format
 msgid "Error while %s archive"
 msgstr ""
 
-#: src/xar.c:2124
+#: src/xar.c:2114
 msgid "creating"
 msgstr ""
 
-#: src/xar.c:2124
+#: src/xar.c:2114
 msgid "extracting"
 msgstr ""
 
-#: src/xar.c:2124
+#: src/xar.c:2114
 msgid "operating on"
 msgstr ""
 
-#: src/xar.c:2129
+#: src/xar.c:2119
 #, c-format
 msgid ":(%s)"
 msgstr ""
 
-#: src/xar.c:2133
+#: src/xar.c:2123
 #, c-format
 msgid ": %s"
 msgstr ""
 
-#: src/xar.c:2135
+#: src/xar.c:2125
 #, c-format
 msgid " (%s)"
 msgstr ""
 
-#: src/xar.c:2138
+#: src/xar.c:2128
 #, c-format
 msgid " - ignored\n"
 msgstr ""
 
-#: src/xar.c:2153
+#: src/xar.c:2143
 #, c-format
 msgid "Usage: %s -[ctx][v] -f <archive> ...\n"
 msgstr "Użycie: %s -[ctx][v] -f <archiwum> ...\n"
 
-#: src/xar.c:2154
+#: src/xar.c:2144
 #, c-format
 msgid "(Use %s --help for extended help)\n"
 msgstr "(Użyj %s --help dla rozszerzonej pomocy)\n"
 
-#: src/xar.c:2160
+#: src/xar.c:2150
 #, c-format
 msgid ""
 "Usage: %s -[ctx][v] -f <archive> ...\n"
@@ -673,317 +668,317 @@ msgid ""
 "\t--version        Print xar's version number to stdout\n"
 msgstr ""
 
-#: src/xar.c:2374
+#: src/xar.c:2364
 #, c-format
 msgid "xar library version 0x%08lX\n"
 msgstr ""
 
-#: src/xar.c:2376
+#: src/xar.c:2366
 #, c-format
 msgid "xar library version unknown\n"
 msgstr ""
 
-#: src/xar.c:2483
+#: src/xar.c:2473
 #, c-format
 msgid "%s: warning: linked xar library version older than %s executable\n"
 msgstr ""
 
-#: src/xar.c:2500
+#: src/xar.c:2490
 #, c-format
 msgid ""
 "\n"
 "--toc-cksum requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2512
+#: src/xar.c:2502
 #, c-format
 msgid ""
 "\n"
 "--toc-cksum unrecognized hash type %s\n"
 msgstr ""
 
-#: src/xar.c:2528
+#: src/xar.c:2518
 #, c-format
 msgid ""
 "\n"
 "--compression requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2544
+#: src/xar.c:2534
 #, c-format
 msgid ""
 "\n"
 "This instance of xar doesn't understand compression type %s\n"
 msgstr ""
 
-#: src/xar.c:2555
+#: src/xar.c:2545
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --list-subdocs and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2569
+#: src/xar.c:2559
 #, c-format
 msgid ""
 "\n"
 "--dump-toc requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2576 src/xar.c:3054
+#: src/xar.c:2566 src/xar.c:3044
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: -%c and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2588
+#: src/xar.c:2578
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --dump-header and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2599
+#: src/xar.c:2589
 #, c-format
 msgid "%s: Error with asprintf()\n"
 msgstr ""
 
-#: src/xar.c:2614
+#: src/xar.c:2604
 #, c-format
 msgid "%s: Error with regular expression %s: %s\n"
 msgstr ""
 
-#: src/xar.c:2633
+#: src/xar.c:2623
 #, c-format
 msgid ""
 "\n"
 "--rsize requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2641
+#: src/xar.c:2631
 #, c-format
 msgid ""
 "\n"
 "Invalid rsize value: %s\n"
 msgstr ""
 
-#: src/xar.c:2746
+#: src/xar.c:2736
 #, c-format
 msgid ""
 "\n"
 "--file-cksum requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2758
+#: src/xar.c:2748
 #, c-format
 msgid ""
 "\n"
 "--file-cksum unrecognized hash type %s\n"
 msgstr ""
 
-#: src/xar.c:2774
+#: src/xar.c:2764
 #, c-format
 msgid ""
 "\n"
 "--sig-size requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2784
+#: src/xar.c:2774
 #, c-format
 msgid ""
 "\n"
 "--data-to-sign requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2791
+#: src/xar.c:2781
 #, c-format
 msgid ""
 "\n"
 "--data-to-sign may not be used with --digestinfo-to-sign\n"
 msgstr ""
 
-#: src/xar.c:2797
+#: src/xar.c:2787
 #, c-format
 msgid ""
 "\n"
 "--data-to-sign may only be used once\n"
 msgstr ""
 
-#: src/xar.c:2806
+#: src/xar.c:2796
 #, c-format
 msgid ""
 "\n"
 "--sig-offset requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2816
+#: src/xar.c:2806
 #, c-format
 msgid ""
 "\n"
 "--cert-loc requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2846
+#: src/xar.c:2836
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --extract-data-to-sign and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2860
+#: src/xar.c:2850
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --replace-sign and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2871
+#: src/xar.c:2861
 #, c-format
 msgid ""
 "\n"
 "--inject-sig requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2878
+#: src/xar.c:2868
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --inject-sig and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2889
+#: src/xar.c:2879
 #, c-format
 msgid ""
 "\n"
 "--extract-certs requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2896
+#: src/xar.c:2886
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --extract-certs and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2905
+#: src/xar.c:2895
 #, c-format
 msgid ""
 "\n"
 "%s is not a directory\n"
 msgstr ""
 
-#: src/xar.c:2914
+#: src/xar.c:2904
 #, c-format
 msgid ""
 "\n"
 "--extract-CAfile requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2921
+#: src/xar.c:2911
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --extract-CAfile and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2930 src/xar.c:2955
+#: src/xar.c:2920 src/xar.c:2945
 #, c-format
 msgid ""
 "\n"
 "%s is a directory\n"
 msgstr ""
 
-#: src/xar.c:2939
+#: src/xar.c:2929
 #, c-format
 msgid ""
 "\n"
 "--extract-sig requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2946
+#: src/xar.c:2936
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --extract-sig and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2964
+#: src/xar.c:2954
 #, c-format
 msgid ""
 "\n"
 "--dump-toc-raw requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2971
+#: src/xar.c:2961
 #, c-format
 msgid ""
 "\n"
 "Conflicting commands: --dump-toc-raw and -%c specified\n"
 msgstr ""
 
-#: src/xar.c:2983
+#: src/xar.c:2973
 #, c-format
 msgid ""
 "\n"
 "--digestinfo-to-sign requires an argument\n"
 msgstr ""
 
-#: src/xar.c:2990
+#: src/xar.c:2980
 #, c-format
 msgid ""
 "\n"
 "--digestinfo-to-sign may not be used with --data-to-sign\n"
 msgstr ""
 
-#: src/xar.c:2997
+#: src/xar.c:2987
 #, c-format
 msgid ""
 "\n"
 "--digestinfo-to-sign may only be used once\n"
 msgstr ""
 
-#: src/xar.c:3014
+#: src/xar.c:3004
 #, c-format
 msgid ""
 "\n"
 "--strip-components requires an argument\n"
 msgstr ""
 
-#: src/xar.c:3021
+#: src/xar.c:3011
 #, c-format
 msgid ""
 "\n"
 "--strip-components requires a newer xar library\n"
 msgstr ""
 
-#: src/xar.c:3029
+#: src/xar.c:3019
 #, c-format
 msgid ""
 "\n"
 "--strip-components requires a non-negative number argument\n"
 msgstr ""
 
-#: src/xar.c:3042
+#: src/xar.c:3032
 #, c-format
 msgid ""
 "\n"
 "-C requires an argument\n"
 msgstr ""
 
-#: src/xar.c:3088
+#: src/xar.c:3078
 #, c-format
 msgid "%s: --to-stdout requires a newer xar library\n"
 msgstr ""
 
-#: src/xar.c:3131
+#: src/xar.c:3121
 #, c-format
 msgid ""
 "\n"
 "--sign requires a --toc-cksum type value other than \"%s\"\n"
 msgstr ""
 
-#: src/xar.c:3141
+#: src/xar.c:3131
 #, c-format
 msgid ""
 "\n"
@@ -991,21 +986,21 @@ msgid ""
 "replace-sign\n"
 msgstr ""
 
-#: src/xar.c:3149
+#: src/xar.c:3139
 #, c-format
 msgid ""
 "%s: warning: The md5 hash is obsolete and should not be used anymore -- "
 "continuing anyway\n"
 msgstr ""
 
-#: src/xar.c:3156
+#: src/xar.c:3146
 #, c-format
 msgid ""
 "\n"
 "-f option is REQUIRED\n"
 msgstr ""
 
-#: src/xar.c:3165
+#: src/xar.c:3155
 #, c-format
 msgid ""
 "\n"
@@ -1013,14 +1008,14 @@ msgid ""
 "to-sign\n"
 msgstr ""
 
-#: src/xar.c:3174
+#: src/xar.c:3164
 #, c-format
 msgid ""
 "\n"
 "--data-to-sign requires a --toc-cksum type value other than \"%s\"\n"
 msgstr ""
 
-#: src/xar.c:3184
+#: src/xar.c:3174
 #, c-format
 msgid ""
 "\n"
@@ -1028,7 +1023,7 @@ msgid ""
 "\"%s\" or \"%s\"\n"
 msgstr ""
 
-#: src/xar.c:3197
+#: src/xar.c:3187
 #, c-format
 msgid ""
 "\n"
@@ -1036,54 +1031,54 @@ msgid ""
 "with --sig-size=0\n"
 msgstr ""
 
-#: src/xar.c:3207
+#: src/xar.c:3197
 #, c-format
 msgid ""
 "\n"
 "--sig-size > 0 and at least one --cert-loc option are required to sign\n"
 msgstr ""
 
-#: src/xar.c:3236
+#: src/xar.c:3226
 #, c-format
 msgid ""
 "\n"
 "--inject-sig requires an argument and also -f\n"
 msgstr ""
 
-#: src/xar.c:3243
+#: src/xar.c:3233
 #, c-format
 msgid ""
 "\n"
 "missing required -f\n"
 msgstr ""
 
-#: src/xar.c:3257
+#: src/xar.c:3247
 #, c-format
 msgid ""
 "\n"
 "No files to operate on\n"
 msgstr ""
 
-#: src/xar.c:3271
+#: src/xar.c:3261
 #, c-format
 msgid ""
 "\n"
 "missing --dump-toc argument\n"
 msgstr ""
 
-#: src/xar.c:3279
+#: src/xar.c:3269
 #, c-format
 msgid ""
 "\n"
 "missing --dump-toc-raw argument\n"
 msgstr ""
 
-#: src/xar.c:3303
+#: src/xar.c:3293
 #, c-format
 msgid "%s: Error opening xar archive: %s\n"
 msgstr ""
 
-#: src/xar.c:3332
+#: src/xar.c:3322
 #, c-format
 msgid ""
 "\n"

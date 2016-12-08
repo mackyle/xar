@@ -4,4 +4,6 @@ ACLOCAL_AMFLAGS = -I ../m4
 
 doc_DATA = ChangeLog INSTALL LICENSE NEWS README
 
-EXTRA_DIST = build-aux/config.rpath
+EXTRA_DIST = $(doc_DATA)
+
+noinst_HEADERS = gettext.h

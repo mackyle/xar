@@ -1,6 +1,13 @@
 xar Release Notes
 =================
 
+1.7.0 (2016-12-08)
+
+  * Reindented most source code.
+  * Made private headers public
+  * Many improvements: xar/appledouble.h
+  * And much more
+
 1.6.1 (2012-09-17)
 
   * Fix issues #75, #76
