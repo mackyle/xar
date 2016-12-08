@@ -1,4 +1,4 @@
-SUBDIRS = po include lib src test
+SUBDIRS = po include lib src test doc
 
 ACLOCAL_AMFLAGS = -I ../m4
 

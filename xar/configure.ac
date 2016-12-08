@@ -21,6 +21,8 @@ AC_PROG_AWK
 AC_PROG_GREP
 AC_PROG_SED
 
+AX_PROG_DOXYGEN
+
 AC_HEADER_STDC
 AC_CHECK_HEADERS([ext2fs/ext2_fs.h sys/statfs.h sys/xattr.h sys/param.h sys/extattr.h libutil.h sys/acl.h sys/statfs.h sys/statvfs.h sys/types.h sys/mount.h])
 AC_CHECK_FUNCS([lgetxattr lsetxattr getxattr setxattr getattrlist setattrlist lchmod lchown chflags statvfs statfs strmode])
@@ -48,12 +50,13 @@ AM_GNU_GETTEXT_VERSION([0.19.8])
 AC_DEFINE([GETTEXT_DOMAIN], ["xar"], [Domain of messages for Gettext])
 
 AC_CONFIG_FILES([Makefile
+                 doc/Makefile
                  include/Makefile
                  include/xar/xar.h
                  lib/Makefile
-		 po/Makefile.in
+                 po/Makefile.in
                  src/Makefile
-		 src/xar.1
+                 src/xar.1
                  test/Makefile
                  xar.spec])
 AC_OUTPUT
