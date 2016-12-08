@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,6 +17,12 @@ err_callback (int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
 int
 main (int argc, char *argv[])
 {
+  if (argc < 2)
+    {
+      fprintf (stderr, "Usage: xar-strextract <FILE>\n");
+      return 77;
+    }
+
   xar_t x;
   xar_iter_t i;
   xar_file_t f;
@@ -25,7 +33,7 @@ main (int argc, char *argv[])
   if (!x)
     {
       fprintf (stderr, "Error opening archive\n");
-      exit (1);
+      return 1;
     }
 
   xar_register_errhandler (x, err_callback, NULL);
@@ -34,7 +42,7 @@ main (int argc, char *argv[])
   if (!i)
     {
       fprintf (stderr, "Error creating xar iterator\n");
-      exit (1);
+      return 1;
     }
 
   for (f = xar_file_first (x, i); f; f = xar_file_next (i))
@@ -83,7 +91,7 @@ main (int argc, char *argv[])
           if (ret == XAR_STREAM_ERR)
             {
               fprintf (stderr, "Error extracting stream %s\n", path);
-              exit (2);
+              return 2;
             }
 
           write (fd, buffer, sizeof (buffer) - s.avail_out);
