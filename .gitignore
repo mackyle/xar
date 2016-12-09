@@ -15,8 +15,6 @@
 /.deps
 /.libs
 /*.la
-/XarKit
-/XarKit.framework
 /*.lo
 /*.o
 /config.cache
