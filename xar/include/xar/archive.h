@@ -49,15 +49,46 @@
 #include <xar/xar.h>
 #include "filetree.h"
 
+/**
+ * Minimal buffer size in Xar archive stream.
+ */
 #define XAR_MINIMUM_BUFFER_SIZE 512
+
+/**
+ * Default, recommended buffer size in Xar archive stream.
+ */
 #define XAR_DEFAULT_BUFFER_SIZE 32768
 
+/**
+ * Information about where an error occured.
+ */
 struct errctx
 {
+  /**
+   * Error message.
+   */
   const char *str;
+
+  /**
+   * Last value of <code>errno</code> from system call.
+   */
   int saved_errno;
+
+  /**
+   * File, which was being processed when the error occured.
+   */
   xar_file_t file;
+
+  /**
+   * Value passed from <code>xar_register_errhandler</code>.
+   * 
+   * @see xar_register_errhandler
+   */
   void *usrctx;
+
+  /**
+   * Archive which was being processed when the error occured.
+   */
   xar_t x;
 };
 
@@ -101,6 +132,9 @@ struct __xar_t
   struct stat sbcache;
 };
 
+/**
+ * Converts an object to <code>struct __xar_t *</code>.
+ */
 #define XAR(x) ((struct __xar_t *)(x))
 
 #endif /* _XAR_ARCHIVE_H_ */
