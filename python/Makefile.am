@@ -41,7 +41,25 @@ setup.py: $(srcdir)/setup.py
 
 ACLOCAL_AMFLAGS = -I ../m4
 
-AM_CPPFLAGS = -I../xar/include -I$(srcdir)/../xar/include
-AM_LDFLAGS = -L../xar/lib -L../xar/lib/.libs
+AM_LDFLAGS = \
+             -L$(BZLIB_HOME)/lib \
+             -L../xar/lib \
+             -L../xar/lib/.libs
+
+AM_CPPFLAGS = \
+              $(LIBXML2_CFLAGS) \
+              -I../xar/include \
+              -I$(srcdir)/../xar.include \
+              $(ZLIB_CFLAGS) \
+              $(LIBLZMA_CFLAGS) \
+              -I$(BZLIB_HOME)/include \
+              $(OPENSSL_CFLAGS)
+
+LDADD = \
+        ../xar/lib/libxar.la \
+        $(ZLIB_LIBS) \
+        $(LIBLZMA_LIBS) \
+        $(OPENSSL_LIBS) \
+        -lbz2
 
 endif

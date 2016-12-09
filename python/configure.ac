@@ -14,6 +14,7 @@ AM_MAINTAINER_MODE([enable])
 
 # Checks for programs.
 AC_PROG_CC
+PKG_PROG_PKG_CONFIG
 HAVE_PYTHON=yes
 AX_PYTHON([> '2.7' and ver < '3'])
 AS_IF([test "$ax_python_bin" = no], [HAVE_PYTHON=])
@@ -23,6 +24,14 @@ AS_IF([test "$PYREXC" = "--NONE--"], [HAVE_PYTHON=])
 AM_CONDITIONAL([HAVE_PYTHON], [test -n "$HAVE_PYTHON"])
 
 # Checks for libraries.
+PKG_CHECK_MODULES([LIBXML2], [libxml-2.0 >= 2.6.11])
+PKG_CHECK_MODULES([OPENSSL], [openssl])
+PKG_CHECK_MODULES([ZLIB], [zlib])
+
+AX_CHECK_BZLIB
+
+PKG_CHECK_MODULES([LIBLZMA], [liblzma], [AC_DEFINE([HAVE_LIBLZMA], [1], [Define
+to 1 if you have development C headers and libraries of LZMA])], [:])
 
 # Checks for header files.
 
