@@ -1,6 +1,7 @@
 #!/bin/sh
 
-PKGVER="`make -f Makefile --eval 'echo $(PACKAGE_VERSION)'`"
+PKGVER="`make -f Makefile --eval 'a:
+	@echo $(PACKAGE_VERSION)' a`"
 
 # This script preassumes that build = host.
 
