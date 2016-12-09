@@ -8,6 +8,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
 
 # Checks for programs.
+AX_PROG_DOXYGEN
 
 # Checks for libraries.
 
@@ -18,6 +19,7 @@ AM_INIT_AUTOMAKE([foreign])
 # Checks for library functions.
 
 AC_CONFIG_FILES([Makefile
+                 doc/Makefile
                  m4/Makefile])
 AC_CONFIG_SUBDIRS([xar
                    tools

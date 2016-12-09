@@ -2,7 +2,8 @@ SUBDIRS = \
           xar \
           tools \
           python \
-          XarKit
+          XarKit \
+          doc
 
 DIST_SUBDIRS = \
                $(SUBDIRS) \
