@@ -12,31 +12,31 @@ fi
 . ${srcdir}/functions
 
 cleanup() {
-	rm -rf h h1 h.xar h.toc h.out
+	rm -rf j j1 j.xar j.toc j.out
 }
 
 echo "Checking normal heap archiving"
 cleanup
-mkdir -p h h1
-cp /bin/ls h
-cp h/ls h/foo
+mkdir -p j j1
+cp /bin/ls j
+cp j/ls j/foo
 
-cd h
-create_archive ../h.xar .
+cd j
+create_archive ../j.xar .
 cd ..
-${XAR} --dump-toc=h.toc -f h.xar
-cd h1
-extract_archive ../h.xar
+${XAR} --dump-toc=j.toc -f j.xar
+cd j1
+extract_archive ../j.xar
 cd ..
-xsltproc heap1.xsl h.toc > h.out
+xsltproc ${srcdir}/heap1.xsl j.toc > j.out
 if [ $? -ne 0 ]; then
 	echo "Error processing toc"
 	cleanup
 	exit 1
 fi
 
-offset1=`head -1 h.out | awk '{print $2}'`
-offset2=`tail -1 h.out | awk '{print $2}'`
+offset1=`head -1 j.out | awk '{print $2}'`
+offset2=`tail -1 j.out | awk '{print $2}'`
 if [ $offset1 -ge $offset2 ]; then
 	echo "Offset of first file is greater than or equal to offset of the first file"
 	cleanup
@@ -46,31 +46,31 @@ cleanup
 
 
 echo "Checking --coalesce-heap heap archiving"
-mkdir -p h h1
-cp /bin/ls h
-cp h/ls h/foo
+mkdir -p j j1
+cp /bin/ls j
+cp j/ls j/foo
 
-cd h
-${XAR} --coalesce-heap -cf ../h.xar .
+cd j
+${XAR} --coalesce-heap -cf ../j.xar .
 if [ $? -ne 0 ]; then
 	echo "Error creating archive"
 	cleanup
 	exit 1
 fi
 cd ..
-${XAR} --dump-toc=h.toc -f h.xar
-cd h1
-extract_archive ../h.xar
+${XAR} --dump-toc=j.toc -f j.xar
+cd j1
+extract_archive ../j.xar
 cd ..
-xsltproc heap1.xsl h.toc > h.out
+xsltproc heap1.xsl j.toc > j.out
 if [ $? -ne 0 ]; then
 	echo "Error processing toc"
 	cleanup
 	exit 1
 fi
 
-offset1=`head -1 h.out | awk '{print $2}'`
-offset2=`tail -1 h.out | awk '{print $2}'`
+offset1=`head -1 j.out | awk '{print $2}'`
+offset2=`tail -1 j.out | awk '{print $2}'`
 if [ $offset1 -ne $offset2 ]; then
 	echo "Offset of the files differ"
 	cleanup
@@ -80,24 +80,24 @@ cleanup
 
 
 echo "Checking --link-same heap archiving"
-mkdir -p h h1
-cp /bin/ls h
-cp h/ls h/foo
+mkdir -p j j1
+cp /bin/ls j
+cp j/ls j/foo
 
-cd h
-${XAR} --link-same -cf ../h.xar .
+cd j
+${XAR} --link-same -cf ../j.xar .
 if [ $? -ne 0 ]; then
 	echo "Error creating archive"
 	cleanup
 	exit 1
 fi
 cd ..
-${XAR} --dump-toc=h.toc -f h.xar
-cd h1
-extract_archive ../h.xar
+${XAR} --dump-toc=j.toc -f j.xar
+cd j1
+extract_archive ../j.xar
 cd ..
-inode1=`ls -i h1/ls | awk '{print $1}'`
-inode2=`ls -i h1/foo | awk '{print $1}'`
+inode1=`ls -i j1/ls | awk '{print $1}'`
+inode2=`ls -i j1/foo | awk '{print $1}'`
 if [ $inode1 -ne $inode2 ]; then
 	echo "Inodes of extracted files don't match"
 	cleanup

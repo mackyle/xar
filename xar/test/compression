@@ -5,119 +5,137 @@ set -x
 . ${srcdir}/functions
 
 echo "Testing normal archival creation/extraction with default compression"
-rm -rf bin.xar bin
-${XAR} -cf bin.xar /bin
+rm -rf bin2.xar bin2
+ln -s /bin bin2
+${XAR} -cf bin2.xar bin2
+rm -f bin2
 if [ $? -ne 0 ]; then
 	echo "Error creating archive"
 	exit 1
 else
-    du -k bin.xar
+    du -k bin2.xar
 fi
 
-${XAR} -xf bin.xar
+${XAR} -xf bin2.xar
 if [ $? -ne 0 ]; then
 	echo "Error extracting archive"
 	exit 1
 fi
 
-if [ ! -e bin/sh ]; then
+if [ ! -e bin2/sh ]; then
 	echo "Error with extracted contents"
+        exit 1
 fi
 
 echo "Testing normal archival creation/extraction with gzip compression"
-rm -rf bin.xar bin
-${XAR} --compression=gzip -cf bin.xar /bin
+rm -rf bin2.xar bin2
+ln -s /bin bin2
+${XAR} --compression=gzip -cf bin2.xar bin2
+rm -f bin2
 if [ $? -ne 0 ]; then
 	echo "Error creating archive"
 	exit 1
 else
-    du -k bin.xar
+    du -k bin2.xar
 fi
 
-${XAR} -xf bin.xar
+${XAR} -xf bin2.xar
 if [ $? -ne 0 ]; then
 	echo "Error extracting archive"
 	exit 1
 fi
 
-if [ ! -e bin/sh ]; then
+if [ ! -e bin2/sh ]; then
 	echo "Error with extracted contents"
+        exit 1
 fi
 
 echo "Testing normal archival creation/extraction with bzip2 compression"
-rm -rf bin.xar bin
-${XAR} --compression=bzip2 -cf bin.xar /bin
+rm -rf bin2.xar bin2
+ln -s /bin bin2
+${XAR} --compression=bzip2 -cf bin2.xar bin2
+rm -f bin2
 if [ $? -ne 0 ]; then
 	echo "Error creating archive"
 	exit 1
 fi
 
-${XAR} -xf bin.xar
+${XAR} -xf bin2.xar
 if [ $? -ne 0 ]; then
 	echo "Error extracting archive"
 	exit 1
 else
-    du -k bin.xar
+    du -k bin2.xar
 fi
 
-if [ ! -e bin/sh ]; then
+if [ ! -e bin2/sh ]; then
 	echo "Error with extracted contents"
+        exit 1
 fi
 
 echo "Testing normal archival creation/extraction with lzma compression"
-rm -rf bin.xar bin
-${XAR} --compression=lzma -cf bin.xar /bin
+rm -rf bin2.xar bin2
+ln -s /bin bin2
+${XAR} --compression=lzma -cf bin2.xar bin2
+rm -f bin2
 if [ $? -ne 0 ]; then
 	echo "Error creating archive"
 	exit 1
 else
-    du -k bin.xar
+    du -k bin2.xar
 fi
 
-${XAR} -xf bin.xar
+${XAR} -xf bin2.xar
 if [ $? -ne 0 ]; then
 	echo "Error extracting archive"
 	exit 1
 fi
 
-if [ ! -e bin/sh ]; then
+if [ ! -e bin2/sh ]; then
 	echo "Error with extracted contents"
+        exit 1
 fi
 
 echo "Testing normal archival creation/extraction with no compression"
-rm -rf bin.xar bin
-${XAR} --compression=none -cf bin.xar /bin
+rm -rf bin2.xar bin2
+ln -s /bin bin2
+${XAR} --compression=none -cf bin2.xar bin2
+rm -f bin2
 if [ $? -ne 0 ]; then
 	echo "Error creating archive"
 	exit 1
 else
-    du -k bin.xar
+    du -k bin2.xar
 fi
 
-${XAR} -xf bin.xar
+${XAR} -xf bin2.xar
 if [ $? -ne 0 ]; then
 	echo "Error extracting archive"
 	exit 1
 fi
 
-if [ ! -e bin/sh ]; then
+if [ ! -e bin2/sh ]; then
 	echo "Error with extracted contents"
+        exit 1
 fi
-${XAR} --compression=none -cf bin.xar /bin
+rm -rf bin2.xar bin2
+ln -s /bin bin2
+${XAR} --compression=none -cf bin2.xar bin2
+rm -f bin2
 if [ $? -ne 0 ]; then
 	echo "Error creating archive"
 	exit 1
 fi
 
-${XAR} -xf bin.xar
+${XAR} -xf bin2.xar
 if [ $? -ne 0 ]; then
 	echo "Error extracting archive"
 	exit 1
 fi
 
-if [ ! -e bin/sh ]; then
+if [ ! -e bin2/sh ]; then
 	echo "Error with extracted contents"
 fi
 
-rm -rf bin.xar bin
+rm -rf bin2.xar bin2
 echo "Success testing compression types"
