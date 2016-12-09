@@ -11,10 +11,9 @@ TESTS_ENVIRONMENT = GREP=$(GREP) SED=$(SED) AWK=$(AWK) srcdir=$(abs_srcdir) \
 check_PROGRAMS = buffer validate
 buffer_SOURCES = buffer.c
 validate_SOURCES = validate.c
-buffer_LDADD = ../lib/libxar.la
-validate_LDADD = ../lib/libxar.la $(OPENSSL_LIBS)
 
-AM_CFLAGS = $(OPENSSL_CFLAGS)
+AM_CFLAGS = $(OPENSSL_CFLAGS) $(LIBXML2_CFLAGS)
+LDADD = ../lib/libxar.la $(OPENSSL_LIBS) $(LIBXML2_LIBS)
 AM_CPPFLAGS = -I../include
 
 CLEANFILES = bin.xar bin2.xar h.xar i.xar j.xar
