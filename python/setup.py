@@ -39,11 +39,11 @@ xarfile = Extension('xarfile',
 
 setup(
         name = 'pyxar', 
-        version = '0.4',
+        version = '2.0.0',
         description = 'Python bindings for XAR, the eXtensible ARchiver', 
         author = 'Will Barton',
         author_email = 'wb@willbarton.com',
-        url = 'http://code.google.com/p/xar',
+        url = 'https://github.com/KubaKaszycki/xar',
         license = 'BSD',
         ext_modules = [xarfile],
         cmdclass = {'build_ext':build_ext}

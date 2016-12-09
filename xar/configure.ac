@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([Xar-Core], [1.7.0], [xar-devel@googlegroups.com], [xar-core])
+AC_INIT([Xar-Core], [2.0.0], [xar-devel@googlegroups.com], [xar-core])
 AC_CONFIG_SRCDIR([lib/util.c])
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_AUX_DIR([../build-aux])

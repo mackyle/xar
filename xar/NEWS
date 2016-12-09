@@ -1,6 +1,13 @@
 xar Release Notes
 =================
 
+2.0.0 (2016-12-09)
+
+  * Created Exposed API, which, as its name suggests, exposes most of internal
+    types
+  * Changed API a bit, but only private part (should not have effect on well
+    written programs)
+
 1.7.0 (2016-12-08)
 
   * Reindented most source code.
