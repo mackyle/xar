@@ -47,7 +47,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <xar/xar.h>
-#include "filetree.h"
+#include <xar/filetree.h>
 
 /**
  * Minimal buffer size in Xar archive stream.

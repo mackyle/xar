@@ -68,7 +68,7 @@ struct __xar_prop_t
 };
 typedef const struct __xar_prop_t *xar_prop_t;
 
-#include "ea.h"
+#include <xar/ea.h>
 
 struct __xar_file_t
 {

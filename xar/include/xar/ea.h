@@ -7,7 +7,7 @@
 #define _XAR_EA_H_
 
 #include <xar/xar.h>
-#include "filetree.h"
+#include <xar/filetree.h>
 
 typedef struct __xar_ea_t *xar_ea_t;
 

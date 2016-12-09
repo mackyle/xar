@@ -33,7 +33,7 @@
 #define _MACHO_H_
 
 #include <xar/xar.h>
-#include "filetree.h"
+#include <xar/filetree.h>
 
 struct mach_header
 {

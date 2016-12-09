@@ -39,7 +39,7 @@
 #define _XAR_SUBDOC_H_
 
 #include <xar/xar.h>
-#include "filetree.h"
+#include <xar/filetree.h>
 
 struct __xar_subdoc_t
 {

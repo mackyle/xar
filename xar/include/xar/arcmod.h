@@ -42,7 +42,7 @@
 #ifndef _XAR_ARCMOD_H_
 #define _XAR_ARCMOD_H_
 #include <xar/xar.h>
-#include "filetree.h"
+#include <xar/filetree.h>
 
 
 typedef int32_t (*arcmod_archive) (xar_t x, xar_file_t f, const char *file,
