@@ -7,6 +7,7 @@
 #include <xar/xar.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <arpa/inet.h> // for ntoh*
 
 static int32_t
 err_callback (int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
@@ -55,7 +56,7 @@ main (int argc, char *argv[])
 
       path = xar_get_path (f);
 
-      xar_prop_get (f, "type", &type);
+      xar_prop_get ((xar_base_t) f, "type", &type);
       if (!type)
         {
           fprintf (stderr, "%s: File has no type: %s\n", argv[0], path);

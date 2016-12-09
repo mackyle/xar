@@ -136,10 +136,10 @@ xar_link_lookup (xar_t x, dev_t dev, ino_t ino, xar_file_t f)
   memset (key, 0, sizeof (key));
   snprintf (key, sizeof (key) - 1, "%08jx%08jx", (intmax_t) dev,
             (intmax_t) ino);
-  ret = xmlHashLookup (XAR (x)->ino_hash, BAD_CAST (key));
+  ret = xmlHashLookup (x->ino_hash, BAD_CAST (key));
   if (ret == NULL)
     {
-      xmlHashAddEntry (XAR (x)->ino_hash, BAD_CAST (key), XAR_FILE (f));
+      xmlHashAddEntry (x->ino_hash, BAD_CAST (key), f);
       return NULL;
     }
   return ret;
@@ -560,14 +560,14 @@ xar_stat_archive (xar_t x, xar_file_t f, const char *file, const char *buffer,
   if (len)
     {
       if (xar_check_prop (x, "type"))
-        xar_prop_set (f, "type", "file");
+        xar_prop_set ((xar_base_t) f, "type", "file");
       return 0;
     }
 
-  if (S_ISREG (XAR (x)->sbcache.st_mode) && (XAR (x)->sbcache.st_nlink > 1))
+  if (S_ISREG (x->sbcache.st_mode) && (x->sbcache.st_nlink > 1))
     {
       xar_file_t tmpf;
-      const char *id = xar_attr_get (f, NULL, "id");
+      const char *id = xar_attr_get ((xar_base_t) f, NULL, "id");
       if (!id)
         {
           xar_err_new (x);
@@ -578,47 +578,47 @@ xar_stat_archive (xar_t x, xar_file_t f, const char *file, const char *buffer,
           return -1;
         }
       tmpf =
-        xar_link_lookup (x, XAR (x)->sbcache.st_dev, XAR (x)->sbcache.st_ino,
+        xar_link_lookup (x, x->sbcache.st_dev, x->sbcache.st_ino,
                          f);
       if (xar_check_prop (x, "type"))
         {
-          xar_prop_set (f, "type", "hardlink");
+          xar_prop_set ((xar_base_t) f, "type", "hardlink");
           if (tmpf)
             {
               const char *id;
-              id = xar_attr_get (tmpf, NULL, "id");
-              xar_attr_set (f, "type", "link", id);
+              id = xar_attr_get ((xar_base_t) tmpf, NULL, "id");
+              xar_attr_set ((xar_base_t) f, "type", "link", id);
             }
           else
             {
-              xar_attr_set (f, "type", "link", "original");
+              xar_attr_set ((xar_base_t) f, "type", "link", "original");
             }
         }
     }
   else
     {
-      type = filetype_name (XAR (x)->sbcache.st_mode & S_IFMT);
+      type = filetype_name (x->sbcache.st_mode & S_IFMT);
       if (xar_check_prop (x, "type"))
-        xar_prop_set (f, "type", type);
+        xar_prop_set ((xar_base_t) f, "type", type);
     }
 
   /* Record major/minor device node numbers */
   if (xar_check_prop (x, "device")
-      && (S_ISBLK (XAR (x)->sbcache.st_mode)
-          || S_ISCHR (XAR (x)->sbcache.st_mode)))
+      && (S_ISBLK (x->sbcache.st_mode)
+          || S_ISCHR (x->sbcache.st_mode)))
     {
       uint32_t major, minor;
       char tmpstr[12];
-      xar_devmake (XAR (x)->sbcache.st_rdev, &major, &minor);
+      xar_devmake (x->sbcache.st_rdev, &major, &minor);
       memset (tmpstr, 0, sizeof (tmpstr));
       snprintf (tmpstr, sizeof (tmpstr) - 1, "%u", major);
-      xar_prop_set (f, "device/major", tmpstr);
+      xar_prop_set ((xar_base_t) f, "device/major", tmpstr);
       memset (tmpstr, 0, sizeof (tmpstr));
       snprintf (tmpstr, sizeof (tmpstr) - 1, "%u", minor);
-      xar_prop_set (f, "device/minor", tmpstr);
+      xar_prop_set ((xar_base_t) f, "device/minor", tmpstr);
     }
 
-  if (S_ISLNK (XAR (x)->sbcache.st_mode))
+  if (S_ISLNK (x->sbcache.st_mode))
     {
       char link[4096];
       struct stat lsb;
@@ -626,100 +626,100 @@ xar_stat_archive (xar_t x, xar_file_t f, const char *file, const char *buffer,
       memset (link, 0, sizeof (link));
       if (readlink (file, link, sizeof (link) - 1) == -1)
         return -1;
-      xar_prop_set (f, "link", link);
+      xar_prop_set ((xar_base_t) f, "link", link);
       if (stat (file, &lsb) != 0)
         {
-          xar_attr_set (f, "link", "type", "broken");
+          xar_attr_set ((xar_base_t) f, "link", "type", "broken");
         }
       else
         {
           type = filetype_name (lsb.st_mode & S_IFMT);
-          xar_attr_set (f, "link", "type", type);
+          xar_attr_set ((xar_base_t) f, "link", "type", type);
         }
     }
 
   if (xar_check_prop (x, "inode"))
     {
-      if (asprintf (&tmpstr, "%jd", (intmax_t) XAR (x)->sbcache.st_ino) == -1)
+      if (asprintf (&tmpstr, "%jd", (intmax_t) x->sbcache.st_ino) == -1)
         return -1;
-      xar_prop_set (f, "inode", tmpstr);
+      xar_prop_set ((xar_base_t) f, "inode", tmpstr);
       free (tmpstr);
     }
 
   if (xar_check_prop (x, "deviceno"))
     {
-      if (asprintf (&tmpstr, "%jd", (intmax_t) XAR (x)->sbcache.st_dev) == -1)
+      if (asprintf (&tmpstr, "%jd", (intmax_t) x->sbcache.st_dev) == -1)
         return -1;
-      xar_prop_set (f, "deviceno", tmpstr);
+      xar_prop_set ((xar_base_t) f, "deviceno", tmpstr);
       free (tmpstr);
     }
 
   if (xar_check_prop (x, "mode"))
     {
-      if (asprintf (&tmpstr, "%04o", XAR (x)->sbcache.st_mode & (~S_IFMT)) ==
+      if (asprintf (&tmpstr, "%04o", x->sbcache.st_mode & (~S_IFMT)) ==
           -1)
         return -1;
-      xar_prop_set (f, "mode", tmpstr);
+      xar_prop_set ((xar_base_t) f, "mode", tmpstr);
       free (tmpstr);
     }
 
   if (xar_check_prop (x, "uid"))
     {
-      if (asprintf (&tmpstr, "%" PRIu64, (uint64_t) XAR (x)->sbcache.st_uid)
+      if (asprintf (&tmpstr, "%" PRIu64, (uint64_t) x->sbcache.st_uid)
           == -1)
         return -1;
-      xar_prop_set (f, "uid", tmpstr);
+      xar_prop_set ((xar_base_t) f, "uid", tmpstr);
       free (tmpstr);
     }
 
   if (xar_check_prop (x, "user"))
     {
-      pw = getpwuid (XAR (x)->sbcache.st_uid);
+      pw = getpwuid (x->sbcache.st_uid);
       if (pw)
-        xar_prop_set (f, "user", pw->pw_name);
+        xar_prop_set ((xar_base_t) f, "user", pw->pw_name);
     }
 
   if (xar_check_prop (x, "gid"))
     {
-      if (asprintf (&tmpstr, "%" PRIu64, (uint64_t) XAR (x)->sbcache.st_gid)
+      if (asprintf (&tmpstr, "%" PRIu64, (uint64_t) x->sbcache.st_gid)
           == -1)
         return -1;
-      xar_prop_set (f, "gid", tmpstr);
+      xar_prop_set ((xar_base_t) f, "gid", tmpstr);
       free (tmpstr);
     }
 
   if (xar_check_prop (x, "group"))
     {
-      gr = getgrgid (XAR (x)->sbcache.st_gid);
+      gr = getgrgid (x->sbcache.st_gid);
       if (gr)
-        xar_prop_set (f, "group", gr->gr_name);
+        xar_prop_set ((xar_base_t) f, "group", gr->gr_name);
     }
 
   if (xar_check_prop (x, "atime"))
     {
-      gmtime_r (&XAR (x)->sbcache.st_atime, &t);
+      gmtime_r (&x->sbcache.st_atime, &t);
       memset (time, 0, sizeof (time));
       strftime (time, sizeof (time), "%Y-%m-%dT%H:%M:%SZ", &t);
-      xar_prop_set (f, "atime", time);
+      xar_prop_set ((xar_base_t) f, "atime", time);
     }
 
   if (xar_check_prop (x, "mtime"))
     {
-      gmtime_r (&XAR (x)->sbcache.st_mtime, &t);
+      gmtime_r (&x->sbcache.st_mtime, &t);
       memset (time, 0, sizeof (time));
       strftime (time, sizeof (time), "%Y-%m-%dT%H:%M:%SZ", &t);
-      xar_prop_set (f, "mtime", time);
+      xar_prop_set ((xar_base_t) f, "mtime", time);
     }
 
   if (xar_check_prop (x, "ctime"))
     {
-      gmtime_r (&XAR (x)->sbcache.st_ctime, &t);
+      gmtime_r (&x->sbcache.st_ctime, &t);
       memset (time, 0, sizeof (time));
       strftime (time, sizeof (time), "%Y-%m-%dT%H:%M:%SZ", &t);
-      xar_prop_set (f, "ctime", time);
+      xar_prop_set ((xar_base_t) f, "ctime", time);
     }
 
-  flags_archive (x, f, &(XAR (x)->sbcache));
+  flags_archive (x, f, &(x->sbcache));
 
   aacls (x, f, file);
 
@@ -756,7 +756,7 @@ xar_set_perm (xar_t x, xar_file_t f, const char *file, char *buffer,
       struct passwd *pw;
       struct group *gr;
 
-      xar_prop_get (f, "user", &opt);
+      xar_prop_get ((xar_base_t) f, "user", &opt);
       if (opt)
         {
           pw = getpwnam (opt);
@@ -765,7 +765,7 @@ xar_set_perm (xar_t x, xar_file_t f, const char *file, char *buffer,
               u = pw->pw_uid;
             }
         }
-      xar_prop_get (f, "group", &opt);
+      xar_prop_get ((xar_base_t) f, "group", &opt);
       if (opt)
         {
           gr = getgrnam (opt);
@@ -778,7 +778,7 @@ xar_set_perm (xar_t x, xar_file_t f, const char *file, char *buffer,
     }
   if (opt && (strcmp (opt, XAR_OPT_VAL_NUMERIC) == 0))
     {
-      xar_prop_get (f, "uid", &opt);
+      xar_prop_get ((xar_base_t) f, "uid", &opt);
       if (opt)
         {
           long long tmp;
@@ -790,7 +790,7 @@ xar_set_perm (xar_t x, xar_file_t f, const char *file, char *buffer,
           u = (uid_t) tmp;
         }
 
-      xar_prop_get (f, "gid", &opt);
+      xar_prop_get ((xar_base_t) f, "gid", &opt);
       if (opt)
         {
           long long tmp;
@@ -810,7 +810,7 @@ xar_set_perm (xar_t x, xar_file_t f, const char *file, char *buffer,
       savesuid = 1;
     }
 
-  xar_prop_get (f, "mode", &opt);
+  xar_prop_get ((xar_base_t) f, "mode", &opt);
   if (opt)
     {
       long long tmp;
@@ -828,7 +828,7 @@ xar_set_perm (xar_t x, xar_file_t f, const char *file, char *buffer,
       mset = 1;
     }
 
-  xar_prop_get (f, "type", &opt);
+  xar_prop_get ((xar_base_t) f, "type", &opt);
   if (opt && !mset)
     {
       mode_t u = umask (0);
@@ -896,7 +896,7 @@ xar_set_perm (xar_t x, xar_file_t f, const char *file, char *buffer,
   eacls (x, f, file);
 
   memset (tv, 0, sizeof (struct timeval) * 2);
-  xar_prop_get (f, "atime", &timestr);
+  xar_prop_get ((xar_base_t) f, "atime", &timestr);
   if (timestr)
     {
       memset (&t, 0, sizeof (t));
@@ -908,7 +908,7 @@ xar_set_perm (xar_t x, xar_file_t f, const char *file, char *buffer,
       tv[ATIME].tv_sec = time (NULL);
     }
 
-  xar_prop_get (f, "mtime", &timestr);
+  xar_prop_get ((xar_base_t) f, "mtime", &timestr);
   if (timestr)
     {
       memset (&t, 0, sizeof (t));
@@ -937,7 +937,7 @@ xar_stat_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
   if (len)
     return 0;
 
-  xar_prop_get (f, "type", &opt);
+  xar_prop_get ((xar_base_t) f, "type", &opt);
   if (opt && (strcmp (opt, "character special") == 0))
     modet = S_IFCHR;
   if (opt && (strcmp (opt, "block special") == 0))
@@ -949,7 +949,7 @@ xar_stat_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
       long long tmpll;
       dev_t devt;
 
-      xar_prop_get (f, "device/major", &opt);
+      xar_prop_get ((xar_base_t) f, "device/major", &opt);
       tmpll = strtoll (opt, NULL, 10);
       if (((tmpll == LLONG_MIN) || (tmpll == LLONG_MAX)) && (errno == ERANGE))
         return -1;
@@ -957,7 +957,7 @@ xar_stat_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
         return -1;
       major = (uint32_t) tmpll;
 
-      xar_prop_get (f, "device/minor", &opt);
+      xar_prop_get ((xar_base_t) f, "device/minor", &opt);
       tmpll = strtoll (opt, NULL, 10);
       if (((tmpll == LLONG_MIN) || (tmpll == LLONG_MAX)) && (errno == ERANGE))
         return -1;
@@ -994,7 +994,7 @@ xar_stat_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
     }
   if (opt && (strcmp (opt, "symlink") == 0))
     {
-      xar_prop_get (f, "link", &opt);
+      xar_prop_get ((xar_base_t) f, "link", &opt);
       if (opt)
         {
           unlink (file);
@@ -1013,13 +1013,13 @@ xar_stat_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
   if (opt && (strcmp (opt, "hardlink") == 0))
     {
       xar_file_t tmpf;
-      opt = xar_attr_get (f, "type", "link");
+      opt = xar_attr_get ((xar_base_t) f, "type", "link");
       if (!opt)
         return 0;
       if (strcmp (opt, "original") == 0)
         goto CREATEFILE;
 
-      tmpf = xmlHashLookup (XAR (x)->link_hash, BAD_CAST (opt));
+      tmpf = xmlHashLookup (x->link_hash, BAD_CAST (opt));
       if (!tmpf)
         {
           xar_err_new (x);
@@ -1032,7 +1032,7 @@ xar_stat_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
         }
 
       unlink (file);
-      if (link (XAR_FILE (tmpf)->fspath, file) != 0)
+      if (link (tmpf->fspath, file) != 0)
         {
           if (errno == ENOENT)
             {
@@ -1048,21 +1048,21 @@ xar_stat_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
                   if (strncmp ("data", ptr, 4) != 0)
                     continue;
 
-                  if (xar_prop_get (tmpf, ptr, &val))
+                  if (xar_prop_get ((xar_base_t) tmpf, ptr, &val))
                     continue;
 
-                  xar_prop_set (f, ptr, val);
+                  xar_prop_set ((xar_base_t) f, ptr, val);
                   a = xar_iter_new ();
-                  for (akey = xar_attr_first (tmpf, ptr, a); akey;
+                  for (akey = xar_attr_first ((xar_base_t) tmpf, ptr, a); akey;
                        akey = xar_attr_next (a))
                     {
-                      aval = xar_attr_get (tmpf, ptr, akey);
-                      xar_attr_set (f, ptr, akey, aval);
+                      aval = xar_attr_get ((xar_base_t) tmpf, ptr, akey);
+                      xar_attr_set ((xar_base_t) f, ptr, akey, aval);
                     }
                   xar_iter_free (a);
                 }
               xar_iter_free (i);
-              xar_attr_set (f, "type", "link", "original");
+              xar_attr_set ((xar_base_t) f, "type", "link", "original");
               return 0;
             }
           else

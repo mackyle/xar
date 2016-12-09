@@ -532,7 +532,7 @@ xar_underbar_check (xar_t x, xar_file_t f, const char *file, void *context)
       if (stat (tmp2, &sb))
         {
           xar_file_t tmpf;
-          tmpf = xar_file_find (XAR (x)->files, nupath);
+          tmpf = xar_file_find (x->files, nupath);
           if (!tmpf)
             {
               tmpf = xar_add (x, nupath);

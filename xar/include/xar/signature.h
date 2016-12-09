@@ -44,28 +44,6 @@
 
 #include <xar/xar.h>
 
-struct __xar_x509cert_t
-{
-  uint8_t *content;
-  int32_t len;
-  struct __xar_x509cert_t *next;
-};
-
-struct __xar_signature_t
-{
-  char *type;
-  int32_t len;
-  off_t offset;
-  int32_t x509cert_count;
-  struct __xar_x509cert_t *x509certs;
-  struct __xar_signature_t *next;
-  xar_signer_callback signer_callback;  /* callback for signing */
-  void *callback_context;       /* context for callback */
-  xar_t x;
-};
-
-#define XAR_SIGNATURE(x) ((struct __xar_signature_t *)(x))
-
 int32_t xar_signature_serialize (xar_signature_t sig,
                                  xmlTextWriterPtr writer);
 xar_signature_t xar_signature_unserialize (xar_t x, xmlTextReaderPtr reader);

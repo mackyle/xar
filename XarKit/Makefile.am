@@ -6,9 +6,11 @@ libXarKit_la_SOURCES = \
                        XarFile.m
 
 libXarKit_la_LIBADD = \
-                      ../xar/lib/libxar.la
-
-AM_LDFLAGS = "$(shell $(GNUSTEP_CONFIG) --base-libs)"
+                      ../xar/lib/libxar.la \
+                      $(ZLIB_LIBS) \
+                      $(LIBLZMA_LIBS) \
+                      $(OPENSSL_LIBS) \
+                      -lbz2
 
 xincludedir = $(includedir)/XarKit
 xinclude_HEADERS = \
@@ -41,9 +43,6 @@ all-am: XarKit.framework
 mostlyclean-local: mostlyclean-hook
 	@:
 
-AM_CPPFLAGS = \
-              -I../xar/include \
-              -I$(srcdir)/../xar/include
 AM_OBJCFLAGS = $(shell $(GNUSTEP_CONFIG) --objc-flags)
 
 EXTRA_DIST = Info.plist
@@ -52,3 +51,16 @@ SHREXT = $(shell $(LIBTOOL) --config > __temp && . __temp && rm -f __temp && ech
 endif
 
 ACLOCAL_AMFLAGS = -I ../m4
+
+AM_LDFLAGS = \
+             -L$(BZLIB_HOME)/lib \
+             "$(shell $(GNUSTEP_CONFIG) --base-libs)"
+
+AM_CPPFLAGS = \
+              $(LIBXML2_CFLAGS) \
+              -I../xar/include \
+              -I$(srcdir)/../xar.include \
+              $(ZLIB_CFLAGS) \
+              $(LIBLZMA_CFLAGS) \
+              -I$(BZLIB_HOME)/include \
+              $(OPENSSL_CFLAGS)

@@ -175,14 +175,14 @@ xar_data_archive (xar_t x, xar_file_t f, const char *file, const char *buffer,
   if (!xar_check_prop (x, "data"))
     return 0;
 
-  xar_prop_get (f, "type", &opt);
+  xar_prop_get ((xar_base_t) f, "type", &opt);
   if (!opt)
     return 0;
   if (strcmp (opt, "file") != 0)
     {
       if (strcmp (opt, "hardlink") == 0)
         {
-          opt = xar_attr_get (f, "type", "link");
+          opt = xar_attr_get ((xar_base_t) f, "type", "link");
           if (!opt)
             return 0;
           if (strcmp (opt, "original") != 0)
@@ -217,11 +217,11 @@ xar_data_archive (xar_t x, xar_file_t f, const char *file, const char *buffer,
   fcntl (context.fd, F_NOCACHE, 1);
 #endif
 
-  tmpp = xar_prop_pset (f, NULL, "data", NULL);
+  tmpp = xar_prop_pset ((xar_base_t) f, NULL, "data", NULL);
   retval =
     xar_attrcopy_to_heap (x, f, tmpp, xar_data_read, (void *) (&context));
   if (context.total == 0)
-    xar_prop_unset (f, "data");
+    xar_prop_unset ((xar_base_t) f, "data");
 
   if (context.fd > 0)
     {
@@ -244,14 +244,14 @@ xar_data_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
   memset (&context, 0, sizeof (struct _data_context));
 
   /* Only regular files are copied in and out of the heap here */
-  xar_prop_get (f, "type", &opt);
+  xar_prop_get ((xar_base_t) f, "type", &opt);
   if (!opt)
     return 0;
   if (strcmp (opt, "file") != 0)
     {
       if (strcmp (opt, "hardlink") == 0)
         {
-          opt = xar_attr_get (f, "type", "link");
+          opt = xar_attr_get ((xar_base_t) f, "type", "link");
           if (!opt)
             return 0;
           if (strcmp (opt, "original") != 0)
@@ -316,7 +316,7 @@ xar_data_verify (xar_t x, xar_file_t f)
   memset (&context, 0, sizeof (struct _data_context));
 
   /* Only regular files are copied in and out of the heap here */
-  xar_prop_get (f, "type", &opt);
+  xar_prop_get ((xar_base_t) f, "type", &opt);
   if (!opt)
     return 0;
   if (strcmp (opt, "directory") == 0)

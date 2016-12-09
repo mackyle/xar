@@ -6,6 +6,7 @@
 #include <xar/xar.h>
 #include <xar/util.h>
 #include <zlib.h>
+#include <arpa/inet.h> // for ntoh*
 
 #define BUFFER_SIZE 8192
 

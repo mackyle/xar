@@ -141,7 +141,7 @@ macho_parse (xar_file_t f, void *in, size_t inlen,
               context->byteswapped = 0;
               context->curarch = 0;
               consumed = 8;
-              xar_prop_set (f, "contents/type", "Mach-O Fat File");
+              xar_prop_set ((xar_base_t) f, "contents/type", "Mach-O Fat File");
             }
           else if (fh->magic == 0xbebafeca)
             {
@@ -158,7 +158,7 @@ macho_parse (xar_file_t f, void *in, size_t inlen,
               context->byteswapped = 1;
               context->curarch = 0;
               consumed = 8;
-              xar_prop_set (f, "contents/type", "Mach-O Fat File");
+              xar_prop_set ((xar_base_t) f, "contents/type", "Mach-O Fat File");
             }
           else
             {
@@ -323,13 +323,13 @@ macho_parse (xar_file_t f, void *in, size_t inlen,
                 };
 
               if (xar_prop_get
-                  (f, "contents/type", (const char **) &typestr2))
+                  ((xar_base_t) f, "contents/type", (const char **) &typestr2))
                 {
-                  xar_prop_set (f, "contents/type", typestr);
+                  xar_prop_set ((xar_base_t) f, "contents/type", typestr);
                 }
               if (asprintf (&typestr2, "contents/%s/type", cpustr) != -1)
                 {
-                  xar_prop_set (f, typestr2, typestr);
+                  xar_prop_set ((xar_base_t) f, typestr2, typestr);
                   free (typestr2);
                 }
               context->me[context->curme].lc =
@@ -457,7 +457,7 @@ macho_parse (xar_file_t f, void *in, size_t inlen,
               tmpstr = macho_cpustr (context->me[context->curme].mh.cputype);
               if (asprintf (&propstr, "contents/%s/library", tmpstr) != -1)
                 {
-                  xar_prop_create (f, propstr, lib);
+                  xar_prop_create ((xar_base_t) f, propstr, lib);
                   free (propstr);
                 }
               free (lib);

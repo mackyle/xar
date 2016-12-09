@@ -43,14 +43,6 @@
 #include <xar/b64.h>
 #include <xar/ea.h>
 
-struct __xar_ea_t
-{
-  const struct __xar_prop_t *prop;
-  const struct __xar_ea_t *next;
-};
-
-#define XAR_EA(x) ((struct __xar_ea_t *)(x))
-
 xar_ea_t
 xar_ea_new (xar_file_t f, const char *name)
 {
@@ -58,33 +50,33 @@ xar_ea_new (xar_file_t f, const char *name)
   char *newidvalue;
   int err;
 
-  err = asprintf (&newidvalue, "%" PRIu64, XAR_FILE (f)->nexteaid);
+  err = asprintf (&newidvalue, "%" PRIu64, f->nexteaid);
   if (err == -1)
     return NULL;
 
-  ret = calloc (sizeof (struct __xar_ea_t), 1);
+  ret = calloc (sizeof (xar_ea), 1);
   if (!ret)
     {
       free (newidvalue);
       return NULL;
     }
 
-  XAR_EA (ret)->prop = xar_prop_new (f, NULL);
-  if (!XAR_EA (ret)->prop)
+  ret->prop = xar_prop_new ((xar_base_t) f, NULL);
+  if (!ret->prop)
     {
       free (newidvalue);
       free (ret);
       return NULL;
     }
 
-  XAR_FILE (f)->nexteaid++;
-  xar_prop_setkey (XAR_EA (ret)->prop, "ea");
-  xar_prop_setvalue (XAR_EA (ret)->prop, NULL);
-  XAR_PROP (XAR_EA (ret)->prop)->attrs = xar_attr_new ();
-  XAR_ATTR (XAR_PROP (XAR_EA (ret)->prop)->attrs)->key = strdup ("id");
-  XAR_ATTR (XAR_PROP (XAR_EA (ret)->prop)->attrs)->value = newidvalue;
+  f->nexteaid++;
+  xar_prop_setkey (ret->prop, "ea");
+  xar_prop_setvalue (ret->prop, NULL);
+  ret->prop->attrs = xar_attr_new ();
+  ret->prop->attrs->key = strdup ("id");
+  ret->prop->attrs->value = newidvalue;
 
-  xar_prop_pset (f, XAR_EA (ret)->prop, "name", name);
+  xar_prop_pset ((xar_base_t) f, ret->prop, "name", name);
 
   return ret;
 }
@@ -92,7 +84,7 @@ xar_ea_new (xar_file_t f, const char *name)
 int32_t
 xar_ea_pset (xar_file_t f, xar_ea_t e, const char *key, const char *value)
 {
-  if (xar_prop_pset (f, XAR_EA (e)->prop, key, value))
+  if (xar_prop_pset ((xar_base_t) f, e->prop, key, value))
     return 0;
   return -1;
 }
@@ -100,7 +92,7 @@ xar_ea_pset (xar_file_t f, xar_ea_t e, const char *key, const char *value)
 int32_t
 xar_ea_pget (xar_ea_t e, const char *key, const char **value)
 {
-  xar_prop_t r = xar_prop_find (XAR_EA (e)->prop, key);
+  xar_prop_t r = xar_prop_find (e->prop, key);
   if (!r)
     {
       if (value)
@@ -109,7 +101,7 @@ xar_ea_pget (xar_ea_t e, const char *key, const char **value)
     }
 
   if (value)
-    *value = XAR_PROP (r)->value;
+    *value = r->value;
 
   return 0;
 }
@@ -117,7 +109,7 @@ xar_ea_pget (xar_ea_t e, const char *key, const char **value)
 xar_prop_t
 xar_ea_root (xar_ea_t e)
 {
-  return XAR_EA (e)->prop;
+  return e->prop;
 }
 
 xar_prop_t

@@ -44,6 +44,9 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <sys/stat.h>
+#include <zlib.h>
+#include <libxml/hash.h>
+#include <openssl/evp.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -87,11 +90,89 @@ extern "C"
 #define XAR_CKSUM_MD5    2
 #define XAR_CKSUM_OTHER  3      /* Must not be used for "none", should not be used for "sha1" or "md5" */
 
-  typedef const struct __xar_file_t *xar_file_t;
-  typedef const struct __xar_iter_t *xar_iter_t;
-  typedef const struct __xar_t *xar_t;
-  typedef const struct __xar_subdoc_t *xar_subdoc_t;
-  typedef const struct __xar_signature_t *xar_signature_t;
+  typedef struct __xar_iter_t *xar_iter_t;
+  typedef struct __xar_t *xar_t;
+
+  typedef struct xar_signature *xar_signature_t;
+  typedef struct xar_x509cert *xar_x509cert_t;
+  typedef struct xar_base *xar_base_t;
+  typedef struct xar_file *xar_file_t;
+  typedef struct xar_attr *xar_attr_t;
+  typedef struct xar_prop *xar_prop_t;
+  typedef struct xar_subdoc *xar_subdoc_t;
+  typedef struct xar_ea *xar_ea_t;
+
+  typedef struct xar_base
+  {
+    xar_prop_t props;
+    xar_attr_t attrs;
+    const char *prefix;
+    const char *ns;
+  } xar_base;
+
+  typedef struct xar_attr
+  {
+    char *key;
+    char *value;
+    char *ns;
+    xar_attr_t next;
+  } xar_attr;
+
+  typedef struct xar_prop
+  {
+    const char *key;
+    const char *value;
+    xar_prop_t parent;
+    xar_prop_t children;
+    xar_prop_t next;
+    xar_attr_t attrs;
+    xar_file_t file;
+    const char *prefix;
+    const char *ns;
+  } xar_prop;
+
+  typedef struct xar_subdoc
+  {
+    xar_prop_t props;
+    xar_attr_t attrs;
+    const char *prefix;
+    const char *ns;
+    const char *blank1;           /* filler for xar_file_t compatibility */
+    const char *blank2;           /* filler for xar_file_t compatibility */
+    char blank3;            /* filler for xar_file_t compatibility */
+    const char *name;
+    xar_subdoc_t next;
+    const char *value;            /* a subdoc should very rarely have a value */
+    xar_t x;
+  } xar_subdoc;
+
+  typedef struct xar_ea
+  {
+    xar_prop_t prop;
+    xar_ea_t next;
+  } xar_ea;
+
+  typedef struct xar_file
+  {
+    xar_prop_t props;
+    xar_attr_t attrs;
+    const char *prefix;
+    const char *ns;
+    const char *fspath;
+    char parent_extracted;
+    xar_file_t parent;
+    xar_file_t children;
+    xar_file_t next;
+    xar_ea_t eas;
+    uint64_t nexteaid;
+  } xar_file;
+
+  typedef struct xar_x509cert
+  {
+    uint8_t *content;
+    int32_t len;
+    xar_x509cert_t next;
+  } xar_x509cert;
 
   /**
    * Information about where an error occured.
@@ -146,6 +227,59 @@ extern "C"
                                           uint8_t * data, uint32_t length,
                                           uint8_t ** signed_data,
                                           uint32_t * signed_len);
+
+  typedef struct xar_signature
+  {
+    char *type;
+    int32_t len;
+    off_t offset;
+    int32_t x509cert_count;
+    xar_x509cert_t x509certs;
+    xar_signature_t next;
+    xar_signer_callback signer_callback;  /* callback for signing */
+    void *callback_context;       /* context for callback */
+    xar_t x;
+  } xar_signature;
+
+  struct __xar_t
+  {
+    xar_prop_t props;
+    xar_attr_t attrs;             /* archive options, such as rsize */
+    const char *prefix;
+    const char *ns;
+    const char *filler1;
+    const char *filler2;
+    xar_file_t files;             /* file forest */
+    const char *filename;         /* name of the archive we are operating on */
+    char *dirname;                /* directory of the archive, used in creation */
+    int fd;                       /* open file descriptor for the archive */
+    int heap_fd;                  /* fd for tmp heap archive, used in creation */
+    off_t heap_offset;            /* current offset within the heap */
+    off_t heap_len;               /* current length of the heap */
+    xar_header_ex_t header;       /* header of the xar archive */
+    void *readbuf;                /* buffer for reading/writing compressed toc */
+    size_t readbuf_len;           /* length of readbuf */
+    size_t offset;                /* offset into readbuf for keeping track
+                                   * between callbacks. */
+    size_t toc_count;             /* current bytes read of the toc */
+    z_stream zs;                  /* gz state for compressing/decompressing toc */
+    char *path_prefix;            /* used for distinguishing absolute paths */
+    err_handler ercallback;       /* callback for errors/warnings */
+    xar_errctx errctx;            /* error callback context */
+    xar_subdoc_t subdocs;         /* linked list of subdocs */
+    xar_signature_t signatures;   /* linked list of signatures */
+    uint64_t last_fileid;         /* unique fileid's in the archive */
+    xmlHashTablePtr ino_hash;     /* Hash for looking up hardlinked files (add) */
+    xmlHashTablePtr link_hash;    /* Hash for looking up hardlinked files (extract) */
+    xmlHashTablePtr csum_hash;    /* Hash for looking up checksums of files */
+    EVP_MD_CTX *toc_ctx;
+    int docksum;
+    int skipwarn;
+    int stripcomps;
+    int tostdout;
+    int rfcformat;
+    struct stat sbcache;
+  };
 
 #define READ 0
 #define WRITE 1
@@ -250,9 +384,9 @@ extern "C"
   int32_t xar_opt_set (xar_t x, const char *option, const char *value);
   int32_t xar_opt_unset (xar_t x, const char *option);
 
-  int32_t xar_prop_set (xar_file_t f, const char *key, const char *value);
-  int32_t xar_prop_create (xar_file_t f, const char *key, const char *value);
-  int32_t xar_prop_get (xar_file_t f, const char *key, const char **value);
+  int32_t xar_prop_set (xar_base_t f, const char *key, const char *value);
+  int32_t xar_prop_create (xar_base_t f, const char *key, const char *value);
+  int32_t xar_prop_get (const xar_base_t f, const char *key, const char **value);
 
   xar_iter_t xar_iter_new (void);
   void xar_iter_free (xar_iter_t i);
@@ -260,14 +394,14 @@ extern "C"
   const char *xar_prop_first (xar_file_t f, xar_iter_t i);
   const char *xar_prop_next (xar_iter_t i);
 
-  void xar_prop_unset (xar_file_t f, const char *key);
+  void xar_prop_unset (xar_base_t f, const char *key);
   xar_file_t xar_file_first (xar_t x, xar_iter_t i);
   xar_file_t xar_file_next (xar_iter_t i);
 
-  const char *xar_attr_get (xar_file_t f, const char *prop, const char *key);
-  int32_t xar_attr_set (xar_file_t f, const char *prop, const char *key,
+  const char *xar_attr_get (const xar_base_t f, const char *prop, const char *key);
+  int32_t xar_attr_set (xar_base_t f, const char *prop, const char *key,
                         const char *value);
-  const char *xar_attr_first (xar_file_t f, const char *prop, xar_iter_t i);
+  const char *xar_attr_first (xar_base_t f, const char *prop, xar_iter_t i);
   const char *xar_attr_next (xar_iter_t i);
 
   xar_subdoc_t xar_subdoc_new (xar_t x, const char *name);

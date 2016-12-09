@@ -97,13 +97,13 @@ xar_get_path (xar_file_t f)
   const char *name;
   xar_file_t i;
 
-  xar_prop_get (f, "name", &name);
+  xar_prop_get ((xar_base_t) f, "name", &name);
   ret = strdup (name);
-  for (i = XAR_FILE (f)->parent; i; i = XAR_FILE (i)->parent)
+  for (i = f->parent; i; i = i->parent)
     {
       int err;
       const char *name;
-      xar_prop_get (i, "name", &name);
+      xar_prop_get ((xar_base_t) i, "name", &name);
       tmp = ret;
       err = asprintf (&ret, "%s/%s", name, tmp);
       free (tmp);
@@ -115,7 +115,7 @@ xar_get_path (xar_file_t f)
 uint64_t
 xar_get_heap_offset (xar_t x)
 {
-  return (uint64_t) XAR (x)->toc_count + XAR (x)->header.size;
+  return (uint64_t) x->toc_count + x->header.size;
 }
 
 /* xar_read_fd
@@ -198,7 +198,7 @@ xar_get_type (xar_t x, xar_file_t f)
 {
   const char *type = NULL;
   (void) x;
-  xar_prop_get (f, "type", &type);
+  xar_prop_get ((xar_base_t) f, "type", &type);
   if (type == NULL)
     type = "unknown";
   return strdup (type);
@@ -210,13 +210,13 @@ xar_get_size (xar_t x, xar_file_t f)
   const char *size = NULL;
   const char *type = NULL;
 
-  xar_prop_get (f, "type", &type);
+  xar_prop_get ((xar_base_t) f, "type", &type);
   if (type != NULL)
     {
       if (strcmp (type, "hardlink") == 0)
         {
           const char *link = NULL;
-          link = xar_attr_get (f, "type", "link");
+          link = xar_attr_get ((xar_base_t) f, "type", "link");
           if (link)
             {
               if (strcmp (link, "original") != 0)
@@ -230,7 +230,7 @@ xar_get_size (xar_t x, xar_file_t f)
                            tmpf = xar_file_next (i))
                         {
                           const char *id;
-                          id = xar_attr_get (tmpf, NULL, "id");
+                          id = xar_attr_get ((xar_base_t) tmpf, NULL, "id");
                           if (!id)
                             continue;
                           if (strcmp (id, link) == 0)
@@ -245,7 +245,7 @@ xar_get_size (xar_t x, xar_file_t f)
             }
         }
     }
-  xar_prop_get (f, "data/size", &size);
+  xar_prop_get ((xar_base_t) f, "data/size", &size);
   if (size == NULL)
     size = "0";
   return strdup (size);
@@ -262,7 +262,7 @@ xar_get_mode (xar_t x, xar_file_t f)
   int gottype = 0;
 
   (void) x;
-  xar_prop_get (f, "mode", &mode);
+  xar_prop_get ((xar_base_t) f, "mode", &mode);
   if (mode)
     {
       long long strmode;
@@ -275,7 +275,7 @@ xar_get_mode (xar_t x, xar_file_t f)
         }
     }
 
-  xar_prop_get (f, "type", &type);
+  xar_prop_get ((xar_base_t) f, "type", &type);
   if (type)
     {
       if (strcmp (type, "file") == 0)
@@ -319,7 +319,7 @@ xar_get_owner (xar_t x, xar_file_t f)
   const char *user = NULL;
 
   (void) x;
-  xar_prop_get (f, "user", &user);
+  xar_prop_get ((xar_base_t) f, "user", &user);
   if (!user)
     return strdup ("unknown");
   return strdup (user);
@@ -331,7 +331,7 @@ xar_get_group (xar_t x, xar_file_t f)
   const char *group = NULL;
 
   (void) x;
-  xar_prop_get (f, "group", &group);
+  xar_prop_get ((xar_base_t) f, "group", &group);
   if (!group)
     return strdup ("unknown");
   return strdup (group);
@@ -345,7 +345,7 @@ xar_get_mtime (xar_t x, xar_file_t f)
   struct tm tm;
 
   (void) x;
-  xar_prop_get (f, "mtime", &mtime);
+  xar_prop_get ((xar_base_t) f, "mtime", &mtime);
   if (!mtime)
     mtime = "1970-01-01T00:00:00Z";
 

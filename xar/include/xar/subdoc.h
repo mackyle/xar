@@ -41,23 +41,6 @@
 #include <xar/xar.h>
 #include <xar/filetree.h>
 
-struct __xar_subdoc_t
-{
-  struct __xar_prop_t *props;
-  struct __xar_attr_t *attrs;
-  const char *prefix;
-  const char *ns;
-  const char *blank1;           /* filler for xar_file_t compatibility */
-  const char *blank2;           /* filler for xar_file_t compatibility */
-  const char blank3;            /* filler for xar_file_t compatibility */
-  const char *name;
-  struct __xar_subdoc_t *next;
-  const char *value;            /* a subdoc should very rarely have a value */
-  xar_t x;
-};
-
-#define XAR_SUBDOC(x) ((struct __xar_subdoc_t *)(x))
-
 void xar_subdoc_unserialize (xar_subdoc_t s, xmlTextReaderPtr reader);
 void xar_subdoc_serialize (xar_subdoc_t s, xmlTextWriterPtr writer, int wrap);
 void xar_subdoc_free (xar_subdoc_t s);

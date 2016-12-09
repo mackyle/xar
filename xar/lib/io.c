@@ -196,9 +196,9 @@ xar_io_seek (xar_t x, xar_file_t f, off_t seekoff)
 {
   int r;
 
-  if (XAR (x)->fd >= 0)
+  if (x->fd >= 0)
     {
-      r = (int) lseek (XAR (x)->fd, seekoff, SEEK_SET);
+      r = (int) lseek (x->fd, seekoff, SEEK_SET);
       if (r == -1)
         {
           if (errno == ESPIPE)
@@ -208,7 +208,7 @@ xar_io_seek (xar_t x, xar_file_t f, off_t seekoff)
               unsigned int len;
 
               len = (unsigned) (seekoff - (off_t) xar_get_heap_offset (x));
-              if (XAR (x)->heap_offset > len)
+              if (x->heap_offset > len)
                 {
                   xar_err_new (x);
                   xar_err_set_file (x, f);
@@ -218,10 +218,10 @@ xar_io_seek (xar_t x, xar_file_t f, off_t seekoff)
                 }
               else
                 {
-                  len -= (unsigned) XAR (x)->heap_offset;
+                  len -= (unsigned) x->heap_offset;
                   buf = malloc (len);
                   assert (buf);
-                  rr = xar_read_fd (XAR (x)->fd, buf, len);
+                  rr = xar_read_fd (x->fd, buf, len);
                   if (rr < (ssize_t) len)
                     {
                       xar_err_new (x);
@@ -230,7 +230,7 @@ xar_io_seek (xar_t x, xar_file_t f, off_t seekoff)
                       xar_err_callback (x, XAR_SEVERITY_NONFATAL,
                                         XAR_ERR_ARCHIVE_EXTRACTION);
                     }
-                  XAR (x)->heap_offset += rr;
+                  x->heap_offset += rr;
                   free (buf);
                 }
             }
@@ -259,7 +259,7 @@ xar_attrcopy_to_heap (xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
   void *inbuf;
   char *tmpstr = NULL;
   const char *opt = NULL, *csum = NULL;
-  off_t orig_heap_offset = XAR (x)->heap_offset;
+  off_t orig_heap_offset = x->heap_offset;
   xar_file_t tmpf = NULL;
   xar_prop_t tmpp = NULL;
 
@@ -309,7 +309,7 @@ xar_attrcopy_to_heap (xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
           do
             {
               r =
-                (int) write (XAR (x)->heap_fd, ((char *) inbuf) + off,
+                (int) write (x->heap_fd, ((char *) inbuf) + off,
                              rsize - off);
               if ((r < 0) && (errno != EINTR))
                 return -1;
@@ -318,7 +318,7 @@ xar_attrcopy_to_heap (xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
             }
           while ((size_t) off < rsize);
         }
-      XAR (x)->heap_offset += off;
+      x->heap_offset += off;
       free (inbuf);
 
     }
@@ -327,8 +327,8 @@ xar_attrcopy_to_heap (xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
   /* If size is 0, don't bother having anything in the heap */
   if (readsize == 0)
     {
-      XAR (x)->heap_offset = orig_heap_offset;
-      lseek (XAR (x)->heap_fd, -writesize, SEEK_CUR);
+      x->heap_offset = orig_heap_offset;
+      lseek (x->heap_fd, -writesize, SEEK_CUR);
       for (i = 0; i < modulecount; i++)
         {
           if (xar_datamods[i].th_done)
@@ -343,41 +343,41 @@ xar_attrcopy_to_heap (xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
         xar_datamods[i].th_done (x, f, p, &(modulecontext[i]));
     }
 
-  XAR (x)->heap_len += writesize;
+  x->heap_len += writesize;
   tmpp = xar_prop_pget (p, "archived-checksum");
   if (tmpp)
     csum = xar_prop_getvalue (tmpp);
   if (csum)
-    tmpf = xmlHashLookup (XAR (x)->csum_hash, BAD_CAST (csum));
+    tmpf = xmlHashLookup (x->csum_hash, BAD_CAST (csum));
   if (tmpf)
     {
       const char *attr = xar_prop_getkey (p);
       opt = xar_opt_get (x, XAR_OPT_LINKSAME);
       if (opt && (strcmp (attr, "data") == 0))
         {
-          const char *id = xar_attr_pget (tmpf, NULL, "id");
-          xar_prop_pset (f, NULL, "type", "hardlink");
+          const char *id = xar_attr_pget ((xar_base_t) tmpf, NULL, "id");
+          xar_prop_pset ((xar_base_t) f, NULL, "type", "hardlink");
           tmpp = xar_prop_pfirst (f);
           if (tmpp)
             tmpp = xar_prop_find (tmpp, "type");
           if (tmpp)
-            xar_attr_pset (f, tmpp, "link", id);
+            xar_attr_pset ((xar_base_t) f, tmpp, "link", id);
 
-          xar_prop_pset (tmpf, NULL, "type", "hardlink");
+          xar_prop_pset ((xar_base_t) tmpf, NULL, "type", "hardlink");
           tmpp = xar_prop_pfirst (tmpf);
           if (tmpp)
             tmpp = xar_prop_find (tmpp, "type");
           if (tmpp)
-            xar_attr_pset (tmpf, tmpp, "link", "original");
+            xar_attr_pset ((xar_base_t) tmpf, tmpp, "link", "original");
 
           tmpp = xar_prop_pfirst (f);
           if (tmpp)
             tmpp = xar_prop_find (tmpp, "data");
-          xar_prop_punset (f, tmpp);
+          xar_prop_punset ((xar_base_t) f, tmpp);
 
-          XAR (x)->heap_offset = orig_heap_offset;
-          lseek (XAR (x)->heap_fd, -writesize, SEEK_CUR);
-          XAR (x)->heap_len -= writesize;
+          x->heap_offset = orig_heap_offset;
+          lseek (x->heap_fd, -writesize, SEEK_CUR);
+          x->heap_len -= writesize;
           return 0;
         }
       opt = xar_opt_get (x, XAR_OPT_COALESCE);
@@ -399,17 +399,17 @@ xar_attrcopy_to_heap (xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
           if (offstr)
             {
               tmpoff = strtoll (offstr, NULL, 10);
-              XAR (x)->heap_offset = orig_heap_offset;
-              lseek (XAR (x)->heap_fd, -writesize, SEEK_CUR);
+              x->heap_offset = orig_heap_offset;
+              lseek (x->heap_fd, -writesize, SEEK_CUR);
               orig_heap_offset = tmpoff;
-              XAR (x)->heap_len -= writesize;
+              x->heap_len -= writesize;
             }
 
         }
     }
   else if (csum)
     {
-      xmlHashAddEntry (XAR (x)->csum_hash, BAD_CAST (csum), XAR_FILE (f));
+      xmlHashAddEntry (x->csum_hash, BAD_CAST (csum), f);
     }
   else
     {
@@ -421,29 +421,29 @@ xar_attrcopy_to_heap (xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
 
   if (asprintf (&tmpstr, "%" PRIu64, readsize) == -1)
     return -1;
-  xar_prop_pset (f, p, "size", tmpstr);
+  xar_prop_pset ((xar_base_t) f, p, "size", tmpstr);
   free (tmpstr);
 
   if (asprintf (&tmpstr, "%" PRIu64, (uint64_t) orig_heap_offset) == -1)
     return -1;
-  xar_prop_pset (f, p, "offset", tmpstr);
+  xar_prop_pset ((xar_base_t) f, p, "offset", tmpstr);
   free (tmpstr);
 
   tmpp = xar_prop_pget (p, "encoding");
   if (!tmpp)
     {
-      xar_prop_pset (f, p, "encoding", NULL);
+      xar_prop_pset ((xar_base_t) f, p, "encoding", NULL);
       tmpp = xar_prop_pget (p, "encoding");
     }
-  opt = xar_attr_pget (f, tmpp, "style");
+  opt = xar_attr_pget ((xar_base_t) f, tmpp, "style");
   if (tmpp && (!opt || !*opt))
     {
-      xar_attr_pset (f, tmpp, "style", "application/octet-stream");
+      xar_attr_pset ((xar_base_t) f, tmpp, "style", "application/octet-stream");
     }
 
   if (asprintf (&tmpstr, "%" PRIu64, writesize) == -1)
     return -1;
-  xar_prop_pset (f, p, "length", tmpstr);
+  xar_prop_pset ((xar_base_t) f, p, "length", tmpstr);
   free (tmpstr);
 
   return 0;
@@ -514,7 +514,7 @@ xar_attrcopy_from_heap (xar_t x, xar_file_t f, xar_prop_t p,
         break;
       if ((fsize - inc) < (int64_t) bsize)
         bsize = (size_t) (fsize - inc);
-      r = (int) read (XAR (x)->fd, inbuf, bsize);
+      r = (int) read (x->fd, inbuf, bsize);
       if (r == 0)
         break;
       if ((r < 0) && (errno == EINTR))
@@ -525,7 +525,7 @@ xar_attrcopy_from_heap (xar_t x, xar_file_t f, xar_prop_t p,
           return -1;
         }
 
-      XAR (x)->heap_offset += r;
+      x->heap_offset += r;
       inc += r;
       bsize = r;
 
@@ -595,7 +595,7 @@ xar_attrcopy_from_heap_to_heap (xar_t xsource, xar_file_t fsource,
   int r, off;
   size_t bsize;
   int64_t fsize, inc = 0, seekoff, writesize = 0;
-  off_t orig_heap_offset = XAR (xdest)->heap_offset;
+  off_t orig_heap_offset = xdest->heap_offset;
   void *inbuf;
   const char *opt;
   char *tmpstr = NULL;
@@ -630,7 +630,7 @@ xar_attrcopy_from_heap_to_heap (xar_t xsource, xar_file_t fsource,
         break;
       if ((fsize - inc) < (int64_t) bsize)
         bsize = (size_t) (fsize - inc);
-      r = (int) read (XAR (xsource)->fd, inbuf, bsize);
+      r = (int) read (xsource->fd, inbuf, bsize);
       if (r == 0)
         break;
       if ((r < 0) && (errno == EINTR))
@@ -641,7 +641,7 @@ xar_attrcopy_from_heap_to_heap (xar_t xsource, xar_file_t fsource,
           return -1;
         }
 
-      XAR (xsource)->heap_offset += r;
+      xsource->heap_offset += r;
       inc += r;
       bsize = r;
 
@@ -650,14 +650,14 @@ xar_attrcopy_from_heap_to_heap (xar_t xsource, xar_file_t fsource,
       do
         {
           r =
-            (int) write (XAR (xdest)->heap_fd, ((char *) inbuf) + off,
+            (int) write (xdest->heap_fd, ((char *) inbuf) + off,
                          r - off);
           off += r;
           writesize += r;
         }
       while (off < r);
-      XAR (xdest)->heap_offset += off;
-      XAR (xdest)->heap_len += off;
+      xdest->heap_offset += off;
+      xdest->heap_len += off;
     }
 
   if (asprintf (&tmpstr, "%" PRIu64, (uint64_t) orig_heap_offset) == -1)
@@ -670,7 +670,7 @@ xar_attrcopy_from_heap_to_heap (xar_t xsource, xar_file_t fsource,
   if (tmpp)
     tmpp = xar_prop_find (tmpp, opt);
   if (tmpp)
-    xar_prop_pset (fdest, tmpp, "offset", tmpstr);
+    xar_prop_pset ((xar_base_t) fdest, tmpp, "offset", tmpstr);
   free (tmpstr);
 
 
@@ -831,7 +831,7 @@ xar_attrcopy_from_heap_to_stream (xar_stream * stream)
     }
   if ((state->fsize - stream->total_in) < bsize)
     bsize = (size_t) (state->fsize - stream->total_in);
-  r = (int) read (XAR (state->x)->fd, inbuf, bsize);
+  r = (int) read (state->x->fd, inbuf, bsize);
   if (r == 0)
     {
       free (inbuf);
@@ -848,7 +848,7 @@ xar_attrcopy_from_heap_to_stream (xar_stream * stream)
       return XAR_STREAM_ERR;
     }
 
-  XAR (state->x)->heap_offset += r;
+  state->x->heap_offset += r;
   stream->total_in += r;
   bsize = r;
 
@@ -954,7 +954,7 @@ xar_heap_to_archive (xar_t x)
 
   while (1)
     {
-      r = read (XAR (x)->heap_fd, b, bsize);
+      r = read (x->heap_fd, b, bsize);
       if (r == 0)
         break;
       if ((r < 0) && (errno == EINTR))
@@ -968,7 +968,7 @@ xar_heap_to_archive (xar_t x)
       off = 0;
       do
         {
-          r = write (XAR (x)->fd, b + off, bsize - off);
+          r = write (x->fd, b + off, bsize - off);
           if ((r < 0) && (errno != EINTR))
             return -1;
           off += (int) r;

@@ -116,7 +116,7 @@ xar_hash_unarchived_out (xar_t x, xar_file_t f, xar_prop_t p, void *in,
   opt = NULL;
   tmpp = xar_prop_pget (p, "extracted-checksum");
   if (tmpp)
-    opt = xar_attr_pget (f, tmpp, "style");
+    opt = xar_attr_pget ((xar_base_t) f, tmpp, "style");
 
   if (!opt)
     opt = xar_opt_get (x, XAR_OPT_FILECKSUM);
@@ -165,7 +165,7 @@ xar_hash_archived_in (xar_t x, xar_file_t f, xar_prop_t p, void *in,
   opt = NULL;
   tmpp = xar_prop_pget (p, "archived-checksum");
   if (tmpp)
-    opt = xar_attr_pget (f, tmpp, "style");
+    opt = xar_attr_pget ((xar_base_t) f, tmpp, "style");
 
   if (!opt)
     opt = xar_opt_get (x, XAR_OPT_FILECKSUM);
@@ -222,9 +222,9 @@ xar_hash_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
       str = xar_format_hash (hashstr, len);
       if (f)
         {
-          tmpp = xar_prop_pset (f, p, "extracted-checksum", str);
+          tmpp = xar_prop_pset ((xar_base_t) f, p, "extracted-checksum", str);
           if (tmpp)
-            xar_attr_pset (f, tmpp, "style", type);
+            xar_attr_pset ((xar_base_t) f, tmpp, "style", type);
         }
       free (str);
     }
@@ -240,9 +240,9 @@ xar_hash_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
       str = xar_format_hash (hashstr, len);
       if (f)
         {
-          tmpp = xar_prop_pset (f, p, "archived-checksum", str);
+          tmpp = xar_prop_pset ((xar_base_t) f, p, "archived-checksum", str);
           if (tmpp)
-            xar_attr_pset (f, tmpp, "style", type);
+            xar_attr_pset ((xar_base_t) f, tmpp, "style", type);
         }
       free (str);
     }
@@ -293,7 +293,7 @@ xar_hash_out_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
       tmpp = xar_prop_pget (p, "archived-checksum");
       if (tmpp)
         {
-          uncompstyle = xar_attr_pget (f, tmpp, "style");
+          uncompstyle = xar_attr_pget ((xar_base_t) f, tmpp, "style");
           uncomp = xar_prop_getvalue (tmpp);
         }
 

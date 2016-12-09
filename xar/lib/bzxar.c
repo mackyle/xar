@@ -112,7 +112,7 @@ xar_bzip_fromheap_in (xar_t x, xar_file_t f, xar_prop_t p, void **in,
       opt = NULL;
       tmpp = xar_prop_pget (p, "encoding");
       if (tmpp)
-        opt = xar_attr_pget (f, tmpp, "style");
+        opt = xar_attr_pget ((xar_base_t) f, tmpp, "style");
       if (!opt)
         return 0;
       if (strcmp (opt, "application/x-bzip2") != 0)
@@ -199,9 +199,9 @@ xar_bzip_toheap_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
     {
       BZ2_bzCompressEnd (&BZIP2_CONTEXT (context)->bz);
 
-      tmpp = xar_prop_pset (f, p, "encoding", NULL);
+      tmpp = xar_prop_pset ((xar_base_t) f, p, "encoding", NULL);
       if (tmpp)
-        xar_attr_pset (f, tmpp, "style", "application/x-bzip2");
+        xar_attr_pset ((xar_base_t) f, tmpp, "style", "application/x-bzip2");
     }
 
   /* free the context */

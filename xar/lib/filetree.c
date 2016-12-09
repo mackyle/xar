@@ -70,7 +70,7 @@
 
 struct __xar_iter_t
 {
-  const void *iter;
+  void *iter;
   char *path;
   void *node;
   int nochild;
@@ -89,64 +89,64 @@ xar_attr_new (void)
 {
   xar_attr_t ret;
 
-  ret = malloc (sizeof (struct __xar_attr_t));
+  ret = malloc (sizeof (struct xar_attr));
   if (!ret)
     return NULL;
 
-  XAR_ATTR (ret)->key = NULL;
-  XAR_ATTR (ret)->value = NULL;
-  XAR_ATTR (ret)->next = NULL;
-  XAR_ATTR (ret)->ns = NULL;
+  ret->key = NULL;
+  ret->value = NULL;
+  ret->next = NULL;
+  ret->ns = NULL;
   return ret;
 }
 
 int32_t
-xar_attr_pset (xar_file_t f, xar_prop_t p, const char *key, const char *value)
+xar_attr_pset (xar_base_t f, xar_prop_t p, const char *key, const char *value)
 {
   xar_attr_t a, i;
   if (!p)
     {
-      a = XAR_FILE (f)->attrs;
+      a = f->attrs;
     }
   else
     {
-      a = XAR_PROP (p)->attrs;
+      a = p->attrs;
     }
 
   if (!a)
     {
       a = xar_attr_new ();
       if (!p)
-        XAR_FILE (f)->attrs = a;
+        f->attrs = a;
       else
-        XAR_PROP (p)->attrs = a;
-      XAR_ATTR (a)->key = strdup (key);
-      XAR_ATTR (a)->value = strdup (value);
+        p->attrs = a;
+      a->key = strdup (key);
+      a->value = strdup (value);
       return 0;
     }
 
-  for (i = a; i && XAR_ATTR (i)->next; i = XAR_ATTR (i)->next)
+  for (i = a; i && i->next; i = i->next)
     {
-      if (strcmp (XAR_ATTR (i)->key, key) == 0)
+      if (strcmp (i->key, key) == 0)
         {
-          free ((char *) XAR_ATTR (i)->value);
-          XAR_ATTR (i)->value = strdup (value);
+          free ((char *) i->value);
+          i->value = strdup (value);
           return 0;
         }
     }
   a = xar_attr_new ();
   if (!p)
     {
-      XAR_ATTR (a)->next = XAR_ATTR (XAR_FILE (f)->attrs);
-      XAR_FILE (f)->attrs = a;
+      a->next = f->attrs;
+      f->attrs = a;
     }
   else
     {
-      XAR_ATTR (a)->next = XAR_ATTR (XAR_PROP (p)->attrs);
-      XAR_PROP (p)->attrs = a;
+      a->next = p->attrs;
+      p->attrs = a;
     }
-  XAR_ATTR (a)->key = strdup (key);
-  XAR_ATTR (a)->value = strdup (value);
+  a->key = strdup (key);
+  a->value = strdup (value);
   return 0;
 }
 
@@ -162,7 +162,7 @@ xar_attr_pset (xar_file_t f, xar_prop_t p, const char *key, const char *value)
  * it can set an attribute on a property or a file.
  */
 int32_t
-xar_attr_set (xar_file_t f, const char *prop, const char *key,
+xar_attr_set (xar_base_t f, const char *prop, const char *key,
               const char *value)
 {
   if (!prop)
@@ -172,7 +172,7 @@ xar_attr_set (xar_file_t f, const char *prop, const char *key,
   else
     {
       xar_prop_t p = NULL;
-      p = xar_prop_find (XAR_FILE (f)->props, prop);
+      p = xar_prop_find (f->props, prop);
       if (!p)
         return -1;
       return xar_attr_pset (f, p, key, value);
@@ -180,27 +180,27 @@ xar_attr_set (xar_file_t f, const char *prop, const char *key,
 }
 
 const char *
-xar_attr_pget (xar_file_t f, xar_prop_t p, const char *key)
+xar_attr_pget (xar_base_t f, xar_prop_t p, const char *key)
 {
   xar_attr_t a, i;
 
   if (!p)
-    a = XAR_FILE (f)->attrs;
+    a = f->attrs;
   else
-    a = XAR_PROP (p)->attrs;
+    a = p->attrs;
 
   if (!a)
     return NULL;
 
-  for (i = a; i && XAR_ATTR (i)->next; i = XAR_ATTR (i)->next)
+  for (i = a; i && i->next; i = i->next)
     {
-      if (strcmp (XAR_ATTR (i)->key, key) == 0)
+      if (strcmp (i->key, key) == 0)
         {
-          return XAR_ATTR (i)->value;
+          return i->value;
         }
     }
-  if (i && (strcmp (XAR_ATTR (i)->key, key) == 0))
-    return XAR_ATTR (i)->value;
+  if (i && (strcmp (i->key, key) == 0))
+    return i->value;
   return NULL;
 }
 
@@ -212,14 +212,14 @@ xar_attr_pget (xar_file_t f, xar_prop_t p, const char *key)
  * Returns: a reference to the value of the attribute.
  */
 const char *
-xar_attr_get (xar_file_t f, const char *prop, const char *key)
+xar_attr_get (xar_base_t f, const char *prop, const char *key)
 {
   if (!prop)
     return xar_attr_pget (f, NULL, key);
   else
     {
       xar_prop_t p = NULL;
-      p = xar_prop_find (XAR_FILE (f)->props, prop);
+      p = xar_prop_find (f->props, prop);
       if (!p)
         return NULL;
       return xar_attr_pget (f, p, key);
@@ -238,9 +238,9 @@ xar_attr_free (xar_attr_t a)
 {
   if (!a)
     return;
-  free ((char *) XAR_ATTR (a)->key);
-  free ((char *) XAR_ATTR (a)->value);
-  free (XAR_ATTR (a));
+  free ((char *) a->key);
+  free ((char *) a->value);
+  free (a);
   return;
 }
 
@@ -254,19 +254,19 @@ xar_attr_free (xar_attr_t a)
  * to iterate over the attributes of property key 'prop'.
  */
 const char *
-xar_attr_first (xar_file_t f, const char *prop, xar_iter_t i)
+xar_attr_first (xar_base_t f, const char *prop, xar_iter_t i)
 {
   xar_prop_t p = NULL;
   xar_attr_t a;
 
   if (!prop)
-    a = XAR_FILE (f)->attrs;
+    a = f->attrs;
   else
     {
-      p = xar_prop_find (XAR_FILE (f)->props, prop);
+      p = xar_prop_find (f->props, prop);
       if (!p)
         return NULL;
-      a = XAR_PROP (p)->attrs;
+      a = p->attrs;
     }
 
   if (!a)
@@ -274,7 +274,7 @@ xar_attr_first (xar_file_t f, const char *prop, xar_iter_t i)
 
   XAR_ITER (i)->iter = a;
   free (XAR_ITER (i)->node);
-  XAR_ITER (i)->node = strdup (XAR_ATTR (a)->key);
+  XAR_ITER (i)->node = strdup (a->key);
   return XAR_ITER (i)->node;
 }
 
@@ -289,12 +289,12 @@ xar_attr_next (xar_iter_t i)
 {
   xar_attr_t a = XAR_ITER (i)->iter;
 
-  if (XAR_ATTR (a)->next == NULL)
+  if (a->next == NULL)
     return NULL;
 
-  XAR_ITER (i)->iter = XAR_ATTR (a)->next;
+  XAR_ITER (i)->iter = a->next;
   free (XAR_ITER (i)->node);
-  XAR_ITER (i)->node = strdup (XAR_ATTR (XAR_ITER (i)->iter)->key);
+  XAR_ITER (i)->node = strdup (((xar_attr_t) XAR_ITER (i)->iter)->key);
   return XAR_ITER (i)->node;
 }
 
@@ -331,30 +331,30 @@ xar_iter_free (xar_iter_t i)
 const char *
 xar_prop_getkey (xar_prop_t p)
 {
-  return XAR_PROP (p)->key;
+  return p->key;
 }
 
 const char *
 xar_prop_getvalue (xar_prop_t p)
 {
-  return XAR_PROP (p)->value;
+  return p->value;
 }
 
 int32_t
 xar_prop_setkey (xar_prop_t p, const char *key)
 {
-  free ((char *) XAR_PROP (p)->key);
+  free ((char *) p->key);
   if (key)
-    XAR_PROP (p)->key = strdup (key);
+    p->key = strdup (key);
   return 0;
 }
 
 int32_t
 xar_prop_setvalue (xar_prop_t p, const char *value)
 {
-  free ((char *) XAR_PROP (p)->value);
+  free ((char *) p->value);
   if (value)
-    XAR_PROP (p)->value = strdup (value);
+    p->value = strdup (value);
   return 0;
 }
 
@@ -366,7 +366,7 @@ xar_prop_setvalue (xar_prop_t p, const char *value)
 xar_prop_t
 xar_prop_pfirst (xar_file_t f)
 {
-  return XAR_FILE (f)->props;
+  return f->props;
 }
 
 /* xar_prop_pnext
@@ -376,7 +376,7 @@ xar_prop_pfirst (xar_file_t f)
 xar_prop_t
 xar_prop_pnext (xar_prop_t p)
 {
-  return XAR_PROP (p)->next;
+  return p->next;
 }
 
 /* xar_prop_first
@@ -392,9 +392,9 @@ xar_prop_pnext (xar_prop_t p)
 const char *
 xar_prop_first (xar_file_t f, xar_iter_t i)
 {
-  XAR_ITER (i)->iter = XAR_FILE (f)->props;
+  XAR_ITER (i)->iter = f->props;
   free (XAR_ITER (i)->node);
-  XAR_ITER (i)->node = strdup (XAR_PROP (XAR_ITER (i)->iter)->key);
+  XAR_ITER (i)->node = strdup (((xar_prop_t) XAR_ITER (i)->iter)->key);
   return XAR_ITER (i)->node;
 }
 
@@ -412,32 +412,32 @@ const char *
 xar_prop_next (xar_iter_t i)
 {
   xar_prop_t p = XAR_ITER (i)->iter;
-  if (!(XAR_ITER (i)->nochild) && XAR_PROP (p)->children)
+  if (!(XAR_ITER (i)->nochild) && p->children)
     {
       int err;
       char *tmp = XAR_ITER (i)->path;
       if (tmp)
         {
           err =
-            asprintf (&XAR_ITER (i)->path, "%s/%s", tmp, XAR_PROP (p)->key);
+            asprintf (&XAR_ITER (i)->path, "%s/%s", tmp, p->key);
           free (tmp);
         }
       else
-        XAR_ITER (i)->path = strdup (XAR_PROP (p)->key);
+        XAR_ITER (i)->path = strdup (p->key);
       if (!XAR_ITER (i)->path)
         return NULL;
-      XAR_ITER (i)->iter = p = XAR_PROP (p)->children;
+      XAR_ITER (i)->iter = p = p->children;
       goto SUCCESS;
     }
   XAR_ITER (i)->nochild = 0;
 
-  if (XAR_PROP (p)->next)
+  if (p->next)
     {
-      XAR_ITER (i)->iter = p = XAR_PROP (p)->next;
+      XAR_ITER (i)->iter = p = p->next;
       goto SUCCESS;
     }
 
-  if (XAR_PROP (p)->parent)
+  if (p->parent)
     {
       char *tmp1, *tmp2;
       char *dname;
@@ -455,7 +455,7 @@ xar_prop_next (xar_iter_t i)
           XAR_ITER (i)->path = NULL;
         }
 
-      XAR_ITER (i)->iter = p = XAR_PROP (p)->parent;
+      XAR_ITER (i)->iter = p = p->parent;
       XAR_ITER (i)->nochild = 1;
       return xar_prop_next (i);
     }
@@ -468,15 +468,15 @@ SUCCESS:
       int err;
       char *result = NULL;
       err =
-        asprintf (&result, "%s/%s", XAR_ITER (i)->path, XAR_PROP (p)->key);
+        asprintf (&result, "%s/%s", XAR_ITER (i)->path, p->key);
       XAR_ITER (i)->node = result;
     }
   else
     {
-      if (XAR_PROP (p)->key == NULL)
+      if (p->key == NULL)
         XAR_ITER (i)->node = strdup ("");
       else
-        XAR_ITER (i)->node = strdup (XAR_PROP (p)->key);
+        XAR_ITER (i)->node = strdup (p->key);
     }
   return XAR_ITER (i)->node;
 }
@@ -490,45 +490,45 @@ SUCCESS:
  * and/or added to the file's list of properties, as appropriate.
  */
 xar_prop_t
-xar_prop_new (xar_file_t f, xar_prop_t parent)
+xar_prop_new (xar_base_t f, xar_prop_t parent)
 {
   xar_prop_t p;
 
-  p = malloc (sizeof (struct __xar_prop_t));
+  p = malloc (sizeof (xar_prop));
   if (!p)
     return NULL;
 
-  XAR_PROP (p)->key = NULL;
-  XAR_PROP (p)->value = NULL;
-  XAR_PROP (p)->children = NULL;
-  XAR_PROP (p)->next = NULL;
-  XAR_PROP (p)->attrs = NULL;
-  XAR_PROP (p)->parent = parent;
-  XAR_PROP (p)->file = f;
-  XAR_PROP (p)->prefix = XAR_FILE (f)->prefix;
-  XAR_PROP (p)->ns = NULL;
+  p->key = NULL;
+  p->value = NULL;
+  p->children = NULL;
+  p->next = NULL;
+  p->attrs = NULL;
+  p->parent = parent;
+  p->file = (xar_file_t) f;
+  p->prefix = f->prefix;
+  p->ns = NULL;
   if (parent)
     {
-      if (!XAR_PROP (parent)->children)
+      if (!parent->children)
         {
-          XAR_PROP (parent)->children = p;
+          parent->children = p;
         }
       else
         {
-          XAR_PROP (p)->next = XAR_PROP (parent)->children;
-          XAR_PROP (parent)->children = p;
+          p->next = parent->children;
+          parent->children = p;
         }
     }
   else
     {
-      if (XAR_FILE (f)->props == NULL)
+      if (f->props == NULL)
         {
-          XAR_FILE (f)->props = p;
+          f->props = p;
         }
       else
         {
-          XAR_PROP (p)->next = XAR_FILE (f)->props;
-          XAR_FILE (f)->props = p;
+          p->next = f->props;
+          f->props = p;
         }
     }
 
@@ -556,18 +556,18 @@ xar_prop_find (xar_prop_t p, const char *key)
   i = p;
   do
     {
-      if (strcmp (tmp3, XAR_PROP (i)->key) == 0)
+      if (strcmp (tmp3, i->key) == 0)
         {
           if (tmp2 == NULL)
             {
               free (tmp1);
               return i;
             }
-          ret = xar_prop_find (XAR_PROP (i)->children, tmp2);
+          ret = xar_prop_find (i->children, tmp2);
           free (tmp1);
           return ret;
         }
-      i = XAR_PROP (i)->next;
+      i = i->next;
     }
   while (i);
   free (tmp1);
@@ -583,7 +583,7 @@ xar_prop_find (xar_prop_t p, const char *key)
  * does the recursion down the property tree.
  */
 static xar_prop_t
-xar_prop_set_r (xar_file_t f, xar_prop_t p, const char *key,
+xar_prop_set_r (xar_base_t f, xar_prop_t p, const char *key,
                 const char *value, int overwrite)
 {
   xar_prop_t i, ret, ret2, start;
@@ -594,16 +594,16 @@ xar_prop_set_r (xar_file_t f, xar_prop_t p, const char *key,
 
   if (!p)
     {
-      start = XAR_FILE (f)->props;
+      start = f->props;
     }
   else
     {
-      start = XAR_PROP (p)->children;
+      start = p->children;
     }
 
-  for (i = start; i; i = XAR_PROP (i)->next)
+  for (i = start; i; i = i->next)
     {
-      if (strcmp (tmp3, XAR_PROP (i)->key) == 0)
+      if (strcmp (tmp3, i->key) == 0)
         {
           if (!tmp2)
             {
@@ -615,7 +615,7 @@ xar_prop_set_r (xar_file_t f, xar_prop_t p, const char *key,
                 }
               else
                 {
-                  ret = xar_prop_new (f, p);
+                  ret = xar_prop_new ((xar_base_t) f, p);
                   if (!ret)
                     {
                       free (tmp1);
@@ -634,7 +634,7 @@ xar_prop_set_r (xar_file_t f, xar_prop_t p, const char *key,
         }
     }
 
-  ret = xar_prop_new (f, p);
+  ret = xar_prop_new ((xar_base_t) f, p);
   if (!ret)
     {
       free (tmp1);
@@ -675,9 +675,9 @@ xar_prop_set_r (xar_file_t f, xar_prop_t p, const char *key,
  * will not be what you're hoping for.
  */
 int32_t
-xar_prop_set (xar_file_t f, const char *key, const char *value)
+xar_prop_set (xar_base_t f, const char *key, const char *value)
 {
-  if (xar_prop_set_r (f, NULL, key, value, 1))
+  if (xar_prop_set_r ((xar_base_t) f, NULL, key, value, 1))
     return 0;
   return -1;
 }
@@ -688,9 +688,9 @@ xar_prop_set (xar_file_t f, const char *key, const char *value)
  * Returns a xar_prop_t that was created or set.  Returns NULL if error.
  */
 xar_prop_t
-xar_prop_pset (xar_file_t f, xar_prop_t p, const char *key, const char *value)
+xar_prop_pset (xar_base_t f, xar_prop_t p, const char *key, const char *value)
 {
-  return xar_prop_set_r (f, p, key, value, 1);
+  return xar_prop_set_r ((xar_base_t) f, p, key, value, 1);
 }
 
 /* xar_prop_create
@@ -698,9 +698,9 @@ xar_prop_pset (xar_file_t f, xar_prop_t p, const char *key, const char *value)
  * property, it will create another one.
  */
 int32_t
-xar_prop_create (xar_file_t f, const char *key, const char *value)
+xar_prop_create (xar_base_t f, const char *key, const char *value)
 {
-  if (xar_prop_set_r (f, NULL, key, value, 0))
+  if (xar_prop_set_r ((xar_base_t) f, NULL, key, value, 0))
     return 0;
   return -1;
 }
@@ -717,9 +717,9 @@ xar_prop_create (xar_file_t f, const char *key, const char *value)
  * "/" separator.  
  */
 int32_t
-xar_prop_get (xar_file_t f, const char *key, const char **value)
+xar_prop_get (xar_base_t f, const char *key, const char **value)
 {
-  xar_prop_t r = xar_prop_find (XAR_FILE (f)->props, key);
+  xar_prop_t r = xar_prop_find (f->props, key);
   if (!r)
     {
       if (value)
@@ -727,7 +727,7 @@ xar_prop_get (xar_file_t f, const char *key, const char **value)
       return -1;
     }
   if (value)
-    *value = XAR_PROP (r)->value;
+    *value = r->value;
   return 0;
 }
 
@@ -737,7 +737,7 @@ xar_prop_pget (xar_prop_t p, const char *key)
   char *tmp;
   const char *k;
   xar_prop_t ret;
-  k = XAR_PROP (p)->key;
+  k = p->key;
   if (asprintf (&tmp, "%s/%s", k, key) == -1)
     return NULL;
   ret = xar_prop_find (p, tmp);
@@ -753,21 +753,21 @@ xar_prop_pget (xar_prop_t p, const char *key)
 */
 
 void
-xar_prop_replicate_r (xar_file_t f, xar_prop_t p, xar_prop_t parent)
+xar_prop_replicate_r (xar_base_t f, xar_prop_t p, xar_prop_t parent)
 {
   xar_prop_t property = p;
 
   /* look through properties */
   for (property = p; property; property = property->next)
     {
-      xar_prop_t newprop = xar_prop_new (f, parent);
+      xar_prop_t newprop = xar_prop_new ((xar_base_t) f, parent);
       xar_attr_t a;
       xar_attr_t last;
 
       /* copy the key value for the property */
-      XAR_PROP (newprop)->key = strdup (property->key);
+      newprop->key = strdup (property->key);
       if (property->value)
-        XAR_PROP (newprop)->value = strdup (property->value);
+        newprop->value = strdup (property->value);
 
       /* loop through the attributes and copy them */
       a = NULL;
@@ -779,21 +779,21 @@ xar_prop_replicate_r (xar_file_t f, xar_prop_t p, xar_prop_t parent)
           if (NULL == newprop->attrs)
             {
               last = xar_attr_new ();
-              XAR_PROP (newprop)->attrs = last;
+              newprop->attrs = last;
             }
           else
             {
-              XAR_ATTR (last)->next = xar_attr_new ();
-              last = XAR_ATTR (last)->next;
+              last->next = xar_attr_new ();
+              last = last->next;
             }
 
-          XAR_ATTR (last)->key = strdup (a->key);
+          last->key = strdup (a->key);
           if (a->value)
-            XAR_ATTR (last)->value = strdup (a->value);
+            last->value = strdup (a->value);
         }
 
       /* loop through the children properties and recursively add them */
-      xar_prop_replicate_r (f, property->children, newprop);
+      xar_prop_replicate_r ((xar_base_t) f, property->children, newprop);
     }
 
 }
@@ -809,70 +809,70 @@ xar_prop_free (xar_prop_t p)
 {
   xar_prop_t i;
   xar_attr_t a;
-  while (XAR_PROP (p)->children)
+  while (p->children)
     {
-      i = XAR_PROP (p)->children;
-      XAR_PROP (p)->children = XAR_PROP (i)->next;
+      i = p->children;
+      p->children = i->next;
       xar_prop_free (i);
     }
-  while (XAR_PROP (p)->attrs)
+  while (p->attrs)
     {
-      a = XAR_PROP (p)->attrs;
-      XAR_PROP (p)->attrs = XAR_ATTR (a)->next;
+      a = p->attrs;
+      p->attrs = a->next;
       xar_attr_free (a);
     }
-  free ((char *) XAR_PROP (p)->key);
-  free ((char *) XAR_PROP (p)->value);
-  free (XAR_PROP (p));
+  free ((char *) p->key);
+  free ((char *) p->value);
+  free (p);
 }
 
 void
-xar_prop_punset (xar_file_t f, xar_prop_t p)
+xar_prop_punset (xar_base_t f, xar_prop_t p)
 {
   xar_prop_t i;
   if (!p)
     {
       return;
     }
-  if (XAR_PROP (p)->parent)
+  if (p->parent)
     {
-      i = XAR_PROP (p)->parent->children;
+      i = p->parent->children;
       if (i == p)
         {
-          XAR_PROP (XAR_PROP (p)->parent)->children = XAR_PROP (p)->next;
+          p->parent->children = p->next;
           xar_prop_free (p);
           return;
         }
     }
   else
     {
-      i = XAR_FILE (f)->props;
+      i = f->props;
       if (i == p)
         {
-          XAR_FILE (f)->props = XAR_PROP (p)->next;
+          f->props = p->next;
           xar_prop_free (p);
           return;
         }
     }
 
-  while (i && (XAR_PROP (i)->next != XAR_PROP (p)))
+  while (i && (i->next != p))
     {
-      i = XAR_PROP (i)->next;
+      i = i->next;
     }
-  if (i && (XAR_PROP (i)->next == XAR_PROP (p)))
+  if (i && (i->next == p))
     {
-      XAR_PROP (i)->next = XAR_PROP (p)->next;
+      i->next = p->next;
       xar_prop_free (p);
     }
   return;
 }
 
 void
-xar_prop_unset (xar_file_t f, const char *key)
+xar_prop_unset (xar_base_t f, const char *key)
 {
-  xar_prop_t r = xar_prop_find (XAR_FILE (f)->props, key);
+  xar_prop_t r = xar_prop_find (f->props, key);
 
-  xar_prop_punset (f, r);
+  xar_prop_punset ((xar_base_t) f, r);
   return;
 }
 
@@ -885,31 +885,31 @@ xar_file_new (xar_file_t f)
 {
   xar_file_t ret, i;
 
-  ret = calloc (1, sizeof (struct __xar_file_t));
+  ret = calloc (1, sizeof (xar_file));
   if (!ret)
     return NULL;
 
-  XAR_FILE (ret)->parent = f;
-  XAR_FILE (ret)->next = NULL;
-  XAR_FILE (ret)->children = NULL;
-  XAR_FILE (ret)->props = NULL;
-  XAR_FILE (ret)->attrs = NULL;
-  XAR_FILE (ret)->prefix = NULL;
-  XAR_FILE (ret)->ns = NULL;
-  XAR_FILE (ret)->fspath = NULL;
-  XAR_FILE (ret)->eas = NULL;
-  XAR_FILE (ret)->nexteaid = 0;
+  ret->parent = f;
+  ret->next = NULL;
+  ret->children = NULL;
+  ret->props = NULL;
+  ret->attrs = NULL;
+  ret->prefix = NULL;
+  ret->ns = NULL;
+  ret->fspath = NULL;
+  ret->eas = NULL;
+  ret->nexteaid = 0;
   if (f)
     {
-      if (!XAR_FILE (f)->children)
+      if (!f->children)
         {
-          XAR_FILE (f)->children = ret;
+          f->children = ret;
         }
       else
         {
-          for (i = XAR_FILE (f)->children; XAR_FILE (i)->next;
-               i = XAR_FILE (i)->next);
-          XAR_FILE (i)->next = ret;
+          for (i = f->children; i->next;
+               i = i->next);
+          i->next = ret;
         }
     }
 
@@ -923,17 +923,17 @@ xar_file_replicate (xar_file_t original, xar_file_t newparent)
   xar_attr_t a;
 
   /* copy attributes for file */
-  for (a = XAR_FILE (original)->attrs; a; a = XAR_ATTR (a)->next)
+  for (a = original->attrs; a; a = a->next)
     {
       /* skip the id attribute */
       if (0 == strcmp (a->key, "id"))
         continue;
 
-      xar_attr_set (ret, NULL, a->key, a->value);
+      xar_attr_set ((xar_base_t) ret, NULL, a->key, a->value);
     }
 
   /* recursively copy properties */
-  xar_prop_replicate_r (ret, XAR_FILE (original)->props, NULL);
+  xar_prop_replicate_r ((xar_base_t) ret, original->props, NULL);
 
   return ret;
 }
@@ -949,26 +949,26 @@ xar_file_free (xar_file_t f)
   xar_file_t i;
   xar_prop_t n;
   xar_attr_t a;
-  while (XAR_FILE (f)->children)
+  while (f->children)
     {
-      i = XAR_FILE (f)->children;
-      XAR_FILE (f)->children = XAR_FILE (i)->next;
+      i = f->children;
+      f->children = i->next;
       xar_file_free (i);
     }
-  while (XAR_FILE (f)->props)
+  while (f->props)
     {
-      n = XAR_FILE (f)->props;
-      XAR_FILE (f)->props = XAR_PROP (n)->next;
+      n = f->props;
+      f->props = n->next;
       xar_prop_free (n);
     }
-  while (XAR_FILE (f)->attrs)
+  while (f->attrs)
     {
-      a = XAR_FILE (f)->attrs;
-      XAR_FILE (f)->attrs = XAR_ATTR (a)->next;
+      a = f->attrs;
+      f->attrs = a->next;
       xar_attr_free (a);
     }
-  free ((char *) XAR_FILE (f)->fspath);
-  free (XAR_FILE (f));
+  free ((char *) f->fspath);
+  free (f);
 }
 
 /* xar_file_first
@@ -984,7 +984,7 @@ xar_file_free (xar_file_t f)
 xar_file_t
 xar_file_first (xar_t x, xar_iter_t i)
 {
-  XAR_ITER (i)->iter = XAR (x)->files;
+  XAR_ITER (i)->iter = x->files;
   free (XAR_ITER (i)->node);
   return XAR_ITER (i)->iter;
 }
@@ -1004,10 +1004,10 @@ xar_file_next (xar_iter_t i)
 {
   xar_file_t f = XAR_ITER (i)->iter;
   const char *name;
-  if (!(XAR_ITER (i)->nochild) && XAR_FILE (f)->children)
+  if (!(XAR_ITER (i)->nochild) && f->children)
     {
       char *tmp = XAR_ITER (i)->path;
-      xar_prop_get (f, "name", &name);
+      xar_prop_get ((xar_base_t) f, "name", &name);
       if (tmp)
         {
           int err;
@@ -1018,18 +1018,18 @@ xar_file_next (xar_iter_t i)
         XAR_ITER (i)->path = strdup (name);
       if (!XAR_ITER (i)->path)
         return NULL;
-      XAR_ITER (i)->iter = f = XAR_FILE (f)->children;
+      XAR_ITER (i)->iter = f = f->children;
       goto FSUCCESS;
     }
   XAR_ITER (i)->nochild = 0;
 
-  if (XAR_FILE (f)->next)
+  if (f->next)
     {
-      XAR_ITER (i)->iter = f = XAR_FILE (f)->next;
+      XAR_ITER (i)->iter = f = f->next;
       goto FSUCCESS;
     }
 
-  if (XAR_FILE (f)->parent)
+  if (f->parent)
     {
       char *tmp1, *tmp2;
       char *dname;
@@ -1047,14 +1047,14 @@ xar_file_next (xar_iter_t i)
           XAR_ITER (i)->path = NULL;
         }
 
-      XAR_ITER (i)->iter = f = XAR_FILE (f)->parent;
+      XAR_ITER (i)->iter = f = f->parent;
       XAR_ITER (i)->nochild = 1;
       return xar_file_next (i);
     }
 
   return NULL;
 FSUCCESS:
-  xar_prop_get (f, "name", &name);
+  xar_prop_get ((xar_base_t) f, "name", &name);
   XAR_ITER (i)->iter = (void *) f;
 
   return XAR_ITER (i)->iter;
@@ -1079,7 +1079,7 @@ xar_file_find (xar_file_t f, const char *path)
   do
     {
       const char *name;
-      xar_prop_get (i, "name", &name);
+      xar_prop_get ((xar_base_t) i, "name", &name);
       if (name == NULL)
         continue;
       if (strcmp (tmp3, name) == 0)
@@ -1089,11 +1089,11 @@ xar_file_find (xar_file_t f, const char *path)
               free (tmp1);
               return i;
             }
-          ret = xar_file_find (XAR_FILE (i)->children, tmp2);
+          ret = xar_file_find (i->children, tmp2);
           free (tmp1);
           return ret;
         }
-      i = XAR_FILE (i)->next;
+      i = i->next;
     }
   while (i);
   free (tmp1);
@@ -1118,23 +1118,23 @@ xar_prop_serialize (xar_prop_t p, xmlTextWriterPtr writer)
   i = p;
   do
     {
-      if (XAR_PROP (i)->prefix || XAR_PROP (i)->ns)
-        xmlTextWriterStartElementNS (writer, BAD_CAST (XAR_PROP (i)->prefix),
-                                     BAD_CAST (XAR_PROP (i)->key), NULL);
+      if (i->prefix || i->ns)
+        xmlTextWriterStartElementNS (writer, BAD_CAST (i->prefix),
+                                     BAD_CAST (i->key), NULL);
       else
-        xmlTextWriterStartElement (writer, BAD_CAST (XAR_PROP (i)->key));
-      for (a = XAR_PROP (i)->attrs; a; a = XAR_ATTR (a)->next)
+        xmlTextWriterStartElement (writer, BAD_CAST (i->key));
+      for (a = i->attrs; a; a = a->next)
         {
-          xmlTextWriterWriteAttributeNS (writer, BAD_CAST (XAR_ATTR (a)->ns),
-                                         BAD_CAST (XAR_ATTR (a)->key), NULL,
-                                         BAD_CAST (XAR_ATTR (a)->value));
+          xmlTextWriterWriteAttributeNS (writer, BAD_CAST (a->ns),
+                                         BAD_CAST (a->key), NULL,
+                                         BAD_CAST (a->value));
         }
-      if (XAR_PROP (i)->value)
+      if (i->value)
         {
-          if (strcmp (XAR_PROP (i)->key, "name") == 0)
+          if (strcmp (i->key, "name") == 0)
             {
               unsigned char *tmp;
-              int outlen = (int) strlen (XAR_PROP (i)->value);
+              int outlen = (int) strlen (i->value);
               int inlen, len;
 
               inlen = len = outlen;
@@ -1142,30 +1142,30 @@ xar_prop_serialize (xar_prop_t p, xmlTextWriterPtr writer)
               tmp = malloc (len);
               assert (tmp);
               if (UTF8Toisolat1
-                  (tmp, &len, BAD_CAST (XAR_PROP (i)->value), &inlen) < 0)
+                  (tmp, &len, BAD_CAST (i->value), &inlen) < 0)
                 {
                   xmlTextWriterWriteAttribute (writer, BAD_CAST ("enctype"),
                                                BAD_CAST ("base64"));
-                  xmlTextWriterWriteBase64 (writer, XAR_PROP (i)->value, 0,
+                  xmlTextWriterWriteBase64 (writer, i->value, 0,
                                             (int)
-                                            strlen (XAR_PROP (i)->value));
+                                            strlen (i->value));
                 }
               else
                 xmlTextWriterWriteString (writer,
-                                          BAD_CAST (XAR_PROP (i)->value));
+                                          BAD_CAST (i->value));
               free (tmp);
             }
           else
-            xmlTextWriterWriteString (writer, BAD_CAST (XAR_PROP (i)->value));
+            xmlTextWriterWriteString (writer, BAD_CAST (i->value));
         }
 
-      if (XAR_PROP (i)->children)
+      if (i->children)
         {
-          xar_prop_serialize (XAR_PROP (i)->children, writer);
+          xar_prop_serialize (i->children, writer);
         }
       xmlTextWriterEndElement (writer);
 
-      i = XAR_PROP (i)->next;
+      i = i->next;
     }
   while (i);
 }
@@ -1186,16 +1186,16 @@ xar_file_serialize (xar_file_t f, xmlTextWriterPtr writer)
   do
     {
       xmlTextWriterStartElement (writer, BAD_CAST ("file"));
-      for (a = XAR_FILE (i)->attrs; a; a = XAR_ATTR (a)->next)
+      for (a = i->attrs; a; a = a->next)
         {
-          xmlTextWriterWriteAttribute (writer, BAD_CAST (XAR_ATTR (a)->key),
-                                       BAD_CAST (XAR_ATTR (a)->value));
+          xmlTextWriterWriteAttribute (writer, BAD_CAST (a->key),
+                                       BAD_CAST (a->value));
         }
-      xar_prop_serialize (XAR_FILE (i)->props, writer);
-      if (XAR_FILE (i)->children)
-        xar_file_serialize (XAR_FILE (i)->children, writer);
+      xar_prop_serialize (i->props, writer);
+      if (i->children)
+        xar_file_serialize (i->children, writer);
       xmlTextWriterEndElement (writer);
-      i = XAR_FILE (i)->next;
+      i = i->next;
     }
   while (i);
   return;
@@ -1215,15 +1215,15 @@ xar_prop_unserialize (xar_file_t f, xar_prop_t parent,
   int isname = 0, isencoded = 0;
   xar_prop_t p;
 
-  p = xar_prop_new (f, parent);
+  p = xar_prop_new ((xar_base_t) f, parent);
   if (xmlTextReaderIsEmptyElement (reader))
     isempty = 1;
   i = xmlTextReaderAttributeCount (reader);
   name = (const char *) xmlTextReaderConstLocalName (reader);
-  XAR_PROP (p)->key = strdup (name);
+  p->key = strdup (name);
   ns = (const char *) xmlTextReaderConstPrefix (reader);
   if (ns)
-    XAR_PROP (p)->prefix = strdup (ns);
+    p->prefix = strdup (ns);
   if (strcmp (name, "name") == 0)
     isname = 1;
   if (i > 0)
@@ -1244,12 +1244,12 @@ xar_prop_unserialize (xar_file_t f, xar_prop_t parent,
           else
             {
               a = xar_attr_new ();
-              XAR_ATTR (a)->key = strdup (name);
-              XAR_ATTR (a)->value = strdup (value);
+              a->key = strdup (name);
+              a->value = strdup (value);
               if (ns)
-                XAR_ATTR (a)->ns = strdup (ns);
-              XAR_ATTR (a)->next = XAR_PROP (p)->attrs;
-              XAR_PROP (p)->attrs = a;
+                a->ns = strdup (ns);
+              a->next = p->attrs;
+              p->attrs = a;
             }
         }
     }
@@ -1265,29 +1265,29 @@ xar_prop_unserialize (xar_file_t f, xar_prop_t parent,
           break;
         case XML_READER_TYPE_TEXT:
           value = (const char *) xmlTextReaderConstValue (reader);
-          free ((char *) XAR_PROP (p)->value);
+          free ((char *) p->value);
           if (isencoded)
-            XAR_PROP (p)->value =
+            p->value =
               (const char *) xar_from_base64 (BAD_CAST (value),
                                               (unsigned) strlen (value),
                                               NULL);
           else
-            XAR_PROP (p)->value = strdup (value);
+            p->value = strdup (value);
           if (isname)
             {
-              if (XAR_FILE (f)->parent)
+              if (f->parent)
                 {
                   int err;
                   err =
-                    asprintf ((char **) &XAR_FILE (f)->fspath, "%s/%s",
-                              XAR_FILE (XAR_FILE (f)->parent)->fspath,
-                              XAR_PROP (p)->value);
+                    asprintf ((char **) &f->fspath, "%s/%s",
+                              f->parent->fspath,
+                              p->value);
                 }
               else
                 {
-                  XAR_FILE (f)->fspath = strdup (XAR_PROP (p)->value);
+                  f->fspath = strdup (p->value);
                 }
-              if (!XAR_FILE (f)->fspath)
+              if (!f->fspath)
                 return -1;
             }
           break;
@@ -1328,10 +1328,10 @@ xar_file_unserialize (xar_t x, xar_file_t parent, xmlTextReaderPtr reader)
             (const char *) xmlTextReaderConstLocalName (reader);
           const char *value = (const char *) xmlTextReaderConstValue (reader);
           a = xar_attr_new ();
-          XAR_ATTR (a)->key = strdup (name);
-          XAR_ATTR (a)->value = strdup (value);
-          XAR_ATTR (a)->next = XAR_FILE (ret)->attrs;
-          XAR_FILE (ret)->attrs = a;
+          a->key = strdup (name);
+          a->value = strdup (value);
+          a->next = ret->attrs;
+          ret->attrs = a;
         }
     }
 
@@ -1343,15 +1343,15 @@ xar_file_unserialize (xar_t x, xar_file_t parent, xmlTextReaderPtr reader)
           && (strcmp (name, "file") == 0))
         {
           const char *opt;
-          xar_prop_get (ret, "type", &opt);
+          xar_prop_get ((xar_base_t) ret, "type", &opt);
           if (opt && (strcmp (opt, "hardlink") == 0))
             {
-              opt = xar_attr_get (ret, "type", "link");
+              opt = xar_attr_get ((xar_base_t) ret, "type", "link");
               if (opt && (strcmp (opt, "original") == 0))
                 {
-                  opt = xar_attr_get (ret, NULL, "id");
-                  xmlHashAddEntry (XAR (x)->link_hash, BAD_CAST (opt),
-                                   XAR_FILE (ret));
+                  opt = xar_attr_get ((xar_base_t) ret, NULL, "id");
+                  xmlHashAddEntry (x->link_hash, BAD_CAST (opt),
+                                   ret);
                 }
             }
           return ret;

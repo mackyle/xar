@@ -28,13 +28,13 @@
 
 - (void)setValue:(id)value forKey:(NSString *)key
 {
-	xar_prop_set(xarFile, [key UTF8String], [value UTF8String]);
+	xar_prop_set((xar_base_t) xarFile, [key UTF8String], [value UTF8String]);
 }
 
 - (id)valueForKey:(NSString *)key
 {
 	const char *value;
-	xar_prop_get(xarFile, [key UTF8String], &value);
+	xar_prop_get((xar_base_t) xarFile, [key UTF8String], &value);
 	return [NSString stringWithUTF8String:value];
 }
 

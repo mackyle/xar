@@ -60,7 +60,7 @@ xar_signature_new (xar_t x, const char *type, int32_t length,
 {
   xar_signature_t ret;
 
-  if (XAR (x)->files)
+  if (x->files)
     {
       xar_err_new (x);
       xar_err_set_string (x,
@@ -69,35 +69,35 @@ xar_signature_new (xar_t x, const char *type, int32_t length,
       return NULL;
     }
 
-  ret = malloc (sizeof (struct __xar_signature_t));
+  ret = malloc (sizeof (xar_signature));
   if (!ret)
     return NULL;
 
-  memset (XAR_SIGNATURE (ret), 0, sizeof (struct __xar_signature_t));
-  XAR_SIGNATURE (ret)->type = strdup (type);
-  XAR_SIGNATURE (ret)->len = length;
-  XAR_SIGNATURE (ret)->offset = XAR (x)->heap_offset;
-  XAR_SIGNATURE (ret)->signer_callback = callback;
-  XAR_SIGNATURE (ret)->callback_context = callback_context;
+  memset (ret, 0, sizeof (xar_signature));
+  ret->type = strdup (type);
+  ret->len = length;
+  ret->offset = x->heap_offset;
+  ret->signer_callback = callback;
+  ret->callback_context = callback_context;
 
   /* Pre allocate space in the heap */
-  XAR (x)->heap_offset += length;
-  XAR (x)->heap_len += length;
+  x->heap_offset += length;
+  x->heap_len += length;
 
   /* Put the new on at the end of the list */
-  if (XAR_SIGNATURE (XAR (x)->signatures))
+  if (x->signatures)
     {
-      struct __xar_signature_t *sig;
+      xar_signature *sig;
 
       /* (Apple) Find the end of the signatures list
        * The open source code seems to smash list items 1 through n when the head of this list is already defined
        * despite the fact that the xar signatures are implemented as a list.  This is an Apple xar 1.4 edit
        * to allow that list to grow beyond 2
        */
-      for (sig = XAR_SIGNATURE (XAR (x)->signatures); sig->next;
+      for (sig = x->signatures; sig->next;
            sig = sig->next);
 
-      sig->next = XAR_SIGNATURE (ret);
+      sig->next = ret;
     }
   else
     {
@@ -112,11 +112,11 @@ xar_signature_new (xar_t x, const char *type, int32_t length,
       memset (tmpstr, 0, sizeof (tmpstr));
       snprintf (tmpstr, sizeof (tmpstr) - 1, "%ld.%u", (long) t,
                 (unsigned) (tv.tv_usec / 100000));
-      xar_prop_set (XAR_FILE (x), "signature-creation-time", tmpstr);
-      XAR (x)->signatures = ret;
+      xar_prop_set ((xar_base_t) x, "signature-creation-time", tmpstr);
+      x->signatures = ret;
     }
 
-  XAR_SIGNATURE (ret)->x = x;
+  ret->x = x;
 
   return ret;
 
@@ -128,7 +128,7 @@ xar_signature_type (xar_signature_t s)
   if (!s)
     return NULL;
 
-  return XAR_SIGNATURE (s)->type;
+  return s->type;
 }
 
 /* Add x509 cert data to this signature */
@@ -137,33 +137,33 @@ xar_signature_add_x509certificate (xar_signature_t sig,
                                    const uint8_t * cert_data,
                                    uint32_t cert_len)
 {
-  struct __xar_x509cert_t *newcert;
+  xar_x509cert *newcert;
 
   if (!sig)
     return -1;
 
-  newcert = malloc (sizeof (struct __xar_x509cert_t));
-  memset (newcert, 0, sizeof (struct __xar_x509cert_t));
+  newcert = malloc (sizeof (xar_x509cert));
+  memset (newcert, 0, sizeof (xar_x509cert));
   newcert->content = malloc (sizeof (const char) * cert_len);
   memcpy (newcert->content, cert_data, cert_len);
   newcert->len = cert_len;
 
-  if (XAR_SIGNATURE (sig)->x509certs)
+  if (sig->x509certs)
     {
-      struct __xar_x509cert_t *cert;
+      xar_x509cert *cert;
 
       /* Find the end of the linked list */
-      for (cert = XAR_SIGNATURE (sig)->x509certs; cert->next;
+      for (cert = sig->x509certs; cert->next;
            cert = cert->next);
 
       cert->next = newcert;
     }
   else
     {
-      XAR_SIGNATURE (sig)->x509certs = newcert;
+      sig->x509certs = newcert;
     }
 
-  XAR_SIGNATURE (sig)->x509cert_count++;
+  sig->x509cert_count++;
 
   return 0;
 }
@@ -176,7 +176,7 @@ xar_signature_get_x509certificate_count (xar_signature_t sig)
       return 0;
     }
 
-  return XAR_SIGNATURE (sig)->x509cert_count;
+  return sig->x509cert_count;
 }
 
 int32_t
@@ -184,11 +184,11 @@ xar_signature_get_x509certificate_data (xar_signature_t sig, int32_t index,
                                         const uint8_t ** cert_data,
                                         uint32_t * cert_len)
 {
-  struct __xar_x509cert_t *cert;
+  xar_x509cert *cert;
   int i = 0;
 
   /* If there are no certs to return, return immediatly */
-  if (!XAR_SIGNATURE (sig)->x509cert_count)
+  if (!sig->x509cert_count)
     {
       if (cert_data)
         *cert_data = 0;
@@ -198,7 +198,7 @@ xar_signature_get_x509certificate_data (xar_signature_t sig, int32_t index,
 
 
   /* Loop through the certs, copying each one's string ptr to the array */
-  for (cert = XAR_SIGNATURE (sig)->x509certs; cert; cert = cert->next)
+  for (cert = sig->x509certs; cert; cert = cert->next)
     {
       if (i == index)
         {
@@ -224,13 +224,13 @@ xar_signature_get_x509certificate_data (xar_signature_t sig, int32_t index,
 xar_signature_t
 xar_signature_first (xar_t x)
 {
-  return XAR (x)->signatures;
+  return x->signatures;
 }
 
 xar_signature_t
 xar_signature_next (xar_signature_t s)
 {
-  return XAR_SIGNATURE (s)->next;
+  return s->next;
 }
 
 static int32_t
@@ -240,7 +240,7 @@ _xar_signature_read_from_heap (xar_t x, off_t offset, size_t length,
   off_t seek_off = (off_t) xar_get_heap_offset (x) + offset;
   int r = 0;
 
-  r = (int) lseek (XAR (x)->fd, seek_off, SEEK_SET);
+  r = (int) lseek (x->fd, seek_off, SEEK_SET);
 
   /* can't seek to the proper location */
   if (-1 == r)
@@ -251,7 +251,7 @@ _xar_signature_read_from_heap (xar_t x, off_t offset, size_t length,
       return -1;
     }
 
-  r = (int) read (XAR (x)->fd, data, length);
+  r = (int) read (x->fd, data, length);
 
   if (r != (int) length)
     {
@@ -289,19 +289,19 @@ xar_signature_copy_signed_data (xar_signature_t sig, uint8_t ** data,
   if (signed_data && !signed_length)
     return -1;
 
-  x = XAR_SIGNATURE (sig)->x;
+  x = sig->x;
 
 
   /* Get the checksum, to be used for signing.  If we support multiple checksums
      in the future, all checksums should be retrieved                                             */
   if (length)
     {
-      if (0 == xar_prop_get (XAR_FILE (x), "checksum/size", &value))
+      if (0 == xar_prop_get ((xar_base_t) x, "checksum/size", &value))
         {
           *length = strtoull (value, (char **) NULL, 10);
         }
 
-      if (0 == xar_prop_get (XAR_FILE (x), "checksum/offset", &value))
+      if (0 == xar_prop_get ((xar_base_t) x, "checksum/offset", &value))
         {
           offset = strtoull (value, (char **) NULL, 10);
         }
@@ -315,7 +315,7 @@ xar_signature_copy_signed_data (xar_signature_t sig, uint8_t ** data,
     }
 
   /* read signature data */
-  offset = XAR_SIGNATURE (sig)->offset;
+  offset = sig->offset;
 
   /* This parameter is an Apple edit */
   /* This out value is ignored OS X in SL, but this method prototype is included in the 10.5 SDK */
@@ -325,7 +325,7 @@ xar_signature_copy_signed_data (xar_signature_t sig, uint8_t ** data,
   if (signed_length)
     {
 
-      *signed_length = XAR_SIGNATURE (sig)->len;
+      *signed_length = sig->len;
 
       if (signed_data)
         {
@@ -342,18 +342,18 @@ xar_signature_copy_signed_data (xar_signature_t sig, uint8_t ** data,
 xar_signature_t
 xar_signature_unserialize (xar_t x, xmlTextReaderPtr reader)
 {
-  struct __xar_signature_t *ret = NULL;
+  xar_signature *ret = NULL;
   const xmlChar *value = NULL;
   const xmlChar *name = NULL;
   int type;
   unsigned int outputLength;
 
-  ret = malloc (sizeof (struct __xar_signature_t));
+  ret = malloc (sizeof (xar_signature));
 
   if (!ret)
     return NULL;
 
-  memset (ret, 0, sizeof (struct __xar_signature_t));
+  memset (ret, 0, sizeof (xar_signature));
 
   ret->x = x;
 
@@ -532,18 +532,18 @@ xar_signature_serialize (xar_signature_t sig, xmlTextWriterPtr writer)
 
   /* write out the style */
   xmlTextWriterWriteAttribute (writer, BAD_CAST ("style"),
-                               BAD_CAST (XAR_SIGNATURE (sig)->type));
+                               BAD_CAST (sig->type));
 
   /* <offset> */
   xmlTextWriterStartElementNS (writer, NULL, BAD_CAST ("offset"), NULL);
   xmlTextWriterWriteFormatString (writer, "%" PRIu64,
-                                  (uint64_t) (XAR_SIGNATURE (sig)->offset));
+                                  (uint64_t) (sig->offset));
   xmlTextWriterEndElement (writer);
 
   /* <size> */
   xmlTextWriterStartElementNS (writer, NULL, BAD_CAST ("size"), NULL);
   xmlTextWriterWriteFormatString (writer, "%" PRId32,
-                                  (XAR_SIGNATURE (sig)->len));
+                                  (sig->len));
   xmlTextWriterEndElement (writer);
 
   /* <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"> */
@@ -553,15 +553,15 @@ xar_signature_serialize (xar_signature_t sig, xmlTextWriterPtr writer)
                                ("http://www.w3.org/2000/09/xmldsig#"));
 
   /* If we have x509 certs, write them out */
-  if (XAR_SIGNATURE (sig)->x509certs)
+  if (sig->x509certs)
     {
-      struct __xar_x509cert_t *cert;
+      xar_x509cert *cert;
 
       /* <X509Data> */
       xmlTextWriterStartElementNS (writer, NULL, BAD_CAST ("X509Data"), NULL);
 
       /* Loop through the certs, copying each one's string ptr to the array */
-      for (cert = XAR_SIGNATURE (sig)->x509certs; cert; cert = cert->next)
+      for (cert = sig->x509certs; cert; cert = cert->next)
         {
           xmlTextWriterStartElementNS (writer, NULL,
                                        BAD_CAST ("X509Certificate"), NULL);
@@ -582,16 +582,16 @@ xar_signature_serialize (xar_signature_t sig, xmlTextWriterPtr writer)
   xmlTextWriterEndElement (writer);
 
   /* serialize the next signature */
-  if (XAR_SIGNATURE (sig)->next)
-    xar_signature_serialize (XAR_SIGNATURE (sig)->next, writer);
+  if (sig->next)
+    xar_signature_serialize (sig->next, writer);
 
   return 0;
 }
 
 void
-_xar_signature_remove_cert (struct __xar_x509cert_t *cert)
+_xar_signature_remove_cert (xar_x509cert *cert)
 {
-  struct __xar_x509cert_t *next;
+  xar_x509cert *next;
 
   if (!cert)
     return;
@@ -616,17 +616,17 @@ xar_signature_remove (xar_signature_t sig)
   if (!sig)
     return;
 
-  next = XAR_SIGNATURE (sig)->next;
+  next = sig->next;
 
-  if (XAR_SIGNATURE (sig)->type)
-    free (XAR_SIGNATURE (sig)->type);
+  if (sig->type)
+    free (sig->type);
 
-  if (XAR_SIGNATURE (sig)->x509cert_count)
+  if (sig->x509cert_count)
     {
-      _xar_signature_remove_cert (XAR_SIGNATURE (sig)->x509certs);
+      _xar_signature_remove_cert (sig->x509certs);
     }
 
-  free (XAR_SIGNATURE (sig));
+  free (sig);
 
   /* remove the next one in the list */
   xar_signature_remove (next);

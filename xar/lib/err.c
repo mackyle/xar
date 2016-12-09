@@ -41,9 +41,9 @@
 void
 xar_register_errhandler (xar_t x, err_handler callback, void *usrctx)
 {
-  XAR (x)->errctx.x = x;
-  XAR (x)->errctx.usrctx = usrctx;
-  XAR (x)->ercallback = callback;
+  x->errctx.x = x;
+  x->errctx.usrctx = usrctx;
+  x->ercallback = callback;
   return;
 }
 
@@ -62,7 +62,7 @@ xar_err_get_file (xar_errctx_t ctx)
 void
 xar_err_set_file (xar_t x, xar_file_t f)
 {
-  XAR (x)->errctx.file = f;
+  x->errctx.file = f;
   return;
 }
 
@@ -75,7 +75,7 @@ xar_err_get_string (xar_errctx_t ctx)
 void
 xar_err_set_string (xar_t x, const char *str)
 {
-  XAR (x)->errctx.str = str;
+  x->errctx.str = str;
   return;
 }
 
@@ -88,23 +88,23 @@ xar_err_get_errno (xar_errctx_t ctx)
 void
 xar_err_set_errno (xar_t x, int e)
 {
-  XAR (x)->errctx.saved_errno = e;
+  x->errctx.saved_errno = e;
   return;
 }
 
 void
 xar_err_new (xar_t x)
 {
-  memset (&XAR (x)->errctx, 0, sizeof (xar_errctx));
-  XAR (x)->errctx.saved_errno = errno;
+  memset (&x->errctx, 0, sizeof (xar_errctx));
+  x->errctx.saved_errno = errno;
   return;
 }
 
 int32_t
 xar_err_callback (xar_t x, int32_t sev, int32_t err)
 {
-  if (XAR (x)->ercallback)
-    return XAR (x)->ercallback (sev, err, &XAR (x)->errctx,
-                                XAR (x)->errctx.usrctx);
+  if (x->ercallback)
+    return x->ercallback (sev, err, &x->errctx,
+                                x->errctx.usrctx);
   return 0;
 }

@@ -45,58 +45,14 @@
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>
 
-struct __xar_attr_t
-{
-  const char *key;
-  const char *value;
-  const char *ns;
-  const struct __xar_attr_t *next;
-};
-typedef const struct __xar_attr_t *xar_attr_t;
-
-struct __xar_prop_t
-{
-  const char *key;
-  const char *value;
-  const struct __xar_prop_t *parent;
-  const struct __xar_prop_t *children;
-  const struct __xar_prop_t *next;
-  const struct __xar_attr_t *attrs;
-  const struct __xar_file_t *file;
-  const char *prefix;
-  const char *ns;
-};
-typedef const struct __xar_prop_t *xar_prop_t;
-
+#include <xar/xar.h>
 #include <xar/ea.h>
-
-struct __xar_file_t
-{
-  const struct __xar_prop_t *props;
-  const struct __xar_attr_t *attrs;
-  const char *prefix;
-  const char *ns;
-  const char *fspath;
-  char parent_extracted;
-  const struct __xar_file_t *parent;
-  const struct __xar_file_t *children;
-  const struct __xar_file_t *next;
-  xar_ea_t eas;
-  uint64_t nexteaid;
-};
-
-#define XAR_ATTR(x) ((struct __xar_attr_t *)(x))
-#define XAR_FILE(x) ((struct __xar_file_t *)(x))
-#define XAR_PROP(x) ((struct __xar_prop_t *)(x))
 
 void xar_file_free (xar_file_t f);
 xar_attr_t xar_attr_new (void);
-int32_t xar_attr_set (xar_file_t f, const char *prop, const char *key,
-                      const char *value);
-int32_t xar_attr_pset (xar_file_t f, xar_prop_t p, const char *key,
+int32_t xar_attr_pset (xar_base_t f, xar_prop_t p, const char *key,
                        const char *value);
-const char *xar_attr_get (xar_file_t f, const char *prop, const char *key);
-const char *xar_attr_pget (xar_file_t f, xar_prop_t p, const char *key);
+const char *xar_attr_pget (xar_base_t f, xar_prop_t p, const char *key);
 void xar_attr_free (xar_attr_t a);
 void xar_file_serialize (xar_file_t f, xmlTextWriterPtr writer);
 xar_file_t xar_file_unserialize (xar_t x, xar_file_t parent,
@@ -110,8 +66,8 @@ void xar_prop_serialize (xar_prop_t p, xmlTextWriterPtr writer);
 int32_t xar_prop_unserialize (xar_file_t f, xar_prop_t parent,
                               xmlTextReaderPtr reader);
 void xar_prop_free (xar_prop_t p);
-xar_prop_t xar_prop_new (xar_file_t f, xar_prop_t parent);
-xar_prop_t xar_prop_pset (xar_file_t f, xar_prop_t p, const char *key,
+xar_prop_t xar_prop_new (xar_base_t f, xar_prop_t parent);
+xar_prop_t xar_prop_pset (xar_base_t f, xar_prop_t p, const char *key,
                           const char *value);
 xar_prop_t xar_prop_find (xar_prop_t p, const char *key);
 xar_prop_t xar_prop_pget (xar_prop_t p, const char *key);
@@ -121,6 +77,6 @@ int32_t xar_prop_setkey (xar_prop_t p, const char *key);
 int32_t xar_prop_setvalue (xar_prop_t p, const char *value);
 xar_prop_t xar_prop_pfirst (xar_file_t f);
 xar_prop_t xar_prop_pnext (xar_prop_t p);
-void xar_prop_punset (xar_file_t f, xar_prop_t p);
+void xar_prop_punset (xar_base_t f, xar_prop_t p);
 
 #endif /* _XAR_FILETREE_H_ */

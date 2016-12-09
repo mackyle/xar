@@ -143,11 +143,11 @@ xar_check_prop (xar_t x, const char *name)
   xar_attr_t i;
   char includeset = 0;
 
-  for (i = XAR (x)->attrs; i; i = XAR_ATTR (i)->next)
+  for (i = x->attrs; i; i = i->next)
     {
-      if (strcmp (XAR_ATTR (i)->key, XAR_OPT_PROPINCLUDE) == 0)
+      if (strcmp (i->key, XAR_OPT_PROPINCLUDE) == 0)
         {
-          if (strcmp (XAR_ATTR (i)->value, name) == 0)
+          if (strcmp (i->value, name) == 0)
             return 1;
           includeset = 1;
         }
@@ -156,11 +156,11 @@ xar_check_prop (xar_t x, const char *name)
   if (includeset)
     return 0;
 
-  for (i = XAR (x)->attrs; i; i = XAR_ATTR (i)->next)
+  for (i = x->attrs; i; i = i->next)
     {
-      if (strcmp (XAR_ATTR (i)->key, XAR_OPT_PROPEXCLUDE) == 0)
+      if (strcmp (i->key, XAR_OPT_PROPEXCLUDE) == 0)
         {
-          if (strcmp (XAR_ATTR (i)->value, name) == 0)
+          if (strcmp (i->value, name) == 0)
             return 0;
         }
     }

@@ -351,7 +351,7 @@ extract_data_to_sign (const char *filename)
   if (DumpDigestInfo)
     {
       const char *hash_name =
-        xar_attr_get ((xar_file_t) x, "checksum", "style");
+        xar_attr_get ((xar_base_t) x, "checksum", "style");
       if (hash_name)
         hash = get_hash_alg (hash_name);
       if (!hash_name || !hash)
@@ -364,7 +364,7 @@ extract_data_to_sign (const char *filename)
     }
   dataToSignOffset = xar_get_heap_offset (x);
   dataToSignOffset += strtoull (value, (char **) NULL, 10);
-  if (0 != xar_prop_get ((xar_file_t) x, "checksum/size", &value))
+  if (0 != xar_prop_get ((xar_base_t) x, "checksum/size", &value))
     {
       fprintf (stderr, _("Could not locate checksum/size in archive\n"));
       exit (1);
@@ -902,7 +902,7 @@ XAR_OPT_OWNERSHIP };
 
   if (!Toccksum || strcmp (Toccksum->name, XAR_OPT_VAL_NONE) == 0)
     {
-      hash_name = xar_attr_get ((xar_file_t) old_xar, "checksum", "style");
+      hash_name = xar_attr_get ((xar_base_t) old_xar, "checksum", "style");
       if (!hash_name || strcmp (hash_name, XAR_OPT_VAL_NONE) == 0)
         {
           fprintf (stderr,
@@ -1016,8 +1016,8 @@ XAR_OPT_OWNERSHIP };
       if (Verbose)
         printf (_("old_xar -> %s (parent: %s)\n"),
                 xar_get_path (current_xar_file),
-                XAR_FILE (current_xar_file)->
-                parent ? xar_get_path (XAR_FILE (current_xar_file)->
+                current_xar_file->
+                parent ? xar_get_path (current_xar_file->
                                        parent) : "(nil)");
     }
   xar_iter_free (loopIter);
@@ -1032,8 +1032,8 @@ XAR_OPT_OWNERSHIP };
        *              that means we either go back up the tree and add a sibling of one of the ancestors, or we add a
        *              sibling on the same level
        */
-      xar_prop_get (f, "name", &name);  /* filename, without any path info */
-      if (!XAR_FILE (f)->parent)
+      xar_prop_get ((xar_base_t) f, "name", &name);  /* filename, without any path info */
+      if (!f->parent)
         {                       /* case 1 */
           if (Verbose)
             printf (_("root: %s\n"), xar_get_path (f));
@@ -1057,17 +1057,17 @@ XAR_OPT_OWNERSHIP };
         {                       /* case 3 */
           if (Verbose)
             printf (_("searching for parent: %s ?\n"), xar_get_path (f));
-          while (XAR_FILE (f)->parent != XAR_FILE (s_old->top->data)->parent)
+          while (f->parent != ((xar_file_t) s_old->top->data)->parent)
             {
               if (Verbose)
                 printf (_("popping: %s\n"),
-                        xar_get_path (XAR_FILE (s_old->top->data)));
+                        xar_get_path (s_old->top->data));
               stack_pop (s_new);
               stack_pop (s_old);
             }
           if (Verbose)
             printf (_("found: %s -> %s\n"),
-                    xar_get_path (XAR_FILE (s_new->top->data)),
+                    xar_get_path (s_new->top->data),
                     xar_get_path (f));
           stack_pop (s_new);
           stack_pop (s_old);
@@ -1712,7 +1712,7 @@ extract (const char *filename, int arglen, char *args[])
             {
               const char *prop = NULL;
               int deferred = 0;
-              if (xar_prop_get (f, "type", &prop) == 0)
+              if (xar_prop_get ((xar_base_t) f, "type", &prop) == 0)
                 {
                   if (strcmp (prop, "directory") == 0)
                     {

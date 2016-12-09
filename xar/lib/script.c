@@ -94,11 +94,11 @@ xar_script_in (xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t * inlen,
           exe[i - 2] = buf[i];
         }
 
-      tmpp = xar_prop_pset (f, p, "contents", NULL);
+      tmpp = xar_prop_pset ((xar_base_t) f, p, "contents", NULL);
       if (tmpp)
         {
-          xar_prop_pset (f, tmpp, "type", "script");
-          xar_prop_pset (f, tmpp, "interpreter", exe);
+          xar_prop_pset ((xar_base_t) f, tmpp, "type", "script");
+          xar_prop_pset ((xar_base_t) f, tmpp, "interpreter", exe);
         }
       free (exe);
     }

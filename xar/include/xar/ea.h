@@ -9,8 +9,6 @@
 #include <xar/xar.h>
 #include <xar/filetree.h>
 
-typedef struct __xar_ea_t *xar_ea_t;
-
 xar_ea_t xar_ea_new (xar_file_t f, const char *name);
 int32_t xar_ea_pset (xar_file_t f, xar_ea_t e, const char *key,
                      const char *value);
