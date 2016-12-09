@@ -87,12 +87,46 @@ extern "C"
 #define XAR_CKSUM_MD5    2
 #define XAR_CKSUM_OTHER  3      /* Must not be used for "none", should not be used for "sha1" or "md5" */
 
-  typedef void *xar_errctx_t;
   typedef const struct __xar_file_t *xar_file_t;
   typedef const struct __xar_iter_t *xar_iter_t;
   typedef const struct __xar_t *xar_t;
   typedef const struct __xar_subdoc_t *xar_subdoc_t;
   typedef const struct __xar_signature_t *xar_signature_t;
+
+  /**
+   * Information about where an error occured.
+   */
+  typedef struct xar_errctx
+  {
+    /**
+     * Error message.
+     */
+    const char *str;
+
+    /**
+     * Last value of <code>errno</code> from system call.
+     */
+    int saved_errno;
+
+    /**
+     * File, which was being processed when the error occured.
+     */
+    xar_file_t file;
+
+    /**
+     * Value passed from <code>xar_register_errhandler</code>.
+     *
+     * @see xar_register_errhandler
+     */
+    void *usrctx;
+
+    /**
+     * Archive which was being processed when the error occured.
+     */
+    xar_t x;
+  } xar_errctx;
+
+  typedef xar_errctx *xar_errctx_t;
 
   typedef struct
   {

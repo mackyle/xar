@@ -38,13 +38,11 @@
 #include <xar/xar.h>
 #include <xar/archive.h>
 
-#define ECTX(x) ((struct errctx *)(x))
-
 void
 xar_register_errhandler (xar_t x, err_handler callback, void *usrctx)
 {
-  ECTX (&XAR (x)->errctx)->x = x;
-  ECTX (&XAR (x)->errctx)->usrctx = usrctx;
+  XAR (x)->errctx.x = x;
+  XAR (x)->errctx.usrctx = usrctx;
   XAR (x)->ercallback = callback;
   return;
 }
@@ -52,13 +50,13 @@ xar_register_errhandler (xar_t x, err_handler callback, void *usrctx)
 xar_t
 xar_err_get_archive (xar_errctx_t ctx)
 {
-  return ECTX (ctx)->x;
+  return ctx->x;
 }
 
 xar_file_t
 xar_err_get_file (xar_errctx_t ctx)
 {
-  return ECTX (ctx)->file;
+  return ctx->file;
 }
 
 void
@@ -71,7 +69,7 @@ xar_err_set_file (xar_t x, xar_file_t f)
 const char *
 xar_err_get_string (xar_errctx_t ctx)
 {
-  return ECTX (ctx)->str;
+  return ctx->str;
 }
 
 void
@@ -84,7 +82,7 @@ xar_err_set_string (xar_t x, const char *str)
 int
 xar_err_get_errno (xar_errctx_t ctx)
 {
-  return ECTX (ctx)->saved_errno;
+  return ctx->saved_errno;
 }
 
 void
@@ -97,7 +95,7 @@ xar_err_set_errno (xar_t x, int e)
 void
 xar_err_new (xar_t x)
 {
-  memset (&XAR (x)->errctx, 0, sizeof (struct errctx));
+  memset (&XAR (x)->errctx, 0, sizeof (xar_errctx));
   XAR (x)->errctx.saved_errno = errno;
   return;
 }
@@ -107,6 +105,6 @@ xar_err_callback (xar_t x, int32_t sev, int32_t err)
 {
   if (XAR (x)->ercallback)
     return XAR (x)->ercallback (sev, err, &XAR (x)->errctx,
-                                ECTX (&XAR (x)->errctx)->usrctx);
+                                XAR (x)->errctx.usrctx);
   return 0;
 }

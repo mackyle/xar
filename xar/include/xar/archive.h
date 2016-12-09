@@ -59,39 +59,6 @@
  */
 #define XAR_DEFAULT_BUFFER_SIZE 32768
 
-/**
- * Information about where an error occured.
- */
-struct errctx
-{
-  /**
-   * Error message.
-   */
-  const char *str;
-
-  /**
-   * Last value of <code>errno</code> from system call.
-   */
-  int saved_errno;
-
-  /**
-   * File, which was being processed when the error occured.
-   */
-  xar_file_t file;
-
-  /**
-   * Value passed from <code>xar_register_errhandler</code>.
-   * 
-   * @see xar_register_errhandler
-   */
-  void *usrctx;
-
-  /**
-   * Archive which was being processed when the error occured.
-   */
-  xar_t x;
-};
-
 struct __xar_t
 {
   xar_prop_t props;
@@ -116,7 +83,7 @@ struct __xar_t
   z_stream zs;                  /* gz state for compressing/decompressing toc */
   char *path_prefix;            /* used for distinguishing absolute paths */
   err_handler ercallback;       /* callback for errors/warnings */
-  struct errctx errctx;         /* error callback context */
+  xar_errctx errctx;            /* error callback context */
   xar_subdoc_t subdocs;         /* linked list of subdocs */
   xar_signature_t signatures;   /* linked list of signatures */
   uint64_t last_fileid;         /* unique fileid's in the archive */
