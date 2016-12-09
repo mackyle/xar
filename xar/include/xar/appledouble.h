@@ -87,10 +87,24 @@ typedef struct AppleSingleHeader
   uint16_t entries;
 } __packed AppleSingleHeader;
 
+/**
+ * Magic number of an AppleSingle file.
+ */
 #define APPLESINGLE_MAGIC 0x00051600
+
+/**
+ * Magic number of an AppleDouble file.
+ */
 #define APPLEDOUBLE_MAGIC 0x00051607
 
+/**
+ * Current version of AppleSingle format.
+ */
 #define APPLESINGLE_VERSION 0x00020000
+
+/**
+ * Current version of AppleDouble format.
+ */
 #define APPLEDOUBLE_VERSION 0x00020000
 
 /**
@@ -99,6 +113,8 @@ typedef struct AppleSingleHeader
  * Entries 1, 3, and 8 are typically created for all files.
  * Macintosh Icon entries are rare, since those are typically in the resource 
  * fork.
+ * 
+ * @since 1.7.0
  */
 typedef enum AppleSingleEntryID
 {
@@ -191,6 +207,8 @@ typedef enum AppleSingleEntryID
 
 /**
  * Entry in AppleSingle file.
+ * 
+ * @since 1.7.0
  */
 typedef struct AppleSingleEntry
 {
@@ -213,6 +231,8 @@ typedef struct AppleSingleEntry
 /**
  * File Dates are stored as the # of seconds before or after
  * 12am Jan 1, 2000 GMT. Negative value means before, positive after.
+ * 
+ * @since 1.7.0
  */
 typedef struct MacTimes
 {
@@ -239,6 +259,8 @@ typedef struct MacTimes
 
 /**
  * Location in directory view in Finder.
+ * 
+ * @since 1.7.0
  */
 typedef struct FinderPoint
 {
@@ -257,6 +279,7 @@ typedef struct FinderPoint
  * Flags of Finder information.
  * 
  * @see FinderInfo.flags
+ * @since 1.7.0
  */
 typedef enum FinderFlags
 {
@@ -327,6 +350,8 @@ typedef enum FinderFlags
 
 /**
  * Finder normal information.
+ * 
+ * @since 1.7.0
  */
 typedef struct FinderNInfo
 {
@@ -358,6 +383,8 @@ typedef struct FinderNInfo
 
 /**
  * Finder extended information.
+ * 
+ * @since 1.7.0
  */
 typedef struct FinderXInfo
 {
@@ -394,6 +421,8 @@ typedef struct FinderXInfo
 
 /**
  * Black and white icon.
+ * 
+ * @since 1.7.0
  */
 typedef struct ASIconBW
 {
@@ -405,6 +434,8 @@ typedef struct ASIconBW
 
 /**
  * Color icon.
+ * 
+ * @since 1.7.0
  */
 typedef struct ASIconColor
 {
@@ -413,6 +444,8 @@ typedef struct ASIconColor
 
 /**
  * Finder information.
+ * 
+ * @since 1.7.0
  */
 typedef struct FinderInfo
 {
@@ -429,6 +462,8 @@ typedef struct FinderInfo
 
 /**
  * Macintosh info.
+ * 
+ * @since 1.7.0
  */
 typedef struct MacInfo
 {
@@ -446,6 +481,8 @@ typedef struct MacInfo
 
 /**
  * DOS file attributes.
+ * 
+ * @since 1.7.0
  */
 typedef enum DOSAttr
 {
@@ -482,6 +519,8 @@ typedef enum DOSAttr
 
 /**
  * ProDOS information.
+ * 
+ * @since 1.7.0
  */
 typedef struct ProDOSInfo
 {
@@ -503,6 +542,8 @@ typedef struct ProDOSInfo
 
 /**
  * MS-DOS info.
+ * 
+ * @since 1.7.0
  */
 typedef struct MSDOSInfo
 {
@@ -517,6 +558,11 @@ typedef struct MSDOSInfo
   DOSAttr attr : 8;
 } __packed MSDOSInfo;
 
+/**
+ * AFP file attributes.
+ * 
+ * @since 1.7.0
+ */
 typedef enum AFPAttr
 {
   /**
@@ -542,6 +588,8 @@ typedef enum AFPAttr
 
 /**
  * AFP file information.
+ * 
+ * @since 1.7.0
  */
 typedef struct AFPInfo
 {
@@ -558,6 +606,8 @@ typedef struct AFPInfo
 
 /**
  * AFP server directory ID.
+ * 
+ * @since 1.7.0
  */
 typedef struct AFPDirId
 {
