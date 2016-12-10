@@ -91,7 +91,7 @@ extern "C"
 #define XAR_CKSUM_OTHER  3      /* Must not be used for "none", should not be used for "sha1" or "md5" */
 
   typedef struct __xar_iter_t *xar_iter_t;
-  typedef struct __xar_t *xar_t;
+  typedef struct xar_archive *xar_archive_t;
 
   typedef struct xar_signature *xar_signature_t;
   typedef struct xar_x509cert *xar_x509cert_t;
@@ -143,7 +143,7 @@ extern "C"
     const char *name;
     xar_subdoc_t next;
     const char *value;            /* a subdoc should very rarely have a value */
-    xar_t x;
+    xar_archive_t x;
   } xar_subdoc;
 
   typedef struct xar_ea
@@ -204,7 +204,7 @@ extern "C"
     /**
      * Archive which was being processed when the error occured.
      */
-    xar_t x;
+    xar_archive_t x;
   } xar_errctx;
 
   typedef xar_errctx *xar_errctx_t;
@@ -238,34 +238,127 @@ extern "C"
     xar_signature_t next;
     xar_signer_callback signer_callback;  /* callback for signing */
     void *callback_context;       /* context for callback */
-    xar_t x;
+    xar_archive_t x;
   } xar_signature;
 
-  struct __xar_t
+  /**
+   * An open xar archive.
+   */
+  typedef struct xar_archive
   {
+    /**
+     * Properties of this object.
+     */
     xar_prop_t props;
-    xar_attr_t attrs;             /* archive options, such as rsize */
+
+    /**
+     * Archive options.
+     */
+    xar_attr_t attrs;
+
+    /**
+     * Prefix.
+     */
     const char *prefix;
+
+    /**
+     * Namespace.
+     */
     const char *ns;
+
+    /**
+     * For compatibility with xar_file_t.
+     *
+     * @see xar_file_t
+     */
     const char *filler1;
+
+    /**
+     * For compatibility with xar_file_t.
+     *
+     * @see xar_file_t
+     */
     const char *filler2;
-    xar_file_t files;             /* file forest */
-    const char *filename;         /* name of the archive we are operating on */
-    char *dirname;                /* directory of the archive, used in creation */
-    int fd;                       /* open file descriptor for the archive */
-    int heap_fd;                  /* fd for tmp heap archive, used in creation */
-    off_t heap_offset;            /* current offset within the heap */
-    off_t heap_len;               /* current length of the heap */
-    xar_header_ex_t header;       /* header of the xar archive */
-    void *readbuf;                /* buffer for reading/writing compressed toc */
-    size_t readbuf_len;           /* length of readbuf */
-    size_t offset;                /* offset into readbuf for keeping track
-                                   * between callbacks. */
-    size_t toc_count;             /* current bytes read of the toc */
-    z_stream zs;                  /* gz state for compressing/decompressing toc */
-    char *path_prefix;            /* used for distinguishing absolute paths */
-    err_handler ercallback;       /* callback for errors/warnings */
-    xar_errctx errctx;            /* error callback context */
+
+    /**
+     * File forest.
+     */
+    xar_file_t files;
+
+    /**
+     * Name of archive we are operating on.
+     */
+    const char *filename;
+
+    /**
+     * Directory of the archive, used in creation.
+     */
+    char *dirname;
+
+    /**
+     * Open file descriptor for the archive.
+     */
+    int fd;
+
+    /**
+     * FD for temporary heap archive, used in creation.
+     */
+    int heap_fd;
+
+    /**
+     * Current offset within the heap.
+     */
+    off_t heap_offset;
+
+    /**
+     * Current length of the heap.
+     */
+    off_t heap_len;
+
+    /**
+     * Archive header.
+     */
+    xar_header_ex_t header;
+
+    /**
+     * Buffer for reading/writing compressed TOC.
+     */
+    void *readbuf;
+
+    /**
+     * Length of readbuf.
+     */
+    size_t readbuf_len;
+
+    /**
+     * Offset into readbuf for keeping track between callbacks.
+     */
+    size_t offset;
+
+    /**
+     * Current bytes read of the TOC.
+     */
+    size_t toc_count;
+
+    /**
+     * Zlib state for compressing/decompressing TOC.
+     */
+    z_stream zs;
+
+    /**
+     * Used for distinguishing absolute paths.
+     */
+    char *path_prefix;
+
+    /**
+     * Callback for errors/warnings.
+     */
+    err_handler ercallback;
+
+    /**
+     * Error callback context.
+     */
+    xar_errctx errctx;
     xar_subdoc_t subdocs;         /* linked list of subdocs */
     xar_signature_t signatures;   /* linked list of signatures */
     uint64_t last_fileid;         /* unique fileid's in the archive */
@@ -279,7 +372,16 @@ extern "C"
     int tostdout;
     int rfcformat;
     struct stat sbcache;
-  };
+  } xar_archive;
+
+  /**
+   * Legacy alias, probable subject for future removal.
+   *
+   * @since 2.0.0
+   * @deprecated Use xar_archive_t instead
+   * @see xar_archive_t
+   */
+  typedef xar_archive_t xar_t;
 
 #define READ 0
 #define WRITE 1

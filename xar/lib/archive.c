@@ -103,10 +103,10 @@ static xar_t
 xar_new ()
 {
   xar_t ret;
-  ret = malloc (sizeof (struct __xar_t));
+  ret = malloc (sizeof (xar_archive));
   if (!ret)
     return NULL;
-  memset (ret, 0, sizeof (struct __xar_t));
+  memset (ret, 0, sizeof (xar_archive));
   ret->readbuf_len = XAR_DEFAULT_BUFFER_SIZE;
   ret->readbuf = malloc (ret->readbuf_len);
   if (!ret->readbuf)
