@@ -16,7 +16,7 @@ NSString *XarErrorErrno = @"Errno";
 static int32_t
 err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
 {
-  NSLog(@"callback");
+  NSLog (@"callback");
   [(id)usrctx addErrorWithSeverity:sev error:err context:ctx];
   return 0;
 }
@@ -35,28 +35,33 @@ err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
 
 - (id)initWithPath:(NSString *)path flags:(int32_t)flags
 {
-  if ((self = [super init])) {
-    xar = xar_open([path UTF8String], flags);
-    errors = [NSMutableArray new];
+  if ((self = [super init]))
+    {
+      xar = xar_open ([path UTF8String], flags);
+      errors = [NSMutableArray new];
 
-    if (xar) {
-      NSLog(@"registering errhandler");
-      xar_register_errhandler(xar, err_callback, self);
-    } else {
-      [self release];
-      self = nil;
+      if (xar)
+        {
+          NSLog (@"registering errhandler");
+          xar_register_errhandler (xar, err_callback, self);
+        }
+      else
+        {
+          [self release];
+          self = nil;
+        }
     }
-  }
 
   return self;
 }
 
 - (void)closeArchive
 {
-  if (xar) {
-    xar_close(xar);
-    xar = NULL;
-  }
+  if (xar)
+    {
+      xar_close (xar);
+      xar = NULL;
+    }
 }
 
 - (void)dealloc
@@ -78,7 +83,7 @@ err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
 
 - (XarFile *)addPath:(NSString *)path
 {
-  return [XarFile xarFileWithFile:xar_add(xar, [path UTF8String])];
+  return [XarFile xarFileWithFile:xar_add (xar, [path UTF8String])];
 }
 
 - (BOOL)extractFile:(XarFile *)file toDirectory:(NSString *)path error:(NSArray **)errorPtr;
@@ -89,14 +94,17 @@ err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
   NSString *oldPath = [manager currentDirectoryPath];
 
   [manager changeCurrentDirectoryPath:path];
-  status = xar_extract(xar, [file file]);
+  status = xar_extract (xar, [file file]);
   [manager changeCurrentDirectoryPath:oldPath];
 
-  if (status == -1) {
-    *errorPtr = [[errors copy] autorelease];
-  } else {
-    *errorPtr = nil;
-  }
+  if (status == -1)
+    {
+      *errorPtr = [[errors copy] autorelease];
+    }
+  else
+    {
+      *errorPtr = nil;
+    }
 
   [errors removeAllObjects];
 
@@ -108,9 +116,9 @@ err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
   NSDictionary *errorDict = [[NSDictionary alloc] initWithObjectsAndKeys:
     [NSNumber numberWithInt:sev], XarErrorSeverity,
     [NSNumber numberWithInt:err], XarErrorError,
-    [XarFile xarFileWithFile:xar_err_get_file(ctx)], XarErrorFile,
-    [NSString stringWithUTF8String:xar_err_get_string(ctx)], XarErrorString,
-    [NSNumber numberWithInt:xar_err_get_errno(ctx)], XarErrorErrno,
+    [XarFile xarFileWithFile:xar_err_get_file (ctx)], XarErrorFile,
+    [NSString stringWithUTF8String:xar_err_get_string (ctx)], XarErrorString,
+    [NSNumber numberWithInt:xar_err_get_errno (ctx)], XarErrorErrno,
     nil];
 
   [errors addObject:errorDict];
