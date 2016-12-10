@@ -147,45 +147,161 @@ extern "C"
 
 #pragma pack()
 
+  /**
+   * Compatibility typedef for <code>xar_header</code>.
+   */
   typedef struct xar_header xar_header_t;
+
+  /**
+   * Compatibility typedef for <code>xar_header_ex</code>.
+   */
   typedef struct xar_header_ex xar_header_ex_t;
 
+/**
+ * Magic number of a xar archive.
+ */
 #define XAR_HEADER_MAGIC 0x78617221
+
+/**
+ * Name of EA property.
+ */
 #define XAR_EA_FORK "ea"
 
+/**
+ * Indicates that there is no TOC checksum.
+ */
 #define XAR_CKSUM_NONE   0
-#define XAR_CKSUM_SHA1   1
-#define XAR_CKSUM_MD5    2
-#define XAR_CKSUM_OTHER  3      /* Must not be used for "none", should not be used for "sha1" or "md5" */
 
+/**
+ * Indicates that TOC is verified using SHA-1 checksum.
+ */
+#define XAR_CKSUM_SHA1   1
+
+/**
+ * Indicates that TOC is verified using MD5 checksum.
+ */
+#define XAR_CKSUM_MD5    2
+
+/**
+ * Indicates that TOC uses a custom checksum.
+ */
+#define XAR_CKSUM_OTHER  3
+
+  /**
+   * Pointer typedef.
+   */
   typedef struct xar_iter *xar_iter_t;
+
+  /**
+   * Pointer typedef.
+   */
   typedef struct xar_archive *xar_archive_t;
 
+  /**
+   * Pointer typedef.
+   */
   typedef struct xar_signature *xar_signature_t;
+
+  /**
+   * Pointer typedef.
+   */
   typedef struct xar_x509cert *xar_x509cert_t;
+
+  /**
+   * Pointer typedef.
+   */
   typedef struct xar_base *xar_base_t;
+
+  /**
+   * Pointer typedef.
+   */
   typedef struct xar_file *xar_file_t;
+
+  /**
+   * Pointer typedef.
+   */
   typedef struct xar_attr *xar_attr_t;
+
+  /**
+   * Pointer typedef.
+   */
   typedef struct xar_prop *xar_prop_t;
+
+  /**
+   * Pointer typedef.
+   */
   typedef struct xar_subdoc *xar_subdoc_t;
+
+  /**
+   * Pointer typedef.
+   */
   typedef struct xar_ea *xar_ea_t;
 
+  /**
+   * Xar base object - implemented partially by <code>xar_archive</code> and
+   * <code>xar_subdoc</code>, fully by <code>xar_file</code>.
+   *
+   * @since 2.0.0
+   * @see xar_archive
+   * @see xar_subdoc
+   * @see xar_file
+   */
   typedef struct xar_base
   {
+    /**
+     * Properties of this object.
+     */
     xar_prop_t props;
+
+    /**
+     * Attributes of this object.
+     */
     xar_attr_t attrs;
+
+    /**
+     * Prefix of this object.
+     */
     const char *prefix;
+
+    /**
+     * Namespace of this object.
+     */
     const char *ns;
   } xar_base;
 
+  /**
+   * An attribute of object.
+   *
+   * @see xar_base
+   */
   typedef struct xar_attr
   {
+    /**
+     * Name of this attribute.
+     */
     char *key;
+
+    /**
+     * Value of this attribute.
+     */
     char *value;
+
+    /**
+     * Namespace of this attribute.
+     */
     char *ns;
+
+    /**
+     * Next attribute in linked list.
+     */
     xar_attr_t next;
   } xar_attr;
 
+  /**
+   * Property of an object.
+   *
+   * @see xar_base
+   */
   typedef struct xar_prop
   {
     const char *key;
@@ -201,9 +317,24 @@ extern "C"
 
   typedef struct xar_subdoc
   {
+    /**
+     * Properties of this object.
+     */
     xar_prop_t props;
+
+    /**
+     * Attributes of this object.
+     */
     xar_attr_t attrs;
+
+    /**
+     * Prefix of this object.
+     */
     const char *prefix;
+
+    /**
+     * Namespace of this object.
+     */
     const char *ns;
     const char *blank1;           /* filler for xar_file_t compatibility */
     const char *blank2;           /* filler for xar_file_t compatibility */
@@ -222,9 +353,24 @@ extern "C"
 
   typedef struct xar_file
   {
+    /**
+     * Properties of this object.
+     */
     xar_prop_t props;
+
+    /**
+     * Attributes of this object.
+     */
     xar_attr_t attrs;
+
+    /**
+     * Prefix of this object.
+     */
     const char *prefix;
+
+    /**
+     * Namespace of this object.
+     */
     const char *ns;
     const char *fspath;
     char parent_extracted;
