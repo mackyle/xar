@@ -117,7 +117,7 @@ static const is_compressed xar_compresschecks[] = {
 
 
 static size_t
-get_rsize (xar_t x)
+get_rsize (xar_archive_t x)
 {
   size_t bsize;
   const char *opt = NULL;
@@ -143,7 +143,7 @@ get_rsize (xar_t x)
 }
 
 static off_t
-get_offset (xar_t x, xar_file_t f, xar_prop_t p)
+get_offset (xar_archive_t x, xar_file_t f, xar_prop_t p)
 {
   off_t seekoff;
   xar_prop_t tmpp;
@@ -192,7 +192,7 @@ get_length (xar_prop_t p)
 }
 
 static void
-xar_io_seek (xar_t x, xar_file_t f, off_t seekoff)
+xar_io_seek (xar_archive_t x, xar_file_t f, off_t seekoff)
 {
   int r;
 
@@ -247,7 +247,7 @@ xar_io_seek (xar_t x, xar_file_t f, off_t seekoff)
 }
 
 int32_t
-xar_attrcopy_to_heap (xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
+xar_attrcopy_to_heap (xar_archive_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
                       void *context)
 {
   void *modulecontext[sizeof (xar_datamods) / sizeof (struct datamod)];
@@ -455,7 +455,7 @@ xar_attrcopy_to_heap (xar_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
  * It is assumed the heap_fd is already positioned appropriately.
  */
 int32_t
-xar_attrcopy_from_heap (xar_t x, xar_file_t f, xar_prop_t p,
+xar_attrcopy_from_heap (xar_archive_t x, xar_file_t f, xar_prop_t p,
                         write_callback wcb, void *context)
 {
   void *modulecontext[sizeof (xar_datamods) / sizeof (struct datamod)];
@@ -589,8 +589,8 @@ xar_attrcopy_from_heap (xar_t x, xar_file_t f, xar_prop_t p,
 * This does not set any properties or attributes of the file, so this should not be used alone.
 */
 int32_t
-xar_attrcopy_from_heap_to_heap (xar_t xsource, xar_file_t fsource,
-                                xar_prop_t p, xar_t xdest, xar_file_t fdest)
+xar_attrcopy_from_heap_to_heap (xar_archive_t xsource, xar_file_t fsource,
+                                xar_prop_t p, xar_archive_t xdest, xar_file_t fdest)
 {
   int r, off;
   size_t bsize;
@@ -747,7 +747,7 @@ write_to_stream (void *inbuf, size_t inlen, xar_stream * stream)
 }
 
 int32_t
-xar_attrcopy_from_heap_to_stream_init (xar_t x, xar_file_t f, xar_prop_t p,
+xar_attrcopy_from_heap_to_stream_init (xar_archive_t x, xar_file_t f, xar_prop_t p,
                                        xar_stream * stream)
 {
   xar_stream_state_t *state;
@@ -924,7 +924,7 @@ xar_attrcopy_from_heap_to_stream_end (xar_stream * stream)
  * Summary: copies the heap into the archive.
  */
 int32_t
-xar_heap_to_archive (xar_t x)
+xar_heap_to_archive (xar_archive_t x)
 {
   long bsize;
   ssize_t r;
@@ -984,7 +984,7 @@ xar_heap_to_archive (xar_t x)
  * Summary: prevents recompression unless XAR_OPT_RECOMPRESS is XAR_OPT_VAL_TRUE
  */
 int32_t
-xar_prevent_recompress (xar_t x, void *in, size_t inlen)
+xar_prevent_recompress (xar_archive_t x, void *in, size_t inlen)
 {
   int checkcount =
     (int) (sizeof (xar_compresschecks) / sizeof (xar_compresschecks[0]));

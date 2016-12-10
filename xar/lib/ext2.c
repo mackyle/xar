@@ -77,7 +77,7 @@ x_addprop (xar_file_t f, const char *name)
 #endif
 
 int
-xar_ext2attr_archive (xar_t x, xar_file_t f, const char *file,
+xar_ext2attr_archive (xar_archive_t x, xar_file_t f, const char *file,
                       const char *buffer, size_t len)
 {
   int ret = 0;
@@ -197,7 +197,7 @@ e2prop_get (xar_file_t f, const char *name, char **value)
 #endif
 
 int
-xar_ext2attr_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
+xar_ext2attr_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
                       size_t len)
 {
 #if (defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)) && !defined(__CYGWIN__)

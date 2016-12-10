@@ -99,14 +99,14 @@ context_destroy (struct _hash_context *context)
 }
 
 int32_t
-xar_hash_unarchived (xar_t x, xar_file_t f, xar_prop_t p, void **in,
+xar_hash_unarchived (xar_archive_t x, xar_file_t f, xar_prop_t p, void **in,
                      size_t * inlen, void **context)
 {
   return xar_hash_unarchived_out (x, f, p, *in, *inlen, context);
 }
 
 int32_t
-xar_hash_unarchived_out (xar_t x, xar_file_t f, xar_prop_t p, void *in,
+xar_hash_unarchived_out (xar_archive_t x, xar_file_t f, xar_prop_t p, void *in,
                          size_t inlen, void **context)
 {
   const char *opt;
@@ -148,14 +148,14 @@ xar_hash_unarchived_out (xar_t x, xar_file_t f, xar_prop_t p, void *in,
 }
 
 int32_t
-xar_hash_archived (xar_t x, xar_file_t f, xar_prop_t p, void **in,
+xar_hash_archived (xar_archive_t x, xar_file_t f, xar_prop_t p, void **in,
                    size_t * inlen, void **context)
 {
   return xar_hash_archived_in (x, f, p, *in, *inlen, context);
 }
 
 int32_t
-xar_hash_archived_in (xar_t x, xar_file_t f, xar_prop_t p, void *in,
+xar_hash_archived_in (xar_archive_t x, xar_file_t f, xar_prop_t p, void *in,
                       size_t inlen, void **context)
 {
   const char *opt;
@@ -197,7 +197,7 @@ xar_hash_archived_in (xar_t x, xar_file_t f, xar_prop_t p, void *in,
 }
 
 int32_t
-xar_hash_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_hash_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
 {
   unsigned char hashstr[HASH_MAX_MD_SIZE];
   char *str;
@@ -276,7 +276,7 @@ xar_format_hash (const unsigned char *m, unsigned int len)
 }
 
 int32_t
-xar_hash_out_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_hash_out_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
 {
   const char *uncomp = NULL, *uncompstyle = NULL;
   unsigned char hashstr[HASH_MAX_MD_SIZE];

@@ -91,18 +91,18 @@
 #define xmlDictCleanup()        /* function doesn't exist in older API */
 #endif
 
-static int32_t xar_unserialize (xar_t x);
-void xar_serialize (xar_t x, const char *file);
+static int32_t xar_unserialize (xar_archive_t x);
+void xar_serialize (xar_archive_t x, const char *file);
 
 /* xar_new
- * Returns: newly allocated xar_t structure
+ * Returns: newly allocated xar_archive_t structure
  * Summary: just does basicallocation and initialization of 
- * xar_t structure.
+ * xar_archive_t structure.
  */
-static xar_t
+static xar_archive_t
 xar_new ()
 {
-  xar_t ret;
+  xar_archive_t ret;
   ret = malloc (sizeof (xar_archive));
   if (!ret)
     return NULL;
@@ -140,7 +140,7 @@ xar_new ()
  * Summary: internal helper function to read in the xar header.
  */
 static int32_t
-xar_parse_header (xar_t x)
+xar_parse_header (xar_archive_t x)
 {
   ssize_t r;
   int off;
@@ -232,10 +232,10 @@ xar_parse_header (xar_t x)
  * file descriptor to the target xar file.  If the xarchive is opened
  * for writing, the file is created, and a heap file is opened.
  */
-xar_t
+xar_archive_t
 xar_open (const char *file, int32_t flags)
 {
-  xar_t ret;
+  xar_archive_t ret;
 
   ret = xar_new ();
   if (!ret)
@@ -500,12 +500,12 @@ xar_open (const char *file, int32_t flags)
 }
 
 /* xar_check_force_rfc6713
- * x: the xar_t to check
+ * x: the xar_archive_t to check
  * Summary: forces the rfcformat option on if the checksum type will be
  *          XAR_CKSUM_OTHER.  Should be called just before first file is added.
  */
 static void
-xar_check_force_rfc6713 (xar_t x)
+xar_check_force_rfc6713 (xar_archive_t x)
 {
   char *tmpser;
 
@@ -522,13 +522,13 @@ xar_check_force_rfc6713 (xar_t x)
 }
 
 /* xar_close
- * x: the xar_t to close
+ * x: the xar_archive_t to close
  * Summary: closes all open file descriptors, frees all
- * file structures and options, deallocates the xar_t its self.
+ * file structures and options, deallocates the xar_archive_t its self.
  * Returns 0 for success, -1 for failure.
  */
 int
-xar_close (xar_t x)
+xar_close (xar_archive_t x)
 {
   xar_attr_t a;
   xar_file_t f;
@@ -955,7 +955,7 @@ CLOSE_BAIL:
  * return the first match.
  */
 const char *
-xar_opt_get (xar_t x, const char *option)
+xar_opt_get (xar_archive_t x, const char *option)
 {
   xar_attr_t i;
   if (!x || !option)
@@ -979,7 +979,7 @@ xar_opt_get (xar_t x, const char *option)
  * Returns: 0 for sucess, -1 for failure
  */
 int32_t
-xar_opt_set (xar_t x, const char *option, const char *value)
+xar_opt_set (xar_archive_t x, const char *option, const char *value)
 {
   xar_attr_t a;
 
@@ -1068,7 +1068,7 @@ xar_opt_set (xar_t x, const char *option, const char *value)
  * This will delete ALL instances of the option name
  */
 int32_t
-xar_opt_unset (xar_t x, const char *option)
+xar_opt_unset (xar_archive_t x, const char *option)
 {
   xar_attr_t i, p = NULL;
   for (i = x->attrs; i; p = i, i = i->next)
@@ -1098,7 +1098,7 @@ xar_opt_unset (xar_t x, const char *option)
  * level node of the archive, x.
  */
 static xar_file_t
-xar_add_node (xar_t x, xar_file_t f, const char *name, const char *prefix,
+xar_add_node (xar_archive_t x, xar_file_t f, const char *name, const char *prefix,
               const char *realpath, int srcpath)
 {
   xar_file_t ret;
@@ -1215,7 +1215,7 @@ xar_add_node (xar_t x, xar_file_t f, const char *name, const char *prefix,
  * to archiving its path.
  */
 static xar_file_t
-xar_add_pseudodir (xar_t x, xar_file_t f, const char *name,
+xar_add_pseudodir (xar_archive_t x, xar_file_t f, const char *name,
                    const char *prefix, const char *realpath)
 {
   xar_file_t ret;
@@ -1309,7 +1309,7 @@ xar_add_pseudodir (xar_t x, xar_file_t f, const char *name,
  * If f is NULL, will start with x->files.
  */
 static xar_file_t
-xar_add_r (xar_t x, xar_file_t f, const char *path, const char *prefix)
+xar_add_r (xar_archive_t x, xar_file_t f, const char *path, const char *prefix)
 {
   xar_file_t i = NULL, ret, ret2, start = NULL;
   char *tmp1, *tmp2, *tmp3;
@@ -1432,7 +1432,7 @@ xar_add_r (xar_t x, xar_file_t f, const char *path, const char *prefix)
  * representing "blah" will be returned.
  */
 xar_file_t
-xar_add (xar_t x, const char *path)
+xar_add (xar_archive_t x, const char *path)
 {
 #ifdef __APPLE__
   xar_file_t ret;
@@ -1463,7 +1463,7 @@ xar_add (xar_t x, const char *path)
 */
 
 xar_file_t
-xar_add_frombuffer (xar_t x, xar_file_t parent, const char *name,
+xar_add_frombuffer (xar_archive_t x, xar_file_t parent, const char *name,
                     char *buffer, size_t length)
 {
   xar_file_t ret;
@@ -1504,7 +1504,7 @@ xar_add_frombuffer (xar_t x, xar_file_t parent, const char *name,
 
   xar_prop_set ((xar_base_t) ret, "name", name);
 
-  /*int32_t xar_arcmod_archive(xar_t x, xar_file_t f, const char *file, const char *buffer, size_t len) */
+  /*int32_t xar_arcmod_archive(xar_archive_t x, xar_file_t f, const char *file, const char *buffer, size_t len) */
   if (xar_arcmod_archive (x, ret, NULL, buffer, length) < 0)
     {
       xar_file_t i;
@@ -1528,7 +1528,7 @@ xar_add_frombuffer (xar_t x, xar_file_t parent, const char *name,
 }
 
 xar_file_t
-xar_add_folder (xar_t x, xar_file_t f, const char *name, struct stat * info)
+xar_add_folder (xar_archive_t x, xar_file_t f, const char *name, struct stat * info)
 {
   xar_file_t ret;
   char idstr[32];
@@ -1586,15 +1586,15 @@ xar_add_folder (xar_t x, xar_file_t f, const char *name, struct stat * info)
 }
 
 xar_file_t
-xar_add_frompath (xar_t x, xar_file_t parent, const char *name,
+xar_add_frompath (xar_archive_t x, xar_file_t parent, const char *name,
                   const char *realpath)
 {
   return xar_add_node (x, parent, name, "", realpath, 1);
 }
 
 xar_file_t
-xar_add_from_archive (xar_t x, xar_file_t parent, const char *name,
-                      xar_t sourcearchive, xar_file_t sourcefile)
+xar_add_from_archive (xar_archive_t x, xar_file_t parent, const char *name,
+                      xar_archive_t sourcearchive, xar_file_t sourcefile)
 {
   xar_file_t ret;
   char idstr[32];
@@ -1663,7 +1663,7 @@ xar_add_from_archive (xar_t x, xar_file_t parent, const char *name,
 * leading up to f already exist.
 */
 int32_t
-xar_extract_tofile (xar_t x, xar_file_t f, const char *path)
+xar_extract_tofile (xar_archive_t x, xar_file_t f, const char *path)
 {
   return xar_arcmod_extract (x, f, path, NULL, 0);
 }
@@ -1679,7 +1679,7 @@ xar_extract_tofile (xar_t x, xar_file_t f, const char *path)
 * Example: xar_extract_tobuffer(x, "foo/bar/blah",&buffer)
 */
 int32_t
-xar_extract_tobuffer (xar_t x, xar_file_t f, char **buffer)
+xar_extract_tobuffer (xar_archive_t x, xar_file_t f, char **buffer)
 {
   size_t size;
 
@@ -1697,7 +1697,7 @@ xar_extract_tobuffer (xar_t x, xar_file_t f, char **buffer)
 * Example: xar_extract_tobuffer(x, "foo/bar/blah",&buffer)
 */
 int32_t
-xar_extract_tobuffersz (xar_t x, xar_file_t f, char **buffer, size_t * size)
+xar_extract_tobuffersz (xar_archive_t x, xar_file_t f, char **buffer, size_t * size)
 {
   const char *sizestring = NULL;
   int32_t ret;
@@ -1739,7 +1739,7 @@ xar_extract_tobuffersz (xar_t x, xar_file_t f, char **buffer, size_t * size)
 }
 
 int32_t
-xar_extract_tostream_init (xar_t x, xar_file_t f, xar_stream * stream)
+xar_extract_tostream_init (xar_archive_t x, xar_file_t f, xar_stream * stream)
 {
   xar_prop_t tmpp;
 
@@ -1798,7 +1798,7 @@ xar_strip_components (const char *path, int components)
  * Total extractions will be "foo", "foo/bar", and "foo/bar/blah".
  */
 int32_t
-xar_extract (xar_t x, xar_file_t f)
+xar_extract (xar_archive_t x, xar_file_t f)
 {
   struct stat sb;
   char *tmp1, *dname;
@@ -1855,7 +1855,7 @@ xar_extract (xar_t x, xar_file_t f)
 * the verification will pass.
 */
 int32_t
-xar_verify (xar_t x, xar_file_t f)
+xar_verify (xar_archive_t x, xar_file_t f)
 {
   return xar_arcmod_verify (x, f);
 }
@@ -1870,7 +1870,7 @@ xar_verify (xar_t x, xar_file_t f)
 static int
 toc_read_callback (void *context, char *buffer, int len)
 {
-  xar_t x = (xar_t) context;
+  xar_archive_t x = (xar_archive_t) context;
   int ret, off = 0;
 
   if (((!x->offset) || (x->offset == x->readbuf_len))
@@ -1914,7 +1914,7 @@ toc_read_callback (void *context, char *buffer, int len)
 }
 
 /* close_callback
- * context: this will be a xar_t
+ * context: this will be a xar_archive_t
  * Returns: 0 or -1 in case of error
  * Summary: this is the callback for xmlTextReaderForIO to close the IO
  */
@@ -1931,7 +1931,7 @@ close_callback (void *context)
  * Summary: serializes the archive out to xml.
  */
 void
-xar_serialize (xar_t x, const char *file)
+xar_serialize (xar_archive_t x, const char *file)
 {
   xmlTextWriterPtr writer;
   xar_subdoc_t i;
@@ -1967,7 +1967,7 @@ xar_serialize (xar_t x, const char *file)
  * corresponding in-memory representation.
  */
 static int32_t
-xar_unserialize (xar_t x)
+xar_unserialize (xar_archive_t x)
 {
   xmlTextReaderPtr reader;
   xar_file_t f = NULL;

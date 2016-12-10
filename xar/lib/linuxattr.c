@@ -95,7 +95,7 @@ struct _linuxattr_context
 #define LINUXATTR_CONTEXT(x) ((struct _linuxattr_context *)(x))
 
 int32_t
-xar_linuxattr_read (xar_t x, xar_file_t f, void *buf, size_t len,
+xar_linuxattr_read (xar_archive_t x, xar_file_t f, void *buf, size_t len,
                     void *context)
 {
 
@@ -160,7 +160,7 @@ xar_linuxattr_read (xar_t x, xar_file_t f, void *buf, size_t len,
 }
 
 int32_t
-xar_linuxattr_write (xar_t x, xar_file_t f, void *buf, size_t len,
+xar_linuxattr_write (xar_archive_t x, xar_file_t f, void *buf, size_t len,
                      void *context)
 {
   (void) x;
@@ -171,7 +171,7 @@ xar_linuxattr_write (xar_t x, xar_file_t f, void *buf, size_t len,
 #endif
 
 int32_t
-xar_linuxattr_archive (xar_t x, xar_file_t f, const char *file,
+xar_linuxattr_archive (xar_archive_t x, xar_file_t f, const char *file,
                        const char *buffer, size_t len)
 {
 #if defined(HAVE_SYS_XATTR_H) && defined(HAVE_LGETXATTR) && !defined(__APPLE__)
@@ -271,7 +271,7 @@ BAIL:
 }
 
 int32_t
-xar_linuxattr_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
+xar_linuxattr_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
                        size_t len)
 {
 #if defined HAVE_SYS_XATTR_H && defined(HAVE_LSETXATTR) && !defined(__APPLE__)

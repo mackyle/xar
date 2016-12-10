@@ -128,7 +128,7 @@ filetype_name (mode_t mode)
 }
 
 static xar_file_t
-xar_link_lookup (xar_t x, dev_t dev, ino_t ino, xar_file_t f)
+xar_link_lookup (xar_archive_t x, dev_t dev, ino_t ino, xar_file_t f)
 {
   char key[32];
   xar_file_t ret;
@@ -146,7 +146,7 @@ xar_link_lookup (xar_t x, dev_t dev, ino_t ino, xar_file_t f)
 }
 
 static int32_t
-aacls (xar_t x, xar_file_t f, const char *file)
+aacls (xar_archive_t x, xar_file_t f, const char *file)
 {
 #ifdef HAVE_SYS_ACL_H
 #if !defined(__APPLE__)
@@ -235,7 +235,7 @@ DONE:
 }
 
 static int32_t
-eacls (xar_t x, xar_file_t f, const char *file)
+eacls (xar_archive_t x, xar_file_t f, const char *file)
 {
 #ifdef HAVE_SYS_ACL_H
 #if !defined(__APPLE__)
@@ -356,7 +356,7 @@ x_addflag (xar_file_t f, const char *name)
 #endif
 
 static int32_t
-flags_archive (xar_t x, xar_file_t f, const struct stat *sb)
+flags_archive (xar_archive_t x, xar_file_t f, const struct stat *sb)
 {
 #ifdef HAVE_STRUCT_STAT_ST_FLAGS
   if (!sb->st_flags)
@@ -437,7 +437,7 @@ x_getprop (xar_file_t f, const char *name, char **value)
 #endif
 
 int32_t
-xar_flags_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
+xar_flags_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
                    size_t len)
 {
 #ifdef HAVE_CHFLAGS
@@ -545,7 +545,7 @@ xar_flags_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
 }
 
 int32_t
-xar_stat_archive (xar_t x, xar_file_t f, const char *file, const char *buffer,
+xar_stat_archive (xar_archive_t x, xar_file_t f, const char *file, const char *buffer,
                   size_t len)
 {
   char *tmpstr;
@@ -727,7 +727,7 @@ xar_stat_archive (xar_t x, xar_file_t f, const char *file, const char *buffer,
 }
 
 int32_t
-xar_set_perm (xar_t x, xar_file_t f, const char *file, char *buffer,
+xar_set_perm (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
               size_t len)
 {
   const char *opt;
@@ -925,7 +925,7 @@ xar_set_perm (xar_t x, xar_file_t f, const char *file, char *buffer,
 }
 
 int32_t
-xar_stat_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
+xar_stat_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
                   size_t len)
 {
   const char *opt;

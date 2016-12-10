@@ -63,7 +63,7 @@ struct _data_context
 #define DATA_CONTEXT(x) ((struct _data_context*)(x))
 
 int32_t
-xar_data_read (xar_t x, xar_file_t f, void *inbuf, size_t bsize,
+xar_data_read (xar_archive_t x, xar_file_t f, void *inbuf, size_t bsize,
                void *context)
 {
   int32_t r;
@@ -117,7 +117,7 @@ xar_data_read (xar_t x, xar_file_t f, void *inbuf, size_t bsize,
 }
 
 int32_t
-xar_data_write (xar_t x, xar_file_t f, void *buf, size_t len, void *context)
+xar_data_write (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *context)
 {
   int32_t r;
   size_t off = 0;
@@ -162,7 +162,7 @@ xar_data_write (xar_t x, xar_file_t f, void *buf, size_t len, void *context)
  * data into the heap file.
  */
 int32_t
-xar_data_archive (xar_t x, xar_file_t f, const char *file, const char *buffer,
+xar_data_archive (xar_archive_t x, xar_file_t f, const char *file, const char *buffer,
                   size_t len)
 {
   const char *opt;
@@ -233,7 +233,7 @@ xar_data_archive (xar_t x, xar_file_t f, const char *file, const char *buffer,
 }
 
 int32_t
-xar_data_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
+xar_data_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
                   size_t len)
 {
   const char *opt;
@@ -307,7 +307,7 @@ xar_data_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
 }
 
 int32_t
-xar_data_verify (xar_t x, xar_file_t f)
+xar_data_verify (xar_archive_t x, xar_file_t f)
 {
   const char *opt;
   struct _data_context context;

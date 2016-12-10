@@ -43,7 +43,7 @@
 #include <xar/filetree.h>
 
 xar_subdoc_t
-xar_subdoc_new (xar_t x, const char *name)
+xar_subdoc_new (xar_archive_t x, const char *name)
 {
   xar_subdoc_t ret;
 
@@ -89,7 +89,7 @@ xar_subdoc_attr_get (xar_subdoc_t s, const char *prop, const char *key)
 }
 
 xar_subdoc_t
-xar_subdoc_first (xar_t x)
+xar_subdoc_first (xar_archive_t x)
 {
   return x->subdocs;
 }
@@ -107,7 +107,7 @@ xar_subdoc_name (xar_subdoc_t s)
 }
 
 xar_subdoc_t
-xar_subdoc_find (xar_t x, const char *name)
+xar_subdoc_find (xar_archive_t x, const char *name)
 {
   xar_subdoc_t i;
 

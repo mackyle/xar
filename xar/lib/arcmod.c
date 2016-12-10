@@ -67,7 +67,7 @@ struct arcmod xar_arcmods[] = {
  * Summary: This is the entry point to actual file archival.
  */
 int32_t
-xar_arcmod_archive (xar_t x, xar_file_t f, const char *file,
+xar_arcmod_archive (xar_archive_t x, xar_file_t f, const char *file,
                     const char *buffer, size_t len)
 {
   int i;
@@ -98,7 +98,7 @@ xar_arcmod_archive (xar_t x, xar_file_t f, const char *file,
  * Summary: This is the entry point to actual file archival.
  */
 int32_t
-xar_arcmod_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
+xar_arcmod_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
                     size_t len)
 {
   int i;
@@ -123,7 +123,7 @@ xar_arcmod_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
 
 
 int32_t
-xar_arcmod_verify (xar_t x, xar_file_t f)
+xar_arcmod_verify (xar_archive_t x, xar_file_t f)
 {
   return xar_data_verify (x, f);
 }
@@ -138,7 +138,7 @@ xar_arcmod_verify (xar_t x, xar_file_t f)
  * Returns: 0 for not to include, 1 for include.
  */
 int32_t
-xar_check_prop (xar_t x, const char *name)
+xar_check_prop (xar_archive_t x, const char *name)
 {
   xar_attr_t i;
   char includeset = 0;

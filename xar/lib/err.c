@@ -39,7 +39,7 @@
 #include <xar/archive.h>
 
 void
-xar_register_errhandler (xar_t x, err_handler callback, void *usrctx)
+xar_register_errhandler (xar_archive_t x, err_handler callback, void *usrctx)
 {
   x->errctx.x = x;
   x->errctx.usrctx = usrctx;
@@ -47,7 +47,7 @@ xar_register_errhandler (xar_t x, err_handler callback, void *usrctx)
   return;
 }
 
-xar_t
+xar_archive_t
 xar_err_get_archive (xar_errctx_t ctx)
 {
   return ctx->x;
@@ -60,7 +60,7 @@ xar_err_get_file (xar_errctx_t ctx)
 }
 
 void
-xar_err_set_file (xar_t x, xar_file_t f)
+xar_err_set_file (xar_archive_t x, xar_file_t f)
 {
   x->errctx.file = f;
   return;
@@ -73,7 +73,7 @@ xar_err_get_string (xar_errctx_t ctx)
 }
 
 void
-xar_err_set_string (xar_t x, const char *str)
+xar_err_set_string (xar_archive_t x, const char *str)
 {
   x->errctx.str = str;
   return;
@@ -86,14 +86,14 @@ xar_err_get_errno (xar_errctx_t ctx)
 }
 
 void
-xar_err_set_errno (xar_t x, int e)
+xar_err_set_errno (xar_archive_t x, int e)
 {
   x->errctx.saved_errno = e;
   return;
 }
 
 void
-xar_err_new (xar_t x)
+xar_err_new (xar_archive_t x)
 {
   memset (&x->errctx, 0, sizeof (xar_errctx));
   x->errctx.saved_errno = errno;
@@ -101,7 +101,7 @@ xar_err_new (xar_t x)
 }
 
 int32_t
-xar_err_callback (xar_t x, int32_t sev, int32_t err)
+xar_err_callback (xar_archive_t x, int32_t sev, int32_t err)
 {
   if (x->ercallback)
     return x->ercallback (sev, err, &x->errctx,

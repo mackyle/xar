@@ -51,7 +51,7 @@ struct _script_context
 #define SCRIPT_CONTEXT(x) ((struct _script_context*)(*x))
 
 int32_t
-xar_script_in (xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t * inlen,
+xar_script_in (xar_archive_t x, xar_file_t f, xar_prop_t p, void **in, size_t * inlen,
                void **context)
 {
   char *buf = *in;
@@ -106,7 +106,7 @@ xar_script_in (xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t * inlen,
 }
 
 int32_t
-xar_script_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_script_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
 {
 
   (void) x;

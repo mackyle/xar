@@ -94,7 +94,7 @@ struct _lzma_context
 #endif
 
 int
-xar_lzma_fromheap_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_lzma_fromheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
 {
 #ifdef HAVE_LIBLZMA
 
@@ -122,7 +122,7 @@ xar_lzma_fromheap_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
 }
 
 int
-xar_lzma_fromheap_in (xar_t x, xar_file_t f, xar_prop_t p, void **in,
+xar_lzma_fromheap_in (xar_archive_t x, xar_file_t f, xar_prop_t p, void **in,
                       size_t * inlen, void **context)
 {
   const char *opt;
@@ -250,7 +250,7 @@ xar_lzma_fromheap_in (xar_t x, xar_file_t f, xar_prop_t p, void **in,
 }
 
 int
-xar_lzma_toheap_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_lzma_toheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
 {
 #ifdef HAVE_LIBLZMA
   xar_prop_t tmpp;
@@ -288,7 +288,7 @@ xar_lzma_toheap_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
 }
 
 int32_t
-xar_lzma_toheap_in (xar_t x, xar_file_t f, xar_prop_t p, void **in,
+xar_lzma_toheap_in (xar_archive_t x, xar_file_t f, xar_prop_t p, void **in,
                     size_t * inlen, void **context)
 {
   const char *opt;

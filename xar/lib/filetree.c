@@ -982,7 +982,7 @@ xar_file_free (xar_file_t f)
  * before xar_file_next.
  */
 xar_file_t
-xar_file_first (xar_t x, xar_iter_t i)
+xar_file_first (xar_archive_t x, xar_iter_t i)
 {
   XAR_ITER (i)->iter = x->files;
   free (XAR_ITER (i)->node);
@@ -1309,7 +1309,7 @@ xar_prop_unserialize (xar_file_t f, xar_prop_t parent,
  * and child files.
  */
 xar_file_t
-xar_file_unserialize (xar_t x, xar_file_t parent, xmlTextReaderPtr reader)
+xar_file_unserialize (xar_archive_t x, xar_file_t parent, xmlTextReaderPtr reader)
 {
   xar_file_t ret;
   const char *name;

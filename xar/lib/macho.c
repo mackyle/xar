@@ -505,7 +505,7 @@ macho_parse (xar_file_t f, void *in, size_t inlen,
 }
 
 int32_t
-xar_macho_in (xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t * inlen,
+xar_macho_in (xar_archive_t x, xar_file_t f, xar_prop_t p, void **in, size_t * inlen,
               void **context)
 {
   int32_t consumed = 0, total = 0;
@@ -534,7 +534,7 @@ xar_macho_in (xar_t x, xar_file_t f, xar_prop_t p, void **in, size_t * inlen,
 }
 
 int32_t
-xar_macho_done (xar_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_macho_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
 {
 
   (void) x;

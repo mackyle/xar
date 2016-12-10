@@ -42,6 +42,8 @@
 #define XAR_VERSION_NUM @XAR_NUMERIC_VERSION@
 
 #include <sys/types.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <sys/stat.h>
 #include <zlib.h>
@@ -359,18 +361,70 @@ extern "C"
      * Error callback context.
      */
     xar_errctx errctx;
-    xar_subdoc_t subdocs;         /* linked list of subdocs */
-    xar_signature_t signatures;   /* linked list of signatures */
-    uint64_t last_fileid;         /* unique fileid's in the archive */
-    xmlHashTablePtr ino_hash;     /* Hash for looking up hardlinked files (add) */
-    xmlHashTablePtr link_hash;    /* Hash for looking up hardlinked files (extract) */
-    xmlHashTablePtr csum_hash;    /* Hash for looking up checksums of files */
+
+    /**
+     * Linked list of subdocuments.
+     */
+    xar_subdoc_t subdocs;
+
+    /**
+     * Linked list of signatures.
+     */
+    xar_signature_t signatures;
+
+    /**
+     * Last unique file ID used.
+     */
+    uint64_t last_fileid;
+
+    /**
+     * Hash for looking up hardlinked files (add).
+     */
+    xmlHashTablePtr ino_hash;
+
+    /**
+     * Hash for looking up hardlinked files (extract).
+     */
+    xmlHashTablePtr link_hash;
+
+    /**
+     * Hash for looking up checksums of files.
+     */
+    xmlHashTablePtr csum_hash;
+
+    /**
+     * Message digest generation context.
+     */
     EVP_MD_CTX *toc_ctx;
-    int docksum;
-    int skipwarn;
-    int stripcomps;
-    int tostdout;
-    int rfcformat;
+
+    /**
+     * If set to <code>1</code>, checksum checks are done.
+     */
+    bool docksum;
+
+    /**
+     * If set to <code>1</code>, warnings are skipped.
+     */
+    bool skipwarn;
+
+    /**
+     * If set to <code>1</code>, components are stripped.
+     */
+    bool stripcomps;
+
+    /**
+     * If set to <code>1</code>, data is extracted to stdout.
+     */
+    bool tostdout;
+    
+    /**
+     * If set to <code>1</code>, RFC 6713 format is used in compressing TOC.
+     */
+    bool rfcformat;
+
+    /**
+     * Cached results of <code>stat</code>.
+     */
     struct stat sbcache;
   } xar_archive;
 
@@ -432,7 +486,7 @@ extern "C"
 
 #define XAR_OPT_STRIPCOMPONENTS "strip-components"      /* Number of components to strip on extraction (default 0) */
 
-/* Use xar_open("",WRITE) to get an xar_t to use xar_opt_get on to fetch this then xar_close it if an xar_t is not otherwise available */
+/* Use xar_open("",WRITE) to get an xar_archive_t to use xar_opt_get on to fetch this then xar_close it if an xar_archive_t is not otherwise available */
 /* Older versions will return NULL from xar_open("",WRITE), current versions will not but only xar_opt_get and xar_close should be called on the result */
 #define XAR_OPT_XARLIBVERSION   "xar-library-version"   /* Library's XAR_VERSION_NUM (as 0xVALUE string [%i scanf format, strtol base 0], get only) */
 
@@ -454,37 +508,37 @@ extern "C"
 #define XAR_ERR_ARCHIVE_CREATION   1
 #define XAR_ERR_ARCHIVE_EXTRACTION 2
 
-  xar_t xar_open (const char *file, int32_t flags);
-  int xar_close (xar_t x);
-  xar_file_t xar_add (xar_t x, const char *path);
+  xar_archive_t xar_open (const char *file, int32_t flags);
+  int xar_close (xar_archive_t x);
+  xar_file_t xar_add (xar_archive_t x, const char *path);
 
-  xar_file_t xar_add_frombuffer (xar_t x, xar_file_t parent, const char *name,
+  xar_file_t xar_add_frombuffer (xar_archive_t x, xar_file_t parent, const char *name,
                                  char *buffer, size_t length);
-  xar_file_t xar_add_folder (xar_t x, xar_file_t f, const char *name,
+  xar_file_t xar_add_folder (xar_archive_t x, xar_file_t f, const char *name,
                              struct stat *info);
-  xar_file_t xar_add_frompath (xar_t x, xar_file_t parent, const char *name,
+  xar_file_t xar_add_frompath (xar_archive_t x, xar_file_t parent, const char *name,
                                const char *realpath);
 
-  xar_file_t xar_add_from_archive (xar_t x, xar_file_t parent,
-                                   const char *name, xar_t sourcearchive,
+  xar_file_t xar_add_from_archive (xar_archive_t x, xar_file_t parent,
+                                   const char *name, xar_archive_t sourcearchive,
                                    xar_file_t sourcefile);
 
-  int32_t xar_extract (xar_t x, xar_file_t f);
-  int32_t xar_extract_tofile (xar_t x, xar_file_t f, const char *path);
-  int32_t xar_extract_tobuffer (xar_t x, xar_file_t f, char **buffer);
-  int32_t xar_extract_tobuffersz (xar_t x, xar_file_t f, char **buffer,
+  int32_t xar_extract (xar_archive_t x, xar_file_t f);
+  int32_t xar_extract_tofile (xar_archive_t x, xar_file_t f, const char *path);
+  int32_t xar_extract_tobuffer (xar_archive_t x, xar_file_t f, char **buffer);
+  int32_t xar_extract_tobuffersz (xar_archive_t x, xar_file_t f, char **buffer,
                                   size_t * size);
-  int32_t xar_extract_tostream_init (xar_t x, xar_file_t f,
+  int32_t xar_extract_tostream_init (xar_archive_t x, xar_file_t f,
                                      xar_stream * stream);
   int32_t xar_extract_tostream (xar_stream * stream);
   int32_t xar_extract_tostream_end (xar_stream * stream);
 
-  int32_t xar_verify (xar_t x, xar_file_t f);
+  int32_t xar_verify (xar_archive_t x, xar_file_t f);
 
 
-  const char *xar_opt_get (xar_t x, const char *option);
-  int32_t xar_opt_set (xar_t x, const char *option, const char *value);
-  int32_t xar_opt_unset (xar_t x, const char *option);
+  const char *xar_opt_get (xar_archive_t x, const char *option);
+  int32_t xar_opt_set (xar_archive_t x, const char *option, const char *value);
+  int32_t xar_opt_unset (xar_archive_t x, const char *option);
 
   int32_t xar_prop_set (xar_base_t f, const char *key, const char *value);
   int32_t xar_prop_create (xar_base_t f, const char *key, const char *value);
@@ -497,7 +551,7 @@ extern "C"
   const char *xar_prop_next (xar_iter_t i);
 
   void xar_prop_unset (xar_base_t f, const char *key);
-  xar_file_t xar_file_first (xar_t x, xar_iter_t i);
+  xar_file_t xar_file_first (xar_archive_t x, xar_iter_t i);
   xar_file_t xar_file_next (xar_iter_t i);
 
   const char *xar_attr_get (const xar_base_t f, const char *prop, const char *key);
@@ -506,7 +560,7 @@ extern "C"
   const char *xar_attr_first (xar_base_t f, const char *prop, xar_iter_t i);
   const char *xar_attr_next (xar_iter_t i);
 
-  xar_subdoc_t xar_subdoc_new (xar_t x, const char *name);
+  xar_subdoc_t xar_subdoc_new (xar_archive_t x, const char *name);
   int32_t xar_subdoc_prop_set (xar_subdoc_t s, const char *key,
                                const char *value);
   int32_t xar_subdoc_prop_get (xar_subdoc_t s, const char *key,
@@ -515,7 +569,7 @@ extern "C"
                                const char *key, const char *value);
   const char *xar_subdoc_attr_get (xar_subdoc_t s, const char *prop,
                                    const char *key);
-  xar_subdoc_t xar_subdoc_first (xar_t x);
+  xar_subdoc_t xar_subdoc_first (xar_archive_t x);
   xar_subdoc_t xar_subdoc_next (xar_subdoc_t s);
   const char *xar_subdoc_name (xar_subdoc_t s);
   int32_t xar_subdoc_copyout (xar_subdoc_t s, unsigned char **,
@@ -525,14 +579,14 @@ extern "C"
   void xar_subdoc_remove (xar_subdoc_t s);
 
 /* signature api for adding various signature types */
-  xar_signature_t xar_signature_new (xar_t x, const char *type,
+  xar_signature_t xar_signature_new (xar_archive_t x, const char *type,
                                      int32_t length,
                                      xar_signer_callback callback,
                                      void *callback_context);
 
   const char *xar_signature_type (xar_signature_t s);
 
-  xar_signature_t xar_signature_first (xar_t x);
+  xar_signature_t xar_signature_first (xar_archive_t x);
   xar_signature_t xar_signature_next (xar_signature_t s);
 
   int32_t xar_signature_add_x509certificate (xar_signature_t sig,
@@ -552,28 +606,28 @@ extern "C"
                                           uint64_t * signed_offset);
 
 /* Helper functions - caller must free returned memory */
-  char *xar_get_size (xar_t x, xar_file_t f);
-  char *xar_get_type (xar_t x, xar_file_t f);
-  char *xar_get_mode (xar_t x, xar_file_t f);
-  char *xar_get_owner (xar_t x, xar_file_t f);
-  char *xar_get_group (xar_t x, xar_file_t f);
-  char *xar_get_mtime (xar_t x, xar_file_t f);
+  char *xar_get_size (xar_archive_t x, xar_file_t f);
+  char *xar_get_type (xar_archive_t x, xar_file_t f);
+  char *xar_get_mode (xar_archive_t x, xar_file_t f);
+  char *xar_get_owner (xar_archive_t x, xar_file_t f);
+  char *xar_get_group (xar_archive_t x, xar_file_t f);
+  char *xar_get_mtime (xar_archive_t x, xar_file_t f);
 
 /* These are for xar modules and should never be needed from a calling app */
-  void xar_register_errhandler (xar_t x, err_handler callback, void *usrctx);
-  xar_t xar_err_get_archive (xar_errctx_t ctx);
+  void xar_register_errhandler (xar_archive_t x, err_handler callback, void *usrctx);
+  xar_archive_t xar_err_get_archive (xar_errctx_t ctx);
   xar_file_t xar_err_get_file (xar_errctx_t ctx);
   const char *xar_err_get_string (xar_errctx_t ctx);
   int xar_err_get_errno (xar_errctx_t ctx);
-  void xar_err_set_file (xar_t x, xar_file_t f);
-  void xar_err_set_string (xar_t x, const char *str);
-  void xar_err_set_errno (xar_t x, int e);
-  void xar_err_new (xar_t x);
-  int32_t xar_err_callback (xar_t x, int32_t sev, int32_t err);
+  void xar_err_set_file (xar_archive_t x, xar_file_t f);
+  void xar_err_set_string (xar_archive_t x, const char *str);
+  void xar_err_set_errno (xar_archive_t x, int e);
+  void xar_err_new (xar_archive_t x);
+  int32_t xar_err_callback (xar_archive_t x, int32_t sev, int32_t err);
 
-  void xar_serialize (xar_t x, const char *file);
+  void xar_serialize (xar_archive_t x, const char *file);
   char *xar_get_path (xar_file_t f);
-  uint64_t xar_get_heap_offset (xar_t x);
+  uint64_t xar_get_heap_offset (xar_archive_t x);
   uint64_t xar_ntoh64 (uint64_t num);
 
 #ifdef __cplusplus

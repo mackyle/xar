@@ -55,7 +55,7 @@ struct _signature_copy_context
 
 
 xar_signature_t
-xar_signature_new (xar_t x, const char *type, int32_t length,
+xar_signature_new (xar_archive_t x, const char *type, int32_t length,
                    xar_signer_callback callback, void *callback_context)
 {
   xar_signature_t ret;
@@ -222,7 +222,7 @@ xar_signature_get_x509certificate_data (xar_signature_t sig, int32_t index,
 }
 
 xar_signature_t
-xar_signature_first (xar_t x)
+xar_signature_first (xar_archive_t x)
 {
   return x->signatures;
 }
@@ -234,7 +234,7 @@ xar_signature_next (xar_signature_t s)
 }
 
 static int32_t
-_xar_signature_read_from_heap (xar_t x, off_t offset, size_t length,
+_xar_signature_read_from_heap (xar_archive_t x, off_t offset, size_t length,
                                uint8_t * data)
 {
   off_t seek_off = (off_t) xar_get_heap_offset (x) + offset;
@@ -272,7 +272,7 @@ xar_signature_copy_signed_data (xar_signature_t sig, uint8_t ** data,
                                 uint64_t * signed_offset)
 {
   uint64_t offset = 0;
-  xar_t x = NULL;
+  xar_archive_t x = NULL;
   const char *value;
 
   /* xar 1.6 fails this method if any of data, length, signed_data, signed_length are NULL */
@@ -340,7 +340,7 @@ xar_signature_copy_signed_data (xar_signature_t sig, uint8_t ** data,
 }
 
 xar_signature_t
-xar_signature_unserialize (xar_t x, xmlTextReaderPtr reader)
+xar_signature_unserialize (xar_archive_t x, xmlTextReaderPtr reader)
 {
   xar_signature *ret = NULL;
   const xmlChar *value = NULL;

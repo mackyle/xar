@@ -74,7 +74,7 @@ struct _fbsdattr_context
 #define FBSDATTR_CONTEXT(x) ((struct _fbsdattr_context *)(x))
 
 int32_t
-xar_fbsdattr_read (xar_t x, xar_file_t f, void *buf, size_t len,
+xar_fbsdattr_read (xar_archive_t x, xar_file_t f, void *buf, size_t len,
                    void *context)
 {
   if (!FBSDATTR_CONTEXT (context)->buf)
@@ -123,7 +123,7 @@ xar_fbsdattr_read (xar_t x, xar_file_t f, void *buf, size_t len,
 }
 
 int32_t
-xar_fbsdattr_write (xar_t x, xar_file_t f, void *buf, size_t len,
+xar_fbsdattr_write (xar_archive_t x, xar_file_t f, void *buf, size_t len,
                     void *context)
 {
   return extattr_set_link (FBSDATTR_CONTEXT (context)->file,
@@ -133,7 +133,7 @@ xar_fbsdattr_write (xar_t x, xar_file_t f, void *buf, size_t len,
 #endif
 
 int32_t
-xar_fbsdattr_archive (xar_t x, xar_file_t f, const char *file,
+xar_fbsdattr_archive (xar_archive_t x, xar_file_t f, const char *file,
                       const char *buffer, size_t len)
 {
 #ifdef HAVE_SYS_EXTATTR_H
@@ -325,7 +325,7 @@ BAIL:
 }
 
 int32_t
-xar_fbsdattr_extract (xar_t x, xar_file_t f, const char *file, char *buffer,
+xar_fbsdattr_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
                       size_t len)
 {
 #ifdef HAVE_SYS_EXTATTR_H

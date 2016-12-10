@@ -113,7 +113,7 @@ xar_get_path (xar_file_t f)
 }
 
 uint64_t
-xar_get_heap_offset (xar_t x)
+xar_get_heap_offset (xar_archive_t x)
 {
   return (uint64_t) x->toc_count + x->header.size;
 }
@@ -194,7 +194,7 @@ xar_devmake (dev_t dev, uint32_t * out_major, uint32_t * out_minor)
 #endif
 
 char *
-xar_get_type (xar_t x, xar_file_t f)
+xar_get_type (xar_archive_t x, xar_file_t f)
 {
   const char *type = NULL;
   (void) x;
@@ -205,7 +205,7 @@ xar_get_type (xar_t x, xar_file_t f)
 }
 
 char *
-xar_get_size (xar_t x, xar_file_t f)
+xar_get_size (xar_archive_t x, xar_file_t f)
 {
   const char *size = NULL;
   const char *type = NULL;
@@ -252,7 +252,7 @@ xar_get_size (xar_t x, xar_file_t f)
 }
 
 char *
-xar_get_mode (xar_t x, xar_file_t f)
+xar_get_mode (xar_archive_t x, xar_file_t f)
 {
   const char *mode = NULL;
   const char *type = NULL;
@@ -314,7 +314,7 @@ xar_get_mode (xar_t x, xar_file_t f)
 }
 
 char *
-xar_get_owner (xar_t x, xar_file_t f)
+xar_get_owner (xar_archive_t x, xar_file_t f)
 {
   const char *user = NULL;
 
@@ -326,7 +326,7 @@ xar_get_owner (xar_t x, xar_file_t f)
 }
 
 char *
-xar_get_group (xar_t x, xar_file_t f)
+xar_get_group (xar_archive_t x, xar_file_t f)
 {
   const char *group = NULL;
 
@@ -338,7 +338,7 @@ xar_get_group (xar_t x, xar_file_t f)
 }
 
 char *
-xar_get_mtime (xar_t x, xar_file_t f)
+xar_get_mtime (xar_archive_t x, xar_file_t f)
 {
   const char *mtime = NULL;
   char *tmp;
