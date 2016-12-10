@@ -1915,7 +1915,7 @@ static int
 dump_header (const char *filename)
 {
   int fd;
-  xar_header_ex_t xh;
+  xar_header_ex xh;
 
   if (filename == NULL)
     fd = 0;
@@ -1929,7 +1929,7 @@ dump_header (const char *filename)
         }
     }
 
-  if (read (fd, &xh, sizeof (xh)) < (int) sizeof (xar_header_t))
+  if (read (fd, &xh, sizeof (xh)) < (int) sizeof (xar_header))
     {
       fprintf (stderr, _("error reading header\n"));
       exit (1);
@@ -1961,14 +1961,14 @@ dump_header (const char *filename)
     case XAR_CKSUM_OTHER:
       {
         uint16_t hsiz = ntohs (xh.size);
-        if (hsiz < sizeof (xar_header_t) + 4 || (hsiz & 0x3) != 0)
+        if (hsiz < sizeof (xar_header) + 4 || (hsiz & 0x3) != 0)
           {
             printf (_("(OTHER + invalid header length)\n"));
             break;
           }
-        if (hsiz > sizeof (xar_header_ex_t))
-          hsiz = sizeof (xar_header_ex_t);
-        if (!memchr (xh.toc_cksum_name, 0, hsiz - sizeof (xar_header_t)))
+        if (hsiz > sizeof (xar_header_ex))
+          hsiz = sizeof (xar_header_ex);
+        if (!memchr (xh.toc_cksum_name, 0, hsiz - sizeof (xar_header)))
           {
             printf (_("(OTHER + invalid non-nul terminated name)\n"));
             break;
@@ -1993,7 +1993,7 @@ static int
 dumptoc_raw (const char *filename, const char *tocfile)
 {
   int fd, toc;
-  xar_header_ex_t xh;
+  xar_header_ex xh;
   uint64_t clen;
   uint16_t hlen;
   unsigned buffer_size = 4096;
@@ -2013,7 +2013,7 @@ dumptoc_raw (const char *filename, const char *tocfile)
         }
     }
 
-  if (read (fd, &xh, sizeof (xh)) < (int) sizeof (xar_header_t))
+  if (read (fd, &xh, sizeof (xh)) < (int) sizeof (xar_header))
     {
       fprintf (stderr, _("error reading header\n"));
       exit (1);
@@ -2028,7 +2028,7 @@ dumptoc_raw (const char *filename, const char *tocfile)
   hlen = ntohs (xh.size);
   clen = xar_ntoh64 (xh.toc_length_compressed);
 
-  if (hlen < sizeof (xar_header_t))
+  if (hlen < sizeof (xar_header))
     {
       fprintf (stderr,
                _("error reading header (header size field value too small)\n"));

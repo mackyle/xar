@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
 	const char *key;
 	int fd;
 	off_t off;
-	xar_header_t hdr;
+	xar_header hdr;
 	
 	x = xar_open(file, READ);
 	if( !x ) {

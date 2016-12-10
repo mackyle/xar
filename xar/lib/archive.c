@@ -174,11 +174,11 @@ xar_parse_header (xar_archive_t x)
 
   x->header.size = ntohs (x->header.size);
 
-  if (x->header.size > sizeof (xar_header_ex_t))
-    sz2read = (int) sizeof (xar_header_ex_t);
+  if (x->header.size > sizeof (xar_header_ex))
+    sz2read = (int) sizeof (xar_header_ex);
   else
     sz2read = x->header.size;
-  if (x->header.size < sizeof (xar_header_t))
+  if (x->header.size < sizeof (xar_header))
     return -1;
 
   off = (int) (sizeof (x->header.magic) + sizeof (x->header.size));
@@ -197,10 +197,10 @@ xar_parse_header (xar_archive_t x)
     {
       /* Make sure toc_cksum_name is Nul terminated and included in header length */
       size_t max_search = x->header.size;
-      if (max_search > sizeof (xar_header_ex_t))
-        max_search = sizeof (xar_header_ex_t);
-      max_search -= sizeof (xar_header_t);
-      if (x->header.size < sizeof (xar_header_t) + 4
+      if (max_search > sizeof (xar_header_ex))
+        max_search = sizeof (xar_header_ex);
+      max_search -= sizeof (xar_header);
+      if (x->header.size < sizeof (xar_header) + 4
           || (x->header.size & 0x3) != 0)
         return -1;              /* Does not include a name or not multiple of 4 */
       if (!memchr (x->header.toc_cksum_name, 0, max_search))
@@ -720,16 +720,16 @@ xar_close (xar_archive_t x)
       /* populate the header and write it out */
       x->header.magic = htonl (XAR_HEADER_MAGIC);
       if (cksum_alg == XAR_CKSUM_OTHER)
-        x->header.size = ntohs (sizeof (xar_header_ex_t));
+        x->header.size = ntohs (sizeof (xar_header_ex));
       else
-        x->header.size = ntohs (sizeof (xar_header_t));
+        x->header.size = ntohs (sizeof (xar_header));
       x->header.version = ntohs (1);
       x->header.toc_length_uncompressed = xar_ntoh64 (ungztoc);
       x->header.toc_length_compressed = xar_ntoh64 (gztoc);
 
       cnt =
         cksum_alg ==
-        XAR_CKSUM_OTHER ? sizeof (xar_header_ex_t) : sizeof (xar_header_t);
+        XAR_CKSUM_OTHER ? sizeof (xar_header_ex) : sizeof (xar_header);
       wcnt = write (x->fd, &x->header, cnt);
       if (wcnt < 0 || wcnt != (ssize_t) cnt)
         {

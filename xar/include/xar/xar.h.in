@@ -57,27 +57,94 @@ extern "C"
 
 #pragma pack(4)
 
-  struct xar_header
+  /**
+   * Regular header of xar archive.
+   */
+  typedef struct xar_header
   {
+    /**
+     * Magic number
+     *
+     * @see XAR_HEADER_MAGIC
+     */
     uint32_t magic;
-    uint16_t size;
-    uint16_t version;
-    uint64_t toc_length_compressed;
-    uint64_t toc_length_uncompressed;
-    uint32_t cksum_alg;
-  };
 
-  struct xar_header_ex
-  {                             /* Only used when cksum_alg == XAR_CKSUM_OTHER */
-    uint32_t magic;
-    uint16_t size;              /* Must be multiple of 4, but may be any multiple ok so long as Nul terminated toc_cksum_name value is included */
+    /**
+     * Size of header
+     */
+    uint16_t size;
+
+    /**
+     * Archive format version
+     */
     uint16_t version;
+
+    /**
+     * Length of compressed TOC.
+     */
     uint64_t toc_length_compressed;
+
+    /**
+     * Length of uncompressed TOC.
+     */
     uint64_t toc_length_uncompressed;
+
+    /**
+     * Checksum algorithm. If set to XAR_CKSUM_OTHER, xar_header_ex is used
+     * instead of xar_header.
+     *
+     * @see XAR_CKSUM_OTHER
+     * @see xar_header_ex
+     */
     uint32_t cksum_alg;
-    char toc_cksum_name[36];    /* Nul terminated and padded toc checksum style attribute value. */
-    /* Must not be "none" or empty string "" if cksum_alg == XAR_CKSUM_OTHER */
-  };
+  } xar_header;
+
+  /**
+   * Extended header of xar archive.
+   */
+  typedef struct xar_header_ex
+  {
+    /**
+     * Magic number.
+     *
+     * @see XAR_HEADER_MAGIC
+     */
+    uint32_t magic;
+
+    /**
+     * Size of header.
+     */
+    uint16_t size;
+
+    /**
+     * Xar format version.
+     */
+    uint16_t version;
+
+    /**
+     * Length of compressed TOC.
+     */
+    uint64_t toc_length_compressed;
+
+    /**
+     * Length of uncompressed TOC.
+     */
+    uint64_t toc_length_uncompressed;
+
+    /**
+     * Checksum algorithm, here must be set to XAR_CKSUM_OTHER, or otherwise
+     * xar_header is used.
+     *
+     * @see XAR_CKSUM_OTHER
+     * @see xar_header
+     */
+    uint32_t cksum_alg;
+
+    /**
+     * Name of custom TOC checksum type.
+     */
+    char toc_cksum_name[36];
+  } xar_header_ex;
 
 #pragma pack()
 
@@ -320,7 +387,7 @@ extern "C"
     /**
      * Archive header.
      */
-    xar_header_ex_t header;
+    xar_header_ex header;
 
     /**
      * Buffer for reading/writing compressed TOC.
