@@ -75,7 +75,7 @@ typedef struct AppleSingleHeader
    * @see APPLEDOUBLE_VERSION
    */
   uint32_t version;
-  
+
   /**
    * Zero filled.
    */
@@ -129,7 +129,7 @@ typedef enum AppleSingleEntryID
    * Data fork.
    */
   AS_ID_DATA = 1,
-  
+
   /**
    * Resource fork.
    */
@@ -215,7 +215,7 @@ typedef struct AppleSingleEntry
   /**
    * Entry type ID.
    */
-  AppleSingleEntryID entry_id : 32;
+  AppleSingleEntryID entry_id:32;
 
   /**
    * Data offset, measured from the beginning of file.
@@ -368,7 +368,7 @@ typedef struct FinderNInfo
   /**
    * File flags.
    */
-  FinderFlags flags : 16;
+  FinderFlags flags:16;
 
   /**
    * Location of file in directory view.
@@ -555,7 +555,7 @@ typedef struct MSDOSInfo
   /**
    * File attributes.
    */
-  DOSAttr attr : 8;
+  DOSAttr attr:8;
 } __packed MSDOSInfo;
 
 /**
@@ -601,7 +601,7 @@ typedef struct AFPInfo
   /**
    * Attributes.
    */
-  AFPAttr attr : 8;
+  AFPAttr attr:8;
 } __packed AFPInfo;
 
 /**

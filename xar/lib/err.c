@@ -104,7 +104,6 @@ int32_t
 xar_err_callback (xar_archive_t x, int32_t sev, int32_t err)
 {
   if (x->ercallback)
-    return x->ercallback (sev, err, &x->errctx,
-                                x->errctx.usrctx);
+    return x->ercallback (sev, err, &x->errctx, x->errctx.usrctx);
   return 0;
 }

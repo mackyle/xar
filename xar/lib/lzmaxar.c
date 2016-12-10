@@ -94,7 +94,8 @@ struct _lzma_context
 #endif
 
 int
-xar_lzma_fromheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_lzma_fromheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p,
+                        void **context)
 {
 #ifdef HAVE_LIBLZMA
 
@@ -250,7 +251,8 @@ xar_lzma_fromheap_in (xar_archive_t x, xar_file_t f, xar_prop_t p, void **in,
 }
 
 int
-xar_lzma_toheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_lzma_toheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p,
+                      void **context)
 {
 #ifdef HAVE_LIBLZMA
   xar_prop_t tmpp;
@@ -269,7 +271,8 @@ xar_lzma_toheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **contex
       if (tmpp)
         {
           if (LZMA_CONTEXT (context)->lzmaalone)
-            xar_attr_pset ((xar_base_t) f, tmpp, "style", "application/x-lzma");
+            xar_attr_pset ((xar_base_t) f, tmpp, "style",
+                           "application/x-lzma");
           else
             xar_attr_pset ((xar_base_t) f, tmpp, "style", "application/x-xz");
         }

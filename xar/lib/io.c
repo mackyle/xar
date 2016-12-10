@@ -247,8 +247,8 @@ xar_io_seek (xar_archive_t x, xar_file_t f, off_t seekoff)
 }
 
 int32_t
-xar_attrcopy_to_heap (xar_archive_t x, xar_file_t f, xar_prop_t p, read_callback rcb,
-                      void *context)
+xar_attrcopy_to_heap (xar_archive_t x, xar_file_t f, xar_prop_t p,
+                      read_callback rcb, void *context)
 {
   void *modulecontext[sizeof (xar_datamods) / sizeof (struct datamod)];
   int modulecount =
@@ -309,8 +309,7 @@ xar_attrcopy_to_heap (xar_archive_t x, xar_file_t f, xar_prop_t p, read_callback
           do
             {
               r =
-                (int) write (x->heap_fd, ((char *) inbuf) + off,
-                             rsize - off);
+                (int) write (x->heap_fd, ((char *) inbuf) + off, rsize - off);
               if ((r < 0) && (errno != EINTR))
                 return -1;
               off += r;
@@ -438,7 +437,8 @@ xar_attrcopy_to_heap (xar_archive_t x, xar_file_t f, xar_prop_t p, read_callback
   opt = xar_attr_pget ((xar_base_t) f, tmpp, "style");
   if (tmpp && (!opt || !*opt))
     {
-      xar_attr_pset ((xar_base_t) f, tmpp, "style", "application/octet-stream");
+      xar_attr_pset ((xar_base_t) f, tmpp, "style",
+                     "application/octet-stream");
     }
 
   if (asprintf (&tmpstr, "%" PRIu64, writesize) == -1)
@@ -590,7 +590,8 @@ xar_attrcopy_from_heap (xar_archive_t x, xar_file_t f, xar_prop_t p,
 */
 int32_t
 xar_attrcopy_from_heap_to_heap (xar_archive_t xsource, xar_file_t fsource,
-                                xar_prop_t p, xar_archive_t xdest, xar_file_t fdest)
+                                xar_prop_t p, xar_archive_t xdest,
+                                xar_file_t fdest)
 {
   int r, off;
   size_t bsize;
@@ -649,9 +650,7 @@ xar_attrcopy_from_heap_to_heap (xar_archive_t xsource, xar_file_t fsource,
 
       do
         {
-          r =
-            (int) write (xdest->heap_fd, ((char *) inbuf) + off,
-                         r - off);
+          r = (int) write (xdest->heap_fd, ((char *) inbuf) + off, r - off);
           off += r;
           writesize += r;
         }
@@ -747,8 +746,8 @@ write_to_stream (void *inbuf, size_t inlen, xar_stream * stream)
 }
 
 int32_t
-xar_attrcopy_from_heap_to_stream_init (xar_archive_t x, xar_file_t f, xar_prop_t p,
-                                       xar_stream * stream)
+xar_attrcopy_from_heap_to_stream_init (xar_archive_t x, xar_file_t f,
+                                       xar_prop_t p, xar_stream * stream)
 {
   xar_stream_state_t *state;
   off_t seekoff;

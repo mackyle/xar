@@ -437,8 +437,8 @@ x_getprop (xar_file_t f, const char *name, char **value)
 #endif
 
 int32_t
-xar_flags_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
-                   size_t len)
+xar_flags_extract (xar_archive_t x, xar_file_t f, const char *file,
+                   char *buffer, size_t len)
 {
 #ifdef HAVE_CHFLAGS
   char *tmp;
@@ -545,8 +545,8 @@ xar_flags_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer
 }
 
 int32_t
-xar_stat_archive (xar_archive_t x, xar_file_t f, const char *file, const char *buffer,
-                  size_t len)
+xar_stat_archive (xar_archive_t x, xar_file_t f, const char *file,
+                  const char *buffer, size_t len)
 {
   char *tmpstr;
   struct passwd *pw;
@@ -577,9 +577,7 @@ xar_stat_archive (xar_archive_t x, xar_file_t f, const char *file, const char *b
                             XAR_ERR_ARCHIVE_CREATION);
           return -1;
         }
-      tmpf =
-        xar_link_lookup (x, x->sbcache.st_dev, x->sbcache.st_ino,
-                         f);
+      tmpf = xar_link_lookup (x, x->sbcache.st_dev, x->sbcache.st_ino, f);
       if (xar_check_prop (x, "type"))
         {
           xar_prop_set ((xar_base_t) f, "type", "hardlink");
@@ -604,8 +602,7 @@ xar_stat_archive (xar_archive_t x, xar_file_t f, const char *file, const char *b
 
   /* Record major/minor device node numbers */
   if (xar_check_prop (x, "device")
-      && (S_ISBLK (x->sbcache.st_mode)
-          || S_ISCHR (x->sbcache.st_mode)))
+      && (S_ISBLK (x->sbcache.st_mode) || S_ISCHR (x->sbcache.st_mode)))
     {
       uint32_t major, minor;
       char tmpstr[12];
@@ -656,8 +653,7 @@ xar_stat_archive (xar_archive_t x, xar_file_t f, const char *file, const char *b
 
   if (xar_check_prop (x, "mode"))
     {
-      if (asprintf (&tmpstr, "%04o", x->sbcache.st_mode & (~S_IFMT)) ==
-          -1)
+      if (asprintf (&tmpstr, "%04o", x->sbcache.st_mode & (~S_IFMT)) == -1)
         return -1;
       xar_prop_set ((xar_base_t) f, "mode", tmpstr);
       free (tmpstr);
@@ -665,8 +661,7 @@ xar_stat_archive (xar_archive_t x, xar_file_t f, const char *file, const char *b
 
   if (xar_check_prop (x, "uid"))
     {
-      if (asprintf (&tmpstr, "%" PRIu64, (uint64_t) x->sbcache.st_uid)
-          == -1)
+      if (asprintf (&tmpstr, "%" PRIu64, (uint64_t) x->sbcache.st_uid) == -1)
         return -1;
       xar_prop_set ((xar_base_t) f, "uid", tmpstr);
       free (tmpstr);
@@ -681,8 +676,7 @@ xar_stat_archive (xar_archive_t x, xar_file_t f, const char *file, const char *b
 
   if (xar_check_prop (x, "gid"))
     {
-      if (asprintf (&tmpstr, "%" PRIu64, (uint64_t) x->sbcache.st_gid)
-          == -1)
+      if (asprintf (&tmpstr, "%" PRIu64, (uint64_t) x->sbcache.st_gid) == -1)
         return -1;
       xar_prop_set ((xar_base_t) f, "gid", tmpstr);
       free (tmpstr);
@@ -925,8 +919,8 @@ xar_set_perm (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
 }
 
 int32_t
-xar_stat_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
-                  size_t len)
+xar_stat_extract (xar_archive_t x, xar_file_t f, const char *file,
+                  char *buffer, size_t len)
 {
   const char *opt;
   int ret, fd;
@@ -1053,8 +1047,8 @@ xar_stat_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
 
                   xar_prop_set ((xar_base_t) f, ptr, val);
                   a = xar_iter_new ();
-                  for (akey = xar_attr_first ((xar_base_t) tmpf, ptr, a); akey;
-                       akey = xar_attr_next (a))
+                  for (akey = xar_attr_first ((xar_base_t) tmpf, ptr, a);
+                       akey; akey = xar_attr_next (a))
                     {
                       aval = xar_attr_get ((xar_base_t) tmpf, ptr, akey);
                       xar_attr_set ((xar_base_t) f, ptr, akey, aval);

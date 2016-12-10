@@ -85,7 +85,8 @@ struct fi
  * This function is used from the nonea_archive() function.
  */
 static int32_t
-finfo_read (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *context)
+finfo_read (xar_archive_t x, xar_file_t f, void *buf, size_t len,
+            void *context)
 {
   (void) x;
   (void) f;
@@ -105,7 +106,8 @@ finfo_read (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *context)
  * This function is used from the nonea_extract() function.
  */
 static int32_t
-finfo_write (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *context)
+finfo_write (xar_archive_t x, xar_file_t f, void *buf, size_t len,
+             void *context)
 {
   struct attrlist attrs;
   struct fi finfo;
@@ -162,7 +164,8 @@ xar_rsrc_read (xar_archive_t x, xar_file_t f, void *inbuf, size_t bsize,
  * in nonea_extract() and underbar_extract().
  */
 static int32_t
-xar_rsrc_write (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *context)
+xar_rsrc_write (xar_archive_t x, xar_file_t f, void *buf, size_t len,
+                void *context)
 {
   int32_t r;
   size_t off = 0;
@@ -185,7 +188,8 @@ xar_rsrc_write (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *cont
 #if defined(HAVE_GETXATTR)
 
 static int32_t
-xar_ea_read (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *context)
+xar_ea_read (xar_archive_t x, xar_file_t f, void *buf, size_t len,
+             void *context)
 {
   (void) x;
   (void) f;
@@ -225,7 +229,8 @@ xar_ea_read (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *context
 }
 
 static int32_t
-xar_ea_write (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *context)
+xar_ea_write (xar_archive_t x, xar_file_t f, void *buf, size_t len,
+              void *context)
 {
   (void) x;
   (void) f;
@@ -486,7 +491,8 @@ nonea_extract (xar_archive_t x, xar_file_t f, const char *file, void *context)
  * stop the archival process.
  */
 xar_file_t
-xar_underbar_check (xar_archive_t x, xar_file_t f, const char *file, void *context)
+xar_underbar_check (xar_archive_t x, xar_file_t f, const char *file,
+                    void *context)
 {
   char *bname, *tmp;
 
@@ -560,7 +566,8 @@ xar_underbar_check (xar_archive_t x, xar_file_t f, const char *file, void *conte
 #ifdef __APPLE__
 /* This only really makes sense on OSX */
 static int32_t
-underbar_archive (xar_archive_t x, xar_file_t f, const char *file, void *context)
+underbar_archive (xar_archive_t x, xar_file_t f, const char *file,
+                  void *context)
 {
   struct stat sb;
   char underbarname[4096], z[32];
@@ -686,7 +693,8 @@ underbar_archive (xar_archive_t x, xar_file_t f, const char *file, void *context
  * ._ file.
  */
 static int32_t
-underbar_extract (xar_archive_t x, xar_file_t f, const char *file, void *context)
+underbar_extract (xar_archive_t x, xar_file_t f, const char *file,
+                  void *context)
 {
   char underbarname[4096];
   char *dname, *bname, *tmp, *tmp2;
@@ -782,7 +790,8 @@ underbar_extract (xar_archive_t x, xar_file_t f, const char *file, void *context
 
 #if defined(__APPLE__)
 static int32_t
-stragglers_archive (xar_archive_t x, xar_file_t f, const char *file, void *context)
+stragglers_archive (xar_archive_t x, xar_file_t f, const char *file,
+                    void *context)
 {
 #ifdef HAVE_GETATTRLIST
   struct fits
@@ -833,7 +842,8 @@ stragglers_archive (xar_archive_t x, xar_file_t f, const char *file, void *conte
 }
 
 static int32_t
-stragglers_extract (xar_archive_t x, xar_file_t f, const char *file, void *context)
+stragglers_extract (xar_archive_t x, xar_file_t f, const char *file,
+                    void *context)
 {
 #ifdef HAVE_GETATTRLIST
   const char *tmpc = NULL;
@@ -900,8 +910,8 @@ xar_darwinattr_archive (xar_archive_t x, xar_file_t f, const char *file,
 }
 
 int32_t
-xar_darwinattr_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
-                        size_t len)
+xar_darwinattr_extract (xar_archive_t x, xar_file_t f, const char *file,
+                        char *buffer, size_t len)
 {
   struct _darwinattr_context context;
 

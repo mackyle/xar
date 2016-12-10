@@ -271,8 +271,8 @@ BAIL:
 }
 
 int32_t
-xar_linuxattr_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
-                       size_t len)
+xar_linuxattr_extract (xar_archive_t x, xar_file_t f, const char *file,
+                       char *buffer, size_t len)
 {
 #if defined HAVE_SYS_XATTR_H && defined(HAVE_LSETXATTR) && !defined(__APPLE__)
   const char *fsname = "bogus";

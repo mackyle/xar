@@ -188,8 +188,7 @@ xar_subdoc_serialize (xar_subdoc_t s, xmlTextWriterPtr writer, int wrap)
   if (wrap)
     {
       xmlTextWriterStartElementNS (writer, BAD_CAST (s->prefix),
-                                   BAD_CAST ("subdoc"),
-                                   BAD_CAST (s->ns));
+                                   BAD_CAST ("subdoc"), BAD_CAST (s->ns));
       xmlTextWriterWriteAttribute (writer, BAD_CAST ("subdoc_name"),
                                    BAD_CAST (s->name));
       if (s->value)

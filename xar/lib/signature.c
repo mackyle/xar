@@ -94,8 +94,7 @@ xar_signature_new (xar_archive_t x, const char *type, int32_t length,
        * despite the fact that the xar signatures are implemented as a list.  This is an Apple xar 1.4 edit
        * to allow that list to grow beyond 2
        */
-      for (sig = x->signatures; sig->next;
-           sig = sig->next);
+      for (sig = x->signatures; sig->next; sig = sig->next);
 
       sig->next = ret;
     }
@@ -153,8 +152,7 @@ xar_signature_add_x509certificate (xar_signature_t sig,
       xar_x509cert *cert;
 
       /* Find the end of the linked list */
-      for (cert = sig->x509certs; cert->next;
-           cert = cert->next);
+      for (cert = sig->x509certs; cert->next; cert = cert->next);
 
       cert->next = newcert;
     }
@@ -542,8 +540,7 @@ xar_signature_serialize (xar_signature_t sig, xmlTextWriterPtr writer)
 
   /* <size> */
   xmlTextWriterStartElementNS (writer, NULL, BAD_CAST ("size"), NULL);
-  xmlTextWriterWriteFormatString (writer, "%" PRId32,
-                                  (sig->len));
+  xmlTextWriterWriteFormatString (writer, "%" PRId32, (sig->len));
   xmlTextWriterEndElement (writer);
 
   /* <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"> */
@@ -589,7 +586,7 @@ xar_signature_serialize (xar_signature_t sig, xmlTextWriterPtr writer)
 }
 
 void
-_xar_signature_remove_cert (xar_x509cert *cert)
+_xar_signature_remove_cert (xar_x509cert * cert)
 {
   xar_x509cert *next;
 

@@ -154,8 +154,7 @@ xar_parse_header (xar_archive_t x)
    * expected header length.
    */
   r =
-    xar_read_fd (x->fd, (char *) &x->header.magic,
-                 sizeof (x->header.magic));
+    xar_read_fd (x->fd, (char *) &x->header.magic, sizeof (x->header.magic));
   if (r == -1)
     return -1;
 
@@ -169,9 +168,7 @@ xar_parse_header (xar_archive_t x)
       return -1;
     }
 
-  r =
-    xar_read_fd (x->fd, (char *) &x->header.size,
-                 sizeof (x->header.size));
+  r = xar_read_fd (x->fd, (char *) &x->header.size, sizeof (x->header.size));
   if (r == -1)
     return -1;
 
@@ -184,11 +181,8 @@ xar_parse_header (xar_archive_t x)
   if (x->header.size < sizeof (xar_header_t))
     return -1;
 
-  off =
-    (int) (sizeof (x->header.magic) + sizeof (x->header.size));
-  r =
-    xar_read_fd (x->fd, ((char *) &x->header) + off,
-                 sz2read - off);
+  off = (int) (sizeof (x->header.magic) + sizeof (x->header.size));
+  r = xar_read_fd (x->fd, ((char *) &x->header) + off, sz2read - off);
   if (r == -1)
     return -1;
 
@@ -395,7 +389,8 @@ xar_open (const char *file, int32_t flags)
        * file! <rdar://problem/6134714>
        */
       cksum_match = 0;
-      cksum_style = xar_attr_get ((const xar_base_t) ret, "checksum", "style");
+      cksum_style =
+        xar_attr_get ((const xar_base_t) ret, "checksum", "style");
       switch (ret->header.cksum_alg)
         {
         case XAR_CKSUM_NONE:
@@ -575,8 +570,7 @@ xar_close (xar_archive_t x)
             cksum_alg = XAR_CKSUM_SHA1;
           else if (strcmp (md_name, XAR_OPT_VAL_MD5) == 0)
             cksum_alg = XAR_CKSUM_MD5;
-          else if (strlen (md_name) + 1 >
-                   sizeof (x->header.toc_cksum_name))
+          else if (strlen (md_name) + 1 > sizeof (x->header.toc_cksum_name))
             {
               retval = -1;
               goto CLOSE_BAIL;
@@ -759,9 +753,7 @@ xar_close (xar_archive_t x)
           off = 0;
           do
             {
-              r =
-                (int) write (x->fd, ((char *) rbuf) + off,
-                             wbytes - off);
+              r = (int) write (x->fd, ((char *) rbuf) + off, wbytes - off);
               if ((r < 0) && (errno == EINTR))
                 continue;
               if (r < 0)
@@ -807,8 +799,7 @@ xar_close (xar_archive_t x)
           uint8_t *signed_data = NULL;
 
           /* Loop through the signatures */
-          for (sig = x->signatures; sig;
-               sig = sig->next)
+          for (sig = x->signatures; sig; sig = sig->next)
             {
               signed_len = sig->len;
 
@@ -832,9 +823,7 @@ xar_close (xar_archive_t x)
                 }
 
               /* Write the signed data to the heap */
-              wcnt =
-                write (x->fd, signed_data,
-                       (size_t) sig->len);
+              wcnt = write (x->fd, signed_data, (size_t) sig->len);
               if (wcnt < 0 || wcnt != (ssize_t) sig->len)
                 {
                   xar_err_new (x);
@@ -1098,8 +1087,8 @@ xar_opt_unset (xar_archive_t x, const char *option)
  * level node of the archive, x.
  */
 static xar_file_t
-xar_add_node (xar_archive_t x, xar_file_t f, const char *name, const char *prefix,
-              const char *realpath, int srcpath)
+xar_add_node (xar_archive_t x, xar_file_t f, const char *name,
+              const char *prefix, const char *realpath, int srcpath)
 {
   xar_file_t ret;
   const char *path;
@@ -1125,8 +1114,7 @@ xar_add_node (xar_archive_t x, xar_file_t f, const char *name, const char *prefi
       if (!ret)
         return NULL;
       memset (idstr, 0, sizeof (idstr));
-      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64,
-                ++x->last_fileid);
+      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64, ++x->last_fileid);
       xar_attr_set ((xar_base_t) ret, NULL, "id", idstr);
       ret->parent = NULL;
       ret->fspath = tmp;
@@ -1174,8 +1162,7 @@ xar_add_node (xar_archive_t x, xar_file_t f, const char *name, const char *prefi
       if (!ret)
         return NULL;
       memset (idstr, 0, sizeof (idstr));
-      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64,
-                ++x->last_fileid);
+      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64, ++x->last_fileid);
       xar_attr_set ((xar_base_t) ret, NULL, "id", idstr);
       ret->fspath = tmp;
     }
@@ -1190,16 +1177,14 @@ xar_add_node (xar_archive_t x, xar_file_t f, const char *name, const char *prefi
           if (ret == f->children)
             f->children = ret->next;
           else
-            for (i = f->children; i && (i->next != ret);
-                 i = i->next);
+            for (i = f->children; i && (i->next != ret); i = i->next);
         }
       else
         {
           if (ret == x->files)
             x->files = ret->next;
           else
-            for (i = x->files; i && (i->next != ret);
-                 i = i->next);
+            for (i = x->files; i && (i->next != ret); i = i->next);
         }
       if (i)
         i->next = ret->next;
@@ -1241,8 +1226,7 @@ xar_add_pseudodir (xar_archive_t x, xar_file_t f, const char *name,
       if (!ret)
         return NULL;
       memset (idstr, 0, sizeof (idstr));
-      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64,
-                ++x->last_fileid);
+      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64, ++x->last_fileid);
       xar_attr_set ((xar_base_t) ret, NULL, "id", idstr);
       ret->parent = NULL;
       ret->fspath = tmp;
@@ -1290,8 +1274,7 @@ xar_add_pseudodir (xar_archive_t x, xar_file_t f, const char *name,
       if (!ret)
         return NULL;
       memset (idstr, 0, sizeof (idstr));
-      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64,
-                ++x->last_fileid);
+      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64, ++x->last_fileid);
       xar_attr_set ((xar_base_t) ret, NULL, "id", idstr);
       ret->fspath = tmp;
     }
@@ -1309,7 +1292,8 @@ xar_add_pseudodir (xar_archive_t x, xar_file_t f, const char *name,
  * If f is NULL, will start with x->files.
  */
 static xar_file_t
-xar_add_r (xar_archive_t x, xar_file_t f, const char *path, const char *prefix)
+xar_add_r (xar_archive_t x, xar_file_t f, const char *path,
+           const char *prefix)
 {
   xar_file_t i = NULL, ret, ret2, start = NULL;
   char *tmp1, *tmp2, *tmp3;
@@ -1475,8 +1459,7 @@ xar_add_frombuffer (xar_archive_t x, xar_file_t parent, const char *name,
       if (!ret)
         return NULL;
       memset (idstr, 0, sizeof (idstr));
-      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64,
-                ++x->last_fileid);
+      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64, ++x->last_fileid);
       xar_attr_set ((xar_base_t) ret, NULL, "id", idstr);
       ret->parent = NULL;
       if (x->files == NULL)
@@ -1496,8 +1479,7 @@ xar_add_frombuffer (xar_archive_t x, xar_file_t parent, const char *name,
       if (!ret)
         return NULL;
       memset (idstr, 0, sizeof (idstr));
-      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64,
-                ++x->last_fileid);
+      snprintf (idstr, sizeof (idstr) - 1, "%" PRIu64, ++x->last_fileid);
       xar_attr_set ((xar_base_t) ret, NULL, "id", idstr);
       ret->fspath = NULL;
     }
@@ -1510,13 +1492,11 @@ xar_add_frombuffer (xar_archive_t x, xar_file_t parent, const char *name,
       xar_file_t i;
       if (parent)
         {
-          for (i = parent->children;
-               i && (i->next != ret); i = i->next);
+          for (i = parent->children; i && (i->next != ret); i = i->next);
         }
       else
         {
-          for (i = x->files; i && (i->next != ret);
-               i = i->next);
+          for (i = x->files; i && (i->next != ret); i = i->next);
         }
       if (i)
         i->next = ret->next;
@@ -1528,7 +1508,8 @@ xar_add_frombuffer (xar_archive_t x, xar_file_t parent, const char *name,
 }
 
 xar_file_t
-xar_add_folder (xar_archive_t x, xar_file_t f, const char *name, struct stat * info)
+xar_add_folder (xar_archive_t x, xar_file_t f, const char *name,
+                struct stat * info)
 {
   xar_file_t ret;
   char idstr[32];
@@ -1568,13 +1549,11 @@ xar_add_folder (xar_archive_t x, xar_file_t f, const char *name, struct stat * i
       xar_file_t i;
       if (f)
         {
-          for (i = f->children; i && (i->next != ret);
-               i = i->next);
+          for (i = f->children; i && (i->next != ret); i = i->next);
         }
       else
         {
-          for (i = x->files; i && (i->next != ret);
-               i = i->next);
+          for (i = x->files; i && (i->next != ret); i = i->next);
         }
       if (i)
         i->next = ret->next;
@@ -1697,7 +1676,8 @@ xar_extract_tobuffer (xar_archive_t x, xar_file_t f, char **buffer)
 * Example: xar_extract_tobuffer(x, "foo/bar/blah",&buffer)
 */
 int32_t
-xar_extract_tobuffersz (xar_archive_t x, xar_file_t f, char **buffer, size_t * size)
+xar_extract_tobuffersz (xar_archive_t x, xar_file_t f, char **buffer,
+                        size_t * size)
 {
   const char *sizestring = NULL;
   int32_t ret;
@@ -1807,8 +1787,7 @@ xar_extract (xar_archive_t x, xar_file_t f)
 
   fspath = f->fspath;
   if (x->stripcomps
-      && (fspath =
-          xar_strip_components (fspath, x->stripcomps)) == NULL)
+      && (fspath = xar_strip_components (fspath, x->stripcomps)) == NULL)
     return -1;
   if (x->tostdout)
     {
@@ -1884,8 +1863,7 @@ toc_read_callback (void *context, char *buffer, int len)
                              (size_t) (x->header.toc_length_compressed -
                                        x->toc_count));
       else
-        ret =
-          (int) read (x->fd, x->readbuf, x->readbuf_len);
+        ret = (int) read (x->fd, x->readbuf, x->readbuf_len);
       if (ret == -1)
         return ret;
 
@@ -1898,8 +1876,7 @@ toc_read_callback (void *context, char *buffer, int len)
 
   if (off && (off < (int) x->readbuf_len))
     x->readbuf_len = off;
-  x->zs.next_in =
-    ((unsigned char *) x->readbuf) + x->offset;
+  x->zs.next_in = ((unsigned char *) x->readbuf) + x->offset;
   x->zs.avail_in = (unsigned) (x->readbuf_len - x->offset);
   x->zs.next_out = (void *) buffer;
   x->zs.avail_out = len;
@@ -1975,8 +1952,7 @@ xar_unserialize (xar_archive_t x)
   int type, noattr, ret;
 
   reader =
-    xmlReaderForIO (toc_read_callback, close_callback, x, NULL, NULL,
-                    0);
+    xmlReaderForIO (toc_read_callback, close_callback, x, NULL, NULL, 0);
   if (!reader)
     return -1;
 
@@ -2026,8 +2002,7 @@ xar_unserialize (xar_archive_t x)
                                 }
 
                               if (x->signatures)
-                                x->signatures->next =
-                                  sig;
+                                x->signatures->next = sig;
                               else
                                 x->signatures = sig;
 

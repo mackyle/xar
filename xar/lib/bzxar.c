@@ -65,7 +65,8 @@ struct _bzip_context
 #endif
 
 int
-xar_bzip_fromheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_bzip_fromheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p,
+                        void **context)
 {
 #ifdef HAVE_LIBBZ2
 
@@ -189,7 +190,8 @@ xar_bzip_fromheap_in (xar_archive_t x, xar_file_t f, xar_prop_t p, void **in,
 }
 
 int
-xar_bzip_toheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_bzip_toheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p,
+                      void **context)
 {
 #ifdef HAVE_LIBBZ2
   xar_prop_t tmpp;

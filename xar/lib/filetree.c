@@ -407,8 +407,7 @@ xar_prop_next (xar_iter_t i)
       char *tmp = i->path;
       if (tmp)
         {
-          err =
-            asprintf (&i->path, "%s/%s", tmp, p->key);
+          err = asprintf (&i->path, "%s/%s", tmp, p->key);
           free (tmp);
         }
       else
@@ -456,8 +455,7 @@ SUCCESS:
     {
       int err;
       char *result = NULL;
-      err =
-        asprintf (&result, "%s/%s", i->path, p->key);
+      err = asprintf (&result, "%s/%s", i->path, p->key);
       i->node = result;
     }
   else
@@ -896,8 +894,7 @@ xar_file_new (xar_file_t f)
         }
       else
         {
-          for (i = f->children; i->next;
-               i = i->next);
+          for (i = f->children; i->next; i = i->next);
           i->next = ret;
         }
     }
@@ -1130,18 +1127,15 @@ xar_prop_serialize (xar_prop_t p, xmlTextWriterPtr writer)
 
               tmp = malloc (len);
               assert (tmp);
-              if (UTF8Toisolat1
-                  (tmp, &len, BAD_CAST (i->value), &inlen) < 0)
+              if (UTF8Toisolat1 (tmp, &len, BAD_CAST (i->value), &inlen) < 0)
                 {
                   xmlTextWriterWriteAttribute (writer, BAD_CAST ("enctype"),
                                                BAD_CAST ("base64"));
                   xmlTextWriterWriteBase64 (writer, i->value, 0,
-                                            (int)
-                                            strlen (i->value));
+                                            (int) strlen (i->value));
                 }
               else
-                xmlTextWriterWriteString (writer,
-                                          BAD_CAST (i->value));
+                xmlTextWriterWriteString (writer, BAD_CAST (i->value));
               free (tmp);
             }
           else
@@ -1269,8 +1263,7 @@ xar_prop_unserialize (xar_file_t f, xar_prop_t parent,
                   int err;
                   err =
                     asprintf ((char **) &f->fspath, "%s/%s",
-                              f->parent->fspath,
-                              p->value);
+                              f->parent->fspath, p->value);
                 }
               else
                 {
@@ -1298,7 +1291,8 @@ xar_prop_unserialize (xar_file_t f, xar_prop_t parent,
  * and child files.
  */
 xar_file_t
-xar_file_unserialize (xar_archive_t x, xar_file_t parent, xmlTextReaderPtr reader)
+xar_file_unserialize (xar_archive_t x, xar_file_t parent,
+                      xmlTextReaderPtr reader)
 {
   xar_file_t ret;
   const char *name;
@@ -1339,8 +1333,7 @@ xar_file_unserialize (xar_archive_t x, xar_file_t parent, xmlTextReaderPtr reade
               if (opt && (strcmp (opt, "original") == 0))
                 {
                   opt = xar_attr_get ((xar_base_t) ret, NULL, "id");
-                  xmlHashAddEntry (x->link_hash, BAD_CAST (opt),
-                                   ret);
+                  xmlHashAddEntry (x->link_hash, BAD_CAST (opt), ret);
                 }
             }
           return ret;

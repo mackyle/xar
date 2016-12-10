@@ -98,8 +98,8 @@ xar_arcmod_archive (xar_archive_t x, xar_file_t f, const char *file,
  * Summary: This is the entry point to actual file archival.
  */
 int32_t
-xar_arcmod_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
-                    size_t len)
+xar_arcmod_extract (xar_archive_t x, xar_file_t f, const char *file,
+                    char *buffer, size_t len)
 {
   int i;
   int32_t ret;

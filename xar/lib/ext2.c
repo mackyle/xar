@@ -197,8 +197,8 @@ e2prop_get (xar_file_t f, const char *name, char **value)
 #endif
 
 int
-xar_ext2attr_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
-                      size_t len)
+xar_ext2attr_extract (xar_archive_t x, xar_file_t f, const char *file,
+                      char *buffer, size_t len)
 {
 #if (defined(HAVE_EXT2FS_EXT2_FS_H) || defined(HAVE_LINUX_EXT2_FS_H)) && !defined(__CYGWIN__)
   int fd = -1, version, flags = 0;

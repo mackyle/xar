@@ -117,7 +117,8 @@ xar_data_read (xar_archive_t x, xar_file_t f, void *inbuf, size_t bsize,
 }
 
 int32_t
-xar_data_write (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *context)
+xar_data_write (xar_archive_t x, xar_file_t f, void *buf, size_t len,
+                void *context)
 {
   int32_t r;
   size_t off = 0;
@@ -162,8 +163,8 @@ xar_data_write (xar_archive_t x, xar_file_t f, void *buf, size_t len, void *cont
  * data into the heap file.
  */
 int32_t
-xar_data_archive (xar_archive_t x, xar_file_t f, const char *file, const char *buffer,
-                  size_t len)
+xar_data_archive (xar_archive_t x, xar_file_t f, const char *file,
+                  const char *buffer, size_t len)
 {
   const char *opt;
   int32_t retval = 0;
@@ -233,8 +234,8 @@ xar_data_archive (xar_archive_t x, xar_file_t f, const char *file, const char *b
 }
 
 int32_t
-xar_data_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
-                  size_t len)
+xar_data_extract (xar_archive_t x, xar_file_t f, const char *file,
+                  char *buffer, size_t len)
 {
   const char *opt;
   int32_t retval = 0;

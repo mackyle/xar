@@ -325,8 +325,8 @@ BAIL:
 }
 
 int32_t
-xar_fbsdattr_extract (xar_archive_t x, xar_file_t f, const char *file, char *buffer,
-                      size_t len)
+xar_fbsdattr_extract (xar_archive_t x, xar_file_t f, const char *file,
+                      char *buffer, size_t len)
 {
 #ifdef HAVE_SYS_EXTATTR_H
   char *fsname = "bogus";

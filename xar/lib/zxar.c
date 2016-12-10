@@ -61,7 +61,8 @@ struct _gzip_context
 #define GZIP_CONTEXT(x) ((struct _gzip_context *)(*x))
 
 int
-xar_gzip_fromheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_gzip_fromheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p,
+                        void **context)
 {
 
   (void) x;
@@ -157,7 +158,8 @@ xar_gzip_fromheap_in (xar_archive_t x, xar_file_t f, xar_prop_t p, void **in,
 }
 
 int
-xar_gzip_toheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p, void **context)
+xar_gzip_toheap_done (xar_archive_t x, xar_file_t f, xar_prop_t p,
+                      void **context)
 {
   xar_prop_t tmpp;
 
