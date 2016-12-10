@@ -31,7 +31,7 @@ AC_CHECK_MEMBER([struct statfs.f_fstypename])
 AC_CHECK_MEMBER([struct statvfs.f_fstypename])
 AC_CHECK_MEMBER([struct stat.st_flags])
 
-AC_SEARCH_LIBS([acl_get_file], [acl])
+AC_CHECK_LIB([acl], [acl_get_file])
 
 AC_CHECK_FUNCS([asprintf])
 
