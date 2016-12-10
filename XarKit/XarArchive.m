@@ -66,7 +66,7 @@ err_callback(int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
 	[super dealloc];
 }
 
-- (xar_t)xar
+- (xar_archive_t)xar
 {
 	return xar;
 }

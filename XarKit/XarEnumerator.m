@@ -1,7 +1,7 @@
 #import "XarEnumerator.h"
 #import "XarArchive.h"
 #import "XarFile.h"
-//#import "XarSubdoc.h"
+#import "XarSubdoc.h"
 
 enum {
 	XarFileEnumerator,
@@ -23,6 +23,11 @@ enum {
 + (id)propEnumeratorWithFile:(XarFile *)file
 {
 	return [[[self alloc] initWithObject:file type:XarPropEnumerator] autorelease];
+}
+
++ (id)propEnumeratorWithSubdoc:(XarSubdoc *)subdoc
+{
+	return [[[self alloc] initWithObject:subdoc type:XarPropEnumerator] autorelease];
 }
 
 + (id)subdocEnumeratorWithArchive:(XarArchive *)archive
@@ -96,7 +101,7 @@ enum {
 		case XarSubdocEnumerator:
 			subdoc = currentSubdoc;
 			currentSubdoc = xar_subdoc_next(currentSubdoc);
-			//ret = [XarSubdoc xarSubdocWithSubdoc:subdoc];
+			ret = [XarSubdoc xarSubdocWithSubdoc:subdoc];
 			break;
 	}
 
@@ -123,7 +128,7 @@ enum {
 			break;
 		case XarSubdocEnumerator:
 			for (subdoc = currentSubdoc; subdoc; subdoc = xar_subdoc_next(subdoc)) {
-				//[array addObject:[XarSubdoc xarSubdocWithSubdoc:subdoc];
+				[array addObject:[XarSubdoc xarSubdocWithSubdoc:subdoc]];
 			}
 			break;
 	}

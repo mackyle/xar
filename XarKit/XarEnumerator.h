@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <xar/xar.h>
 
-@class XarArchive, XarFile;
+@class XarArchive, XarFile, XarSubdoc;
 
 @interface XarEnumerator : NSEnumerator
 {
@@ -14,6 +14,7 @@
 
 + (id)fileEnumeratorWithArchive:(XarArchive *)archive;
 + (id)propEnumeratorWithFile:(XarFile *)archive;
++ (id)propEnumeratorWithSubdoc:(XarSubdoc *)archive;
 + (id)subdocEnumeratorWithArchive:(XarArchive *)archive;
 
 @end

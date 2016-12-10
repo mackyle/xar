@@ -2,8 +2,10 @@ if HAVE_GNUSTEP
 lib_LTLIBRARIES = libXarKit.la
 libXarKit_la_SOURCES = \
                        XarArchive.m \
+                       XarBase.m \
                        XarEnumerator.m \
-                       XarFile.m
+                       XarFile.m \
+                       XarSubdoc.m
 
 libXarKit_la_LIBADD = \
                       ../xar/lib/libxar.la \
@@ -15,9 +17,11 @@ libXarKit_la_LIBADD = \
 xincludedir = $(includedir)/XarKit
 xinclude_HEADERS = \
                    XarArchive.h \
+                   XarBase.h \
                    XarEnumerator.h \
                    XarFile.h \
-                   XarKit.h
+                   XarKit.h \
+                   XarSubdoc.h
 
 mostlyclean-hook:
 	rm -rf XarKit.framework
