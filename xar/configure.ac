@@ -1,7 +1,7 @@
 AC_PREREQ(2.59)
 AC_INIT([Xar-Core], [2.0.0], [xar-devel@googlegroups.com], [xar-core])
 AC_CONFIG_SRCDIR([lib/util.c])
-AC_CONFIG_HEADERS([include/config.h])
+AC_CONFIG_HEADERS([include/config.h include/xar/config.h])
 AC_CONFIG_AUX_DIR([../build-aux])
 AC_CONFIG_MACRO_DIR([../m4])
 AM_INIT_AUTOMAKE([foreign])
@@ -9,7 +9,8 @@ AM_INIT_AUTOMAKE([foreign])
 LT_INIT
 
 dnl xar version variables.
-AC_SUBST([XAR_NUMERIC_VERSION], [0x01060180])
+AC_DEFINE([XAR_VERSION_NUM], [0x01060180], [Numeric version of xar])
+AC_DEFINE_UNQUOTED([XAR_VERSION], "${PACKAGE_VERSION}", [String version of xar])
 AC_PROG_CPP
 AC_PROG_CC
 
@@ -49,7 +50,6 @@ AC_DEFINE([GETTEXT_DOMAIN], ["xar"], [Domain of messages for Gettext])
 
 AC_CONFIG_FILES([Makefile
                  include/Makefile
-                 include/xar/xar.h
                  lib/Makefile
                  po/Makefile.in
                  src/Makefile

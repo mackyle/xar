@@ -38,8 +38,7 @@
 #ifndef _XAR_H_
 #define _XAR_H_
 
-#define XAR_VERSION "@PACKAGE_VERSION@"
-#define XAR_VERSION_NUM @XAR_NUMERIC_VERSION@
+#include <xar/config.h>
 
 #include <sys/types.h>
 #include <stdbool.h>

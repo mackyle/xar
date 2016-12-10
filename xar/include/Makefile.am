@@ -22,14 +22,15 @@ nobase_include_HEADERS = \
                          xar/strmode.h \
                          xar/subdoc.h \
                          xar/util.h \
+                         xar/xar.h \
                          xar/zxar.h
 
 DISTCLEANFILES = config.h
 
-nobase_nodist_include_HEADERS = xar/xar.h
+nobase_nodist_include_HEADERS = xar/config.h
 
-EXTRA_DIST = config.h.in xar/xar.h.in
+EXTRA_DIST = config.h.in xar/config.h.in
 
-xar/xar.h: $(srcdir)/xar/xar.h.in
+xar/config.h: $(srcdir)/xar/config.h.in
 	$(AM_V_GEN)(cd $(top_builddir) && $(SHELL) ./config.status \
-        include/xar/xar.h || exit $$?)
+        include/xar/config.h || exit $$?)

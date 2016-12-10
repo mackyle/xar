@@ -1,0 +1,7 @@
+#ifndef _XAR_CONFIG_H_
+#define _XAR_CONFIG_H_
+
+#undef XAR_VERSION
+#undef XAR_VERSION_NUM
+
+#endif
