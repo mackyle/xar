@@ -70,8 +70,8 @@ x_addprop (xar_file_t f, const char *name)
   char opt[1024];
   memset (opt, 0, sizeof (opt));
   snprintf (opt, sizeof (opt) - 1, "%s/%s", XAR_ATTR_FORK, name);
-  xar_prop_set (f, opt, NULL);
-  xar_attr_set (f, opt, "fstype", "ext2");
+  xar_prop_set ((xar_base_t) f, opt, NULL);
+  xar_attr_set ((xar_base_t) f, opt, "fstype", "ext2");
   return;
 }
 #endif
@@ -93,7 +93,7 @@ xar_ext2attr_archive (xar_archive_t x, xar_file_t f, const char *file,
   if (len)
     return 0;
 
-  xar_prop_get (f, "type", &opt);
+  xar_prop_get ((xar_base_t) f, "type", &opt);
   if (!opt)
     return 0;
   if (strcmp (opt, "file") != 0)
@@ -122,9 +122,9 @@ xar_ext2attr_archive (xar_archive_t x, xar_file_t f, const char *file,
   if (flags == 0)
     goto BAIL;
 
-  xar_prop_set (f, XAR_EXT2_FORK, NULL);
+  xar_prop_set ((xar_base_t) f, XAR_EXT2_FORK, NULL);
   if (asprintf (&vstr, "%d", version) != -1)
-    xar_attr_set (f, XAR_EXT2_FORK, "version", vstr);
+    xar_attr_set ((xar_base_t) f, XAR_EXT2_FORK, "version", vstr);
   free (vstr);
 
   if (!(flags & ~EXT2_SECRM_FL))
@@ -194,7 +194,7 @@ e2prop_get (xar_file_t f, const char *name, char **value)
 
   memset (v, 0, sizeof (v));
   snprintf (v, sizeof (v) - 1, "%s/%s", XAR_ATTR_FORK, name);
-  return xar_prop_get (f, v, (const char **) value);
+  return xar_prop_get ((xar_base_t) f, v, (const char **) value);
 }
 #endif
 
@@ -212,10 +212,10 @@ xar_ext2attr_extract (xar_archive_t x, xar_file_t f, const char *file,
   if (len)
     return 0;
 
-  if (xar_prop_get (f, XAR_EXT2_FORK, NULL) == 0)
+  if (xar_prop_get ((xar_base_t) f, XAR_EXT2_FORK, NULL) == 0)
     {
       const char *temp;
-      temp = xar_attr_get (f, XAR_EXT2_FORK, "version");
+      temp = xar_attr_get ((xar_base_t) f, XAR_EXT2_FORK, "version");
       version = strtol (temp, NULL, 10);
       fd = open (file, O_RDONLY);
       if (fd < 0)
@@ -223,7 +223,7 @@ xar_ext2attr_extract (xar_archive_t x, xar_file_t f, const char *file,
       ioctl (fd, EXT2_IOC_SETVERSION, &version);
     }
 
-  if (xar_prop_get (f, XAR_ATTR_FORK, NULL))
+  if (xar_prop_get ((xar_base_t) f, XAR_ATTR_FORK, NULL))
     {
       if (fd >= 0)
         close (fd);
