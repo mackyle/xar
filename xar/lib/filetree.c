@@ -68,17 +68,6 @@
  * The file has an attribute of "id" with a value of "42".
  */
 
-struct __xar_iter_t
-{
-  void *iter;
-  char *path;
-  void *node;
-  int nochild;
-};
-
-/* Convenience macros for dereferencing the structs */
-#define XAR_ITER(x) ((struct __xar_iter_t *)(x))
-
 /* xar_attr_prop
  * Returns: a newly allocated and initialized property attribute.
  * It is the caller's responsibility to associate the attribute
@@ -272,10 +261,10 @@ xar_attr_first (xar_base_t f, const char *prop, xar_iter_t i)
   if (!a)
     return NULL;
 
-  XAR_ITER (i)->iter = a;
-  free (XAR_ITER (i)->node);
-  XAR_ITER (i)->node = strdup (a->key);
-  return XAR_ITER (i)->node;
+  i->iter = a;
+  free (i->node);
+  i->node = strdup (a->key);
+  return i->node;
 }
 
 /* xar_attr_next
@@ -287,15 +276,15 @@ xar_attr_first (xar_base_t f, const char *prop, xar_iter_t i)
 const char *
 xar_attr_next (xar_iter_t i)
 {
-  xar_attr_t a = XAR_ITER (i)->iter;
+  xar_attr_t a = i->iter;
 
   if (a->next == NULL)
     return NULL;
 
-  XAR_ITER (i)->iter = a->next;
-  free (XAR_ITER (i)->node);
-  XAR_ITER (i)->node = strdup (((xar_attr_t) XAR_ITER (i)->iter)->key);
-  return XAR_ITER (i)->node;
+  i->iter = a->next;
+  free (i->node);
+  i->node = strdup (((xar_attr_t) i->iter)->key);
+  return i->node;
 }
 
 /* xar_iter_new
@@ -305,14 +294,14 @@ xar_attr_next (xar_iter_t i)
 xar_iter_t
 xar_iter_new (void)
 {
-  xar_iter_t ret = malloc (sizeof (struct __xar_iter_t));
+  xar_iter_t ret = malloc (sizeof (struct xar_iter));
   if (!ret)
     return NULL;
 
-  XAR_ITER (ret)->iter = NULL;
-  XAR_ITER (ret)->path = NULL;
-  XAR_ITER (ret)->node = NULL;
-  XAR_ITER (ret)->nochild = 0;
+  ret->iter = NULL;
+  ret->path = NULL;
+  ret->node = NULL;
+  ret->nochild = 0;
   return ret;
 }
 
@@ -322,10 +311,10 @@ xar_iter_new (void)
 void
 xar_iter_free (xar_iter_t i)
 {
-  free (XAR_ITER (i)->node);
-  if (XAR_ITER (i)->path)
-    free (XAR_ITER (i)->path);
-  free (XAR_ITER (i));
+  free (i->node);
+  if (i->path)
+    free (i->path);
+  free (i);
 }
 
 const char *
@@ -392,10 +381,10 @@ xar_prop_pnext (xar_prop_t p)
 const char *
 xar_prop_first (xar_file_t f, xar_iter_t i)
 {
-  XAR_ITER (i)->iter = f->props;
-  free (XAR_ITER (i)->node);
-  XAR_ITER (i)->node = strdup (((xar_prop_t) XAR_ITER (i)->iter)->key);
-  return XAR_ITER (i)->node;
+  i->iter = f->props;
+  free (i->node);
+  i->node = strdup (((xar_prop_t) i->iter)->key);
+  return i->node;
 }
 
 /* xar_prop_next
@@ -411,29 +400,29 @@ xar_prop_first (xar_file_t f, xar_iter_t i)
 const char *
 xar_prop_next (xar_iter_t i)
 {
-  xar_prop_t p = XAR_ITER (i)->iter;
-  if (!(XAR_ITER (i)->nochild) && p->children)
+  xar_prop_t p = i->iter;
+  if (!(i->nochild) && p->children)
     {
       int err;
-      char *tmp = XAR_ITER (i)->path;
+      char *tmp = i->path;
       if (tmp)
         {
           err =
-            asprintf (&XAR_ITER (i)->path, "%s/%s", tmp, p->key);
+            asprintf (&i->path, "%s/%s", tmp, p->key);
           free (tmp);
         }
       else
-        XAR_ITER (i)->path = strdup (p->key);
-      if (!XAR_ITER (i)->path)
+        i->path = strdup (p->key);
+      if (!i->path)
         return NULL;
-      XAR_ITER (i)->iter = p = p->children;
+      i->iter = p = p->children;
       goto SUCCESS;
     }
-  XAR_ITER (i)->nochild = 0;
+  i->nochild = 0;
 
   if (p->next)
     {
-      XAR_ITER (i)->iter = p = p->next;
+      i->iter = p = p->next;
       goto SUCCESS;
     }
 
@@ -442,43 +431,43 @@ xar_prop_next (xar_iter_t i)
       char *tmp1, *tmp2;
       char *dname;
 
-      if (strstr (XAR_ITER (i)->path, "/"))
+      if (strstr (i->path, "/"))
         {
-          tmp1 = tmp2 = XAR_ITER (i)->path;
+          tmp1 = tmp2 = i->path;
           dname = dirname (tmp2);
-          XAR_ITER (i)->path = strdup (dname);
+          i->path = strdup (dname);
           free (tmp1);
         }
       else
         {
-          free (XAR_ITER (i)->path);
-          XAR_ITER (i)->path = NULL;
+          free (i->path);
+          i->path = NULL;
         }
 
-      XAR_ITER (i)->iter = p = p->parent;
-      XAR_ITER (i)->nochild = 1;
+      i->iter = p = p->parent;
+      i->nochild = 1;
       return xar_prop_next (i);
     }
 
   return NULL;
 SUCCESS:
-  free (XAR_ITER (i)->node);
-  if (XAR_ITER (i)->path)
+  free (i->node);
+  if (i->path)
     {
       int err;
       char *result = NULL;
       err =
-        asprintf (&result, "%s/%s", XAR_ITER (i)->path, p->key);
-      XAR_ITER (i)->node = result;
+        asprintf (&result, "%s/%s", i->path, p->key);
+      i->node = result;
     }
   else
     {
       if (p->key == NULL)
-        XAR_ITER (i)->node = strdup ("");
+        i->node = strdup ("");
       else
-        XAR_ITER (i)->node = strdup (p->key);
+        i->node = strdup (p->key);
     }
-  return XAR_ITER (i)->node;
+  return i->node;
 }
 
 /* xar_prop_new
@@ -984,9 +973,9 @@ xar_file_free (xar_file_t f)
 xar_file_t
 xar_file_first (xar_archive_t x, xar_iter_t i)
 {
-  XAR_ITER (i)->iter = x->files;
-  free (XAR_ITER (i)->node);
-  return XAR_ITER (i)->iter;
+  i->iter = x->files;
+  free (i->node);
+  return i->iter;
 }
 
 /* xar_file_next
@@ -1002,30 +991,30 @@ xar_file_first (xar_archive_t x, xar_iter_t i)
 xar_file_t
 xar_file_next (xar_iter_t i)
 {
-  xar_file_t f = XAR_ITER (i)->iter;
+  xar_file_t f = i->iter;
   const char *name;
-  if (!(XAR_ITER (i)->nochild) && f->children)
+  if (!(i->nochild) && f->children)
     {
-      char *tmp = XAR_ITER (i)->path;
+      char *tmp = i->path;
       xar_prop_get ((xar_base_t) f, "name", &name);
       if (tmp)
         {
           int err;
-          err = asprintf (&XAR_ITER (i)->path, "%s/%s", tmp, name);
+          err = asprintf (&i->path, "%s/%s", tmp, name);
           free (tmp);
         }
       else
-        XAR_ITER (i)->path = strdup (name);
-      if (!XAR_ITER (i)->path)
+        i->path = strdup (name);
+      if (!i->path)
         return NULL;
-      XAR_ITER (i)->iter = f = f->children;
+      i->iter = f = f->children;
       goto FSUCCESS;
     }
-  XAR_ITER (i)->nochild = 0;
+  i->nochild = 0;
 
   if (f->next)
     {
-      XAR_ITER (i)->iter = f = f->next;
+      i->iter = f = f->next;
       goto FSUCCESS;
     }
 
@@ -1034,30 +1023,30 @@ xar_file_next (xar_iter_t i)
       char *tmp1, *tmp2;
       char *dname;
 
-      if (strstr (XAR_ITER (i)->path, "/"))
+      if (strstr (i->path, "/"))
         {
-          tmp1 = tmp2 = XAR_ITER (i)->path;
+          tmp1 = tmp2 = i->path;
           dname = dirname (tmp2);
-          XAR_ITER (i)->path = strdup (dname);
+          i->path = strdup (dname);
           free (tmp1);
         }
       else
         {
-          free (XAR_ITER (i)->path);
-          XAR_ITER (i)->path = NULL;
+          free (i->path);
+          i->path = NULL;
         }
 
-      XAR_ITER (i)->iter = f = f->parent;
-      XAR_ITER (i)->nochild = 1;
+      i->iter = f = f->parent;
+      i->nochild = 1;
       return xar_file_next (i);
     }
 
   return NULL;
 FSUCCESS:
   xar_prop_get ((xar_base_t) f, "name", &name);
-  XAR_ITER (i)->iter = (void *) f;
+  i->iter = (void *) f;
 
-  return XAR_ITER (i)->iter;
+  return i->iter;
 }
 
 /* xar_file_find

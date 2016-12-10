@@ -92,7 +92,7 @@ extern "C"
 #define XAR_CKSUM_MD5    2
 #define XAR_CKSUM_OTHER  3      /* Must not be used for "none", should not be used for "sha1" or "md5" */
 
-  typedef struct __xar_iter_t *xar_iter_t;
+  typedef struct xar_iter *xar_iter_t;
   typedef struct xar_archive *xar_archive_t;
 
   typedef struct xar_signature *xar_signature_t;
@@ -436,6 +436,14 @@ extern "C"
    * @see xar_archive_t
    */
   typedef xar_archive_t xar_t;
+
+  typedef struct xar_iter
+  {
+    void *iter;
+    char *path;
+    void *node;
+    int nochild;
+  } xar_iter;
 
 #define READ 0
 #define WRITE 1
