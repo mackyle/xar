@@ -64,7 +64,7 @@ typedef struct AppleSingleHeader
    * Magic number.
    * 
    * @see APPLESINGLE_MAGIC
-   * @See APPLEDOUBLE_MAGIC
+   * @see APPLEDOUBLE_MAGIC
    */
   uint32_t magic;
 
