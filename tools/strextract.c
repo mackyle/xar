@@ -7,7 +7,7 @@
 #include <xar/xar.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <arpa/inet.h> // for ntoh*
+#include <arpa/inet.h>          // for ntoh*
 
 static int32_t
 err_callback (int32_t sev, int32_t err, xar_errctx_t ctx, void *usrctx)
@@ -73,7 +73,8 @@ main (int argc, char *argv[])
       fprintf (stderr, "%s: Extracting: %s\n", argv[0], path);
       if (xar_extract_tostream_init (x, f, &s) != XAR_STREAM_OK)
         {
-          fprintf (stderr, "%s: Error initializing stream: %s\n", argv[0], path);
+          fprintf (stderr, "%s: Error initializing stream: %s\n", argv[0],
+                   path);
           free (path);
           continue;
         }
@@ -81,7 +82,8 @@ main (int argc, char *argv[])
       fd = open (path, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
       if (!fd)
         {
-          fprintf (stderr, "%s: Error opening output file: %s\n", argv[0], path);
+          fprintf (stderr, "%s: Error opening output file: %s\n", argv[0],
+                   path);
           free (path);
           continue;
         }
@@ -92,7 +94,8 @@ main (int argc, char *argv[])
         {
           if (ret == XAR_STREAM_ERR)
             {
-              fprintf (stderr, "%s: Error extracting stream: %s\n", argv[0], path);
+              fprintf (stderr, "%s: Error extracting stream: %s\n", argv[0],
+                       path);
               return 2;
             }
 
