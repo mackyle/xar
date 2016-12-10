@@ -153,7 +153,7 @@ aacls (xar_archive_t x, xar_file_t f, const char *file)
   acl_t a;
   const char *type;
 
-  xar_prop_get (f, "type", &type);
+  xar_prop_get ((xar_base_t) f, "type", &type);
   if (!type || (strcmp (type, "symlink") == 0))
     return 0;
 
@@ -173,7 +173,7 @@ aacls (xar_archive_t x, xar_file_t f, const char *file)
       t = acl_to_text (a, NULL);
       if (t)
         {
-          xar_prop_set (f, "acl/default", t);
+          xar_prop_set ((xar_base_t) f, "acl/default", t);
           acl_free (t);
         }
       acl_free (a);
@@ -193,7 +193,7 @@ NEXT:
       t = acl_to_text (a, NULL);
       if (t)
         {
-          xar_prop_set (f, "acl/access", t);
+          xar_prop_set ((xar_base_t) f, "acl/access", t);
           acl_free (t);
         }
       acl_free (a);
@@ -243,12 +243,12 @@ eacls (xar_archive_t x, xar_file_t f, const char *file)
   acl_t a;
   const char *type;
 
-  xar_prop_get (f, "type", &type);
+  xar_prop_get ((xar_base_t) f, "type", &type);
   if (!type || (strcmp (type, "symlink") == 0))
     return 0;
 
 
-  xar_prop_get (f, "acl/default", &t);
+  xar_prop_get ((xar_base_t) f, "acl/default", &t);
   if (t)
     {
       a = acl_from_text (t);
@@ -275,7 +275,7 @@ eacls (xar_archive_t x, xar_file_t f, const char *file)
         }
     }
 
-  xar_prop_get (f, "acl/access", &t);
+  xar_prop_get ((xar_base_t) f, "acl/access", &t);
   if (t)
     {
       a = acl_from_text (t);
