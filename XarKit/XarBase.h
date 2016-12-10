@@ -1,4 +1,6 @@
 #import <Foundation/Foundation.h>
+#import "XarEnumerator.h"
+#import <xar/xar.h>
 
 @interface XarBase : NSObject
 {
