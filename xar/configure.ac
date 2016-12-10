@@ -9,7 +9,7 @@ AM_INIT_AUTOMAKE([foreign])
 LT_INIT
 
 dnl xar version variables.
-AC_DEFINE([XAR_VERSION_NUM], [0x01060180], [Numeric version of xar])
+AC_DEFINE([XAR_VERSION_NUM], [0x02000000], [Numeric version of xar])
 AC_DEFINE_UNQUOTED([XAR_VERSION], "${PACKAGE_VERSION}", [String version of xar])
 AC_PROG_CPP
 AC_PROG_CC
