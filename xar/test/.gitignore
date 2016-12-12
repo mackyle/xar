@@ -1,0 +1,11 @@
+/validate
+/buffer
+/Makefile
+/Makefile.in
+/*.log
+/*.trs
+/.deps
+/.libs
+/buffer.o
+/validate.o
+/bin.xar

@@ -1,0 +1,65 @@
+EXTRA_DIST = xarfile.pyx setup.py
+
+if HAVE_PYTHON
+
+noinst_DATA = stamp-all
+
+PASS_ENV = \
+           CPPFLAGS='$(CPPFLAGS) $(AM_CPPFLAGS) $(INCLUDES)' \
+           LDFLAGS='$(LDFLAGS) $(AM_LDFLAGS)' \
+           CFLAGS='$(CFLAGS) $(AM_CFLAGS)' \
+           LIBS='$(LIBS) $(LDADD)' \
+           CC='$(CC)' \
+           CCLD='$(CC)' \
+           LD='$(CC)' \
+           PYTHON='$(PYTHON)'
+
+stamp-all: $(srcdir)/setup.py $(srcdir)/xarfile.pyx
+	$(PASS_ENV) \
+        $(PYTHON) $(srcdir)/setup.py build; \
+        touch $@
+
+mostlyclean-am:
+	rm -f stamp-all; \
+	$(PASS_ENV) \
+	$(PYTHON) $(srcdir)/setup.py clean -a
+
+install-exec-hook:
+	$(PASS_ENV) \
+	$(PYTHON) $(srcdir)/setup.py install
+
+check-am:
+	$(PASS_ENV) \
+	$(PYTHON) $(srcdir)/setup.py check
+
+@_EMPTY@ifneq (-$(srcdir)-,-$(builddir)-)
+xarfile.pyx: $(srcdir)/xarfile.pyx
+	$(AM_V_GEN)$(LN_S) $< $@
+setup.py: $(srcdir)/setup.py
+	$(AM_V_GEN)$(LN_S) $< $@
+@_EMPTY@endif
+
+ACLOCAL_AMFLAGS = -I ../m4
+
+AM_LDFLAGS = \
+             -L$(BZLIB_HOME)/lib \
+             -L../xar/lib \
+             -L../xar/lib/.libs
+
+AM_CPPFLAGS = \
+              $(LIBXML2_CFLAGS) \
+              -I../xar/include \
+              -I$(srcdir)/../xar.include \
+              $(ZLIB_CFLAGS) \
+              $(LIBLZMA_CFLAGS) \
+              -I$(BZLIB_HOME)/include \
+              $(OPENSSL_CFLAGS)
+
+LDADD = \
+        ../xar/lib/libxar.la \
+        $(ZLIB_LIBS) \
+        $(LIBLZMA_LIBS) \
+        $(OPENSSL_LIBS) \
+        -lbz2
+
+endif

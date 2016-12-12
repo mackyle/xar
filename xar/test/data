@@ -1,6 +1,13 @@
 #!/bin/sh
 
-. functions
+if [ -z "`which xsltproc`" ]
+then
+	# Skip
+	echo 'No xsltproc' >&2
+	exit 77
+fi
+
+. ${srcdir}/functions
 
 cleanup() {
 	rm -rf a b h h.xar h.toc

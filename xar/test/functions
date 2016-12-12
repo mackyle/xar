@@ -1,5 +1,3 @@
-XAR="xar"
-
 # Create an archive.
 # 1st arg: the archive to create
 # 2nd arg: the file to add to the archive

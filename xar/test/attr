@@ -1,15 +1,22 @@
 #!/bin/sh
 
-. functions
+. ${srcdir}/functions
+
+if [ -z "`which setfattr`" ]
+then
+	# No ATTR installed
+	echo 'No attr utilities, skipping' >&2
+	exit 77
+fi
 
 cleanup() {
-	rm -rf h a a.xar
+	rm -rf k a k.xar
 }
 
 echo "Checking empty ea preservation on single empty file"
 cleanup
-mkdir h
-cd h
+mkdir k
+cd k
 touch a
 setfattr -n user.foo a
 if [ $? -ne 0 ]; then
@@ -18,9 +25,9 @@ if [ $? -ne 0 ]; then
 	exit
 fi
 
-create_archive ../a.xar .
+create_archive ../k.xar .
 cd ..
-extract_archive a.xar
+extract_archive k.xar
 
 if [ ! -f a ]; then
 	echo "File didn't extract"
@@ -38,8 +45,8 @@ cleanup
 
 echo "Checking populated ea preservation on single empty file"
 cleanup
-mkdir h
-cd h
+mkdir k
+cd k
 touch a
 setfattr -n user.foo -v bar a
 if [ $? -ne 0 ]; then
@@ -48,9 +55,9 @@ if [ $? -ne 0 ]; then
 	exit
 fi
 
-create_archive ../a.xar .
+create_archive ../k.xar .
 cd ..
-extract_archive a.xar
+extract_archive k.xar
 
 if [ ! -f a ]; then
 	echo "File didn't extract"
@@ -69,8 +76,8 @@ cleanup
 
 echo "Checking populated ea preservation on single file with data"
 cleanup
-mkdir h
-cd h
+mkdir k
+cd k
 touch a
 echo "foo" > a
 setfattr -n user.foo -v bar a
@@ -80,9 +87,9 @@ if [ $? -ne 0 ]; then
 	exit
 fi
 
-create_archive ../a.xar .
+create_archive ../k.xar .
 cd ..
-extract_archive a.xar
+extract_archive k.xar
 
 if [ ! -f a ]; then
 	echo "File didn't extract"

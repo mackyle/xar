@@ -11,8 +11,8 @@ extern NSString *XarErrorErrno;
 
 @interface XarArchive : NSObject
 {
-	xar_t xar;
-	NSMutableArray *errors;
+  xar_archive_t xar;
+  NSMutableArray *errors;
 }
 
 + (id)archiveForReadingAtPath:(NSString *)path;
@@ -20,7 +20,7 @@ extern NSString *XarErrorErrno;
 
 - (void)closeArchive;
 
-- (xar_t)xar;
+- (xar_archive_t)xar;
 
 - (NSEnumerator *)fileEnumerator;
 

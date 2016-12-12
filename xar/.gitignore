@@ -1,0 +1,9 @@
+/Makefile
+/Makefile.in
+/aclocal.m4
+/libtool
+/config.log
+/config.status
+/xar.spec
+/autom4te.cache
+/configure

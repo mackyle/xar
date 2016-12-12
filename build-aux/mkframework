@@ -1,0 +1,56 @@
+#!/bin/sh
+
+if [ ! "$#" -eq 7 ]
+then
+  echo 'Usage: mkframework <LIBEXT> <INFOPLIST> <NAME> <VERSION> <LIBDIR> \
+<HEADERS> <INCLUDEDIR>'
+  exit 2
+fi
+
+set -e
+
+rm -f -r "${NAME}.framework"
+
+LIBEXT="$1"
+INFOPLIST="$2"
+NAME="$3"
+VERSION="$4"
+LIBDIR="$5"
+HEADERS="$6"
+INCLUDEDIR="$7"
+
+mklink () {
+  ${LN_S} -s -f -T $@
+}
+
+${MKDIR_P} "${NAME}.framework"
+${MKDIR_P} "${NAME}.framework/Versions"
+${MKDIR_P} "${NAME}.framework/Versions/${VERSION}"
+${MKDIR_P} "${NAME}.framework/Versions/${VERSION}/Resources"
+${MKDIR_P} "${NAME}.framework/Versions/${VERSION}/Headers"
+${MKDIR_P} "${NAME}.framework/Versions/${VERSION}/Headers/${NAME}"
+
+mklink "${VERSION}" "${NAME}.framework/Versions/Current"
+
+mklink "Info.plist" \
+"${NAME}.framework/Versions/${VERSION}/Resources/Info-gnustep.plist"
+
+mklink "Resources/Info.plist" \
+"${NAME}.framework/Versions/${VERSION}/Info.plist"
+
+mklink "Resources/Info-gnustep.plist" \
+"${NAME}.framework/Versions/${VERSION}/Info-gnustep.plist"
+
+for X in "${NAME}" Headers Resources Info.plist Info-gnustep.plist
+do
+  mklink "Versions/Current/${NAME}" "${NAME}.framework/${NAME}"
+done
+
+mklink "${LIBDIR}/lib${NAME}${LIBEXT}" "${NAME}.framework/Versions/${VERSION}/${NAME}"
+cp "${INFOPLIST}" "${NAME}.framework/Versions/${VERSION}/Resources/Info.plist"
+
+for X in ${HEADERS}
+do
+  mklink "${INCLUDEDIR}/${NAME}/$X" \
+  "${NAME}.framework/Versions/${VERSION}/Headers/${NAME}/$X"
+done

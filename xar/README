@@ -1,0 +1,13 @@
+To build:
+
+./autogen.sh
+./configure
+
+Then type:
+
+make
+sudo make install
+
+NOTE: CLI signature patch based heavily upon:
+
+http://opensource.apple.com/source/xar/xar-36.1/xarsig/xar-sig.c

@@ -1,9 +1,10 @@
 #import <Foundation/Foundation.h>
 #import <xar/xar.h>
+#import "XarBase.h"
 
-@interface XarFile : NSObject
+@interface XarFile : XarBase
 {
-	xar_file_t xarFile;
+  xar_file_t xarFile;
 }
 
 + (id)xarFileWithFile:(xar_file_t)file;

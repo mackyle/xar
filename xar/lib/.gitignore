@@ -1,0 +1,8 @@
+/*.o
+/*.lo
+/.libs
+/.deps
+/*.la
+/Makefile
+/Makefile.in
+/localedir.h

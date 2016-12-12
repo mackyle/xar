@@ -1,6 +1,15 @@
 #!/bin/sh
 
-. functions
+set -x
+
+if [ -z "`which dd`" ]
+then
+	# Skip
+	echo 'No dd' >&2
+	exit 77
+fi
+
+. ${srcdir}/functions
 
 echo "Testing handling of a broken TOC with default checksum"
 rm -rf bin.xar bin
@@ -10,7 +19,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-hdrsize=`${XAR} --dump-header -f bin.xar | grep size | awk '{print $2}'`
+hdrsize=`${XAR} --dump-header -f bin.xar | ${GREP} size | ${AWK} '{print $2}'`
 
 offset=`expr ${hdrsize} + 4`
 
@@ -35,7 +44,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-hdrsize=`${XAR} --dump-header -f bin.xar | grep size | awk '{print $2}'`
+hdrsize=`${XAR} --dump-header -f bin.xar | ${GREP} size | ${AWK} '{print $2}'`
 
 offset=`expr ${hdrsize} + 4`
 
@@ -60,7 +69,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-hdrsize=`${XAR} --dump-header -f bin.xar | grep size | awk '{print $2}'`
+hdrsize=`${XAR} --dump-header -f bin.xar | ${GREP} size | ${AWK} '{print $2}'`
 
 offset=`expr ${hdrsize} + 4`
 
@@ -82,8 +91,8 @@ rm -f bin.xar
 echo "Testing handling of a broken heap with defaults"
 rm -rf bin.xar bin
 create_archive bin.xar /bin
-hdrsize=`${XAR} --dump-header -f bin.xar | grep size | awk '{print $2}'`
-tocsize=`${XAR} --dump-header -f bin.xar | grep "Compressed" | awk '{print $4}'`
+hdrsize=`${XAR} --dump-header -f bin.xar | ${GREP} size | ${AWK} '{print $2}'`
+tocsize=`${XAR} --dump-header -f bin.xar | ${GREP} "Compressed" | ${AWK} '{print $4}'`
 offset=`expr ${hdrsize} + ${tocsize} + 20`
 dd if=/dev/random of=bin.xar seek=${offset} bs=100 count=1 > /dev/null 2>&1
 

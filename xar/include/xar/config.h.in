@@ -1,0 +1,14 @@
+#ifndef _XAR_CONFIG_H_
+#define _XAR_CONFIG_H_
+
+/**
+ * String version of Xar API.
+ */
+#undef XAR_VERSION
+
+/**
+ * Numeric version of Xar API.
+ */
+#undef XAR_VERSION_NUM
+
+#endif

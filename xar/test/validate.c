@@ -129,14 +129,14 @@ void prop_check(int fd, xar_t x, xar_file_t f) {
 }
 
 int main(int argc, char *argv[]) {
-	char *file = argv[1];
+	char *file = getenv ("XARFILE");
 	xar_t x;
 	xar_iter_t ifile, iprop, iattr;
 	xar_file_t f;
 	const char *key;
 	int fd;
 	off_t off;
-	xar_header_t hdr;
+	xar_header hdr;
 	
 	x = xar_open(file, READ);
 	if( !x ) {

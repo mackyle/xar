@@ -506,10 +506,10 @@ cdef class XarArchive:
 
 class XarInfo(object):
 
-    def __init__(self, name, type = '', mode = '', uid = '', user = '',
+    def __init__(self, name, _type = '', mode = '', uid = '', user = '',
             gid = '', group = '', atime = '', mtime = '', ctime = ''): 
         self.name = name
-        self.type = type
+        self.type = _type
         self.mode = mode
         self.uid = uid
         self.user = user
