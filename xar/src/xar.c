@@ -1388,7 +1388,7 @@ static int extract(const char *filename, int arglen, char *args[]) {
 				const char *prop = NULL;
 				int deferred = 0;
 				if( xar_prop_get(f, "type", &prop) == 0 ) {
-					if( strcmp(prop, "directory") == 0 ) {
+					if( prop != NULL && strcmp(prop, "directory") == 0 ) {
 						if (!ToStdout) {
 							struct lnode *tmpl = calloc(sizeof(struct lnode),1);
 							tmpl->str = (char *)f;
