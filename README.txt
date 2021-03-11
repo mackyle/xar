@@ -28,6 +28,19 @@ Source Directories
 xar -
         Primary source directory, contains libxar sources and xar sources.
 
+docker -
+        Run xar encapsulated in docker to do use it in your file system:
+
+        ```
+        cd docker
+        sudo docker build -t xar .
+        ```
+
+        then for example if you wish to extract a pkg file
+        ```
+        sudo docker run -ti --rm -v path_to_pkg_file:/xar/ xar xar -xvf packagefile.pkg
+        ```
+
 XarCMPlugin -
         OS X xar contextual menu plugin with Xcode project.  May be out of date.
 
